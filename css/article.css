@@ -1,0 +1,83 @@
+/* 原有的樣式保持不變 */
+
+.flex1 {
+  flex: 1;
+}
+
+/* 縮圖樣式 */
+.thumbnail {
+  width: 150px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.image-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 狀態標籤樣式 */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-draft {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.status-published {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-scheduled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* 標籤和分類樣式 */
+.tag-badge,
+.category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: rgb(251, 247, 247);
+}
+
+.category-badge {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+/* 搜尋區域樣式 */
+.search-area {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.total-count {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  font-weight: 500;
+}
+
+/* 日期範圍樣式 */
+.date-range {
+  min-width: 300px;
+}
+
+.date-range input[type='date'] {
+  width: 130px;
+}

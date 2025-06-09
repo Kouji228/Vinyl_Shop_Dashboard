@@ -1,1 +1,15 @@
-components/connect.php
+# 忽略上傳的圖片檔案
+img/uploads/*
+img/covers/*
+img/content/*
+
+# 保留目錄結構
+!img/uploads/.gitkeep
+!img/covers/.gitkeep
+!img/content/.gitkeep
+
+# 其他忽略項目
+.DS_Store
+.env
+vendor/
+node_modules/

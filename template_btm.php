@@ -1,136 +1,88 @@
-  
 </main>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
+    crossorigin="anonymous"
+></script>
 
 <script>
-  function showSection(sectionId) {
-    // Hide all sections
-    const sections = document.querySelectorAll('.page-section');
-    sections.forEach(section => {
-      section.style.display = 'none';
-    });
+    // 側邊欄切換功能
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.mobile-overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
 
-    // Remove active class from all nav items
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-      item.classList.remove('active');
-    });
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.mobile-overlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    }
 
-    // Show selected section
-    document.getElementById(sectionId).style.display = 'block';
-
-    // Add active class to clicked nav item
-    event.target.closest('.nav-item').classList.add('active');
-
-    const titles = {
-      'members': '會員管理',
-      'products': '商品管理',
-      'secondhand': '二手商品管理',
-      'coupons': '優惠券管理',
-      'articles': '文章管理',
-      'stores': '店面管理',
-      'settings': '系統設定',
-      'logout': '登出'
-    };
-
+    // 頁面切換功能
     function showSection(sectionId) {
-      // 隱藏所有 section
-      const sections = document.querySelectorAll('.page-section');
-      sections.forEach(section => {
-        section.style.display = 'none';
-      });
+        // 隱藏所有 section
+        const sections = document.querySelectorAll('.page-section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
 
-      // 顯示對應 section
-      const target = document.getElementById(sectionId);
-      if (target) target.style.display = 'block';
+        // 顯示對應 section
+        const target = document.getElementById(sectionId);
+        if (target) target.style.display = 'block';
 
-      // 更新標題
-      if (titles[sectionId]) {
-        document.getElementById('page-title').textContent = titles[sectionId];
-      }
+        // 更新標題
+        const titles = {
+            'members': '會員管理',
+            'products': '商品管理',
+            'secondhand': '二手商品管理',
+            'coupons': '優惠券管理',
+            'articles': '文章管理',
+            'stores': '店面管理',
+            'settings': '系統設定',
+            'logout': '登出'
+        };
 
-      // 將選取項目加上 active
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      event.target.closest('.nav-item').classList.add('active');
+        if (titles[sectionId]) {
+            const pageTitle = document.getElementById('page-title');
+            if (pageTitle) pageTitle.textContent = titles[sectionId];
+        }
+
+        // 更新導航項目狀態
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const activeItem = event.target.closest('.nav-item');
+        if (activeItem) activeItem.classList.add('active');
     }
-  }
 
-  // Pagination functions
-  let currentPage = 1;
-  const totalPages = 5;
+    // 動畫效果
+    document.addEventListener('DOMContentLoaded', function () {
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease';
 
-  function changePage(direction) {
-    if (direction === 'prev' && currentPage > 1) {
-      currentPage--;
-    } else if (direction === 'next' && currentPage < totalPages) {
-      currentPage++;
-    }
-    updatePagination();
-  }
-
-  function goToPage(page) {
-    currentPage = page;
-    updatePagination();
-  }
-
-  function updatePagination() {
-    // Remove active class from all page buttons
-    document.querySelectorAll('.pagination-btn').forEach(btn => {
-      btn.classList.remove('active');
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }, index * 150);
+        });
     });
-
-    // Add active class to current page
-    const pageButtons = document.querySelectorAll('.pagination-btn:not([id])');
-    pageButtons.forEach((btn, index) => {
-      if (parseInt(btn.textContent) === currentPage) {
-        btn.classList.add('active');
-      }
-    });
-
-    // Update prev/next button states
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    if (prevBtn) {
-      prevBtn.disabled = currentPage === 1;
-    }
-    if (nextBtn) {
-      nextBtn.disabled = currentPage === totalPages;
-    }
-  }
-
-  // Add some interactive animations
-  document.addEventListener('DOMContentLoaded', function () {
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach((card, index) => {
-      setTimeout(() => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'all 0.6s ease';
-
-        setTimeout(() => {
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, 100);
-      }, index * 150);
-    });
-  });
 </script>
 
 <?php
 if (isset($jsList)) {
-  foreach ($jsList as $js) {
-    ?>
-    <script src="<?= $js ?>"></script>
-    <?php
-  }
+    foreach ($jsList as $js) {
+        echo '<script src="' . $js . '"></script>';
+    }
 }
 ?>
 
-
 </body>
-
 </html>

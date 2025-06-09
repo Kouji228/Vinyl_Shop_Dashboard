@@ -6,18 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><?= $pageTitle ?? "Echo & Flow 管理後台" ?></title>
 
-  <!-- Bootstrap CSS -->
-  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap 5.3.5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+    crossorigin="anonymous" />
 
-  <!-- Bootstrap Icons (使用 CDN 較方便更新) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"
     crossorigin="anonymous" />
 
   <!-- Google 字體 -->
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
 
   <!-- 載入其他自訂 CSS -->
   <?php if (isset($cssList)): ?>
@@ -35,7 +37,7 @@
 
   <div class="mobile-overlay" onclick="closeSidebar()"></div>
 
-  <div class="container d-flex">
+  <div class="container-new-model d-flex">
     <!-- 側邊欄 -->
     <nav class="sidebar" id="sidebar">
       <div class="logo">
@@ -54,4 +56,3 @@
 
     <!-- 這裡開啟 main-content，template_main.php 會直接插入內容 -->
     <main class="main-content flex-grow-1">
-    
