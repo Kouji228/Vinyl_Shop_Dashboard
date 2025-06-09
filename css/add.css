@@ -1,4 +1,22 @@
-form-container {
+:root {
+    --retro-indigo: #736347;
+    --olive-moss: #7c805e;
+    --warm-brass: #d1a65a;
+    --beige-mist: #f3efea;
+    --smoke-violet: #9b8ba8;
+    --vinyl-black: #1a1a1a;
+    --white: #ffffff;
+    --light-gray: #f8f6f3;
+    --border-color: #d1a55a6e;
+    --shadow-light: 0 2px 8px #2e405714;
+    --shadow-medium: 0 4px 16px #2e40571f;
+    --shadow-heavy: 0 8px 32px #2e405729;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+}
+
+.form-container {
     max-width: 800px;
     margin: 0 auto;
     background: white;
@@ -10,7 +28,6 @@ form-container {
 .form-section {
     margin-bottom: 30px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
 }
 
 .form-section:last-of-type {
@@ -23,7 +40,10 @@ form-container {
     font-weight: 600;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-color);
+    padding-left: 10px;
+    padding-top: 10px;
+    background-color: var(--border-color);
+    text-align: start;
 }
 
 /* 表單布局樣式 */

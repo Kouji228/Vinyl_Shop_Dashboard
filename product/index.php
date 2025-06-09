@@ -1,4 +1,5 @@
 <?php
+// ? 首頁資訊
 // session_start();
 // if(!isset($_SESSION["user"])){
 //     header("location: ./login.php");
@@ -6,11 +7,22 @@
 // }
 
 require_once "../components/connect.php";
-require_once "../components/utilities.php";
+require_once "../components/Utilities.php";
 
 $genre = intval($_GET["genre"] ?? 0);
 $gender = intval($_GET["gender"] ?? 0);
 $status = isset($_GET["status"]) ? intval($_GET["status"]) : null;
+
+// ? 修改排序
+// 1. 定義允許排序的欄位
+$valid_columns = ['id', 'price', 'title', 'author'];  // 根據你實際資料表欄位調整
+
+// 2. 取得 GET 參數
+$sort_by = $_GET['sort_by'] ?? '';
+$sort_order = ($_GET['sort_order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+// 3. 判斷 sort_by 是否在允許欄位中，否則預設 'id'
+$sort_column = in_array($sort_by, $valid_columns) ? $sort_by : 'id';
 
 $conditions = [];
 $values = [];
@@ -32,7 +44,7 @@ if (isset($_GET["status"]) && $_GET["status"] !== "") {
   $conditions[] = "status_id = 1"; // 預設狀態
 }
 
-$author_id=$_GET["author_id"] ?? "";
+$author_id = $_GET["author_id"] ?? "";
 if ($author_id) {
   $conditions[] = "vinyl.author_id = :author_id";
   $values["author_id"] = $author_id;
@@ -63,15 +75,16 @@ if ($price1 !== "" || $price2 !== "") {
   $values["endPrice"] = $endPrice;
 }
 
+
 $whereSQL = "WHERE " . implode(" AND ", $conditions);
 
 $perPage = 20;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
 
-$select = "vinyl.id AS id,title,author_id,vinyl_author.author AS author,company,price,stock,vinyl_gender.gender AS gender FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id";
+$select = "vinyl.id AS id,title,author_id,vinyl_author.author AS author,company,price,stock,vinyl_gender.gender AS gender,status_id FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id";
 
-$sql = "SELECT $select $whereSQL LIMIT $perPage OFFSET $pageStart";
+$sql = "SELECT $select $whereSQL ORDER BY $sort_column $sort_order LIMIT $perPage OFFSET $pageStart";
 $sqlAll = "SELECT $select  $whereSQL ";
 
 $sqlAuthor = "SELECT * FROM vinyl_author";
@@ -141,20 +154,21 @@ $totalPage = ceil($totalCount / $perPage);
       border: 1px solid #A3472A;
     }
 
-
     .msg .title:nth-child(odd) {
       border-right: 1px solid #e6c068;
     }
 
     .id {
-      width: 50px;
+      width: 40px;
       text-align: center;
     }
 
     .title {
       padding-left: 10px;
       flex: 1;
-
+      a {
+        color: #e6c068;
+      }
     }
 
     .msg:nth-of-type(odd) {
@@ -171,7 +185,7 @@ $totalPage = ceil($totalCount / $perPage);
     .author {
       width: 320px;
       /* text-align: center; */
-      a{
+      a {
         color: #e6c068;
       }
     }
@@ -184,6 +198,19 @@ $totalPage = ceil($totalCount / $perPage);
 
     .time {
       width: 100px;
+    }
+
+    .sortable {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #fff;
+      &#id{
+        padding-left: 10px;
+      }
+      i{
+        padding-left: 5px;
+      }
     }
 
     .wpx200 {
@@ -209,7 +236,7 @@ $totalPage = ceil($totalCount / $perPage);
 
 
     <div class="my-2 d-flex align-items-center">
-      <span class="me-auto">目前共 <?= $totalCount ?> 筆資料</span>
+      <span class="me-auto">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span>
 
       <div class="me-1-lg-1 mb-1 mb-lg-0 ms-auto">
         <div class="input-group input-group-sm">
@@ -235,8 +262,6 @@ $totalPage = ceil($totalCount / $perPage);
             placeholder="<?= htmlspecialchars($searchHolder) ?>">
           <div class="btn btn-primary btn-sm btn-search me-2">搜尋</div>
 
-
-
         </div>
       </div>
 
@@ -258,7 +283,7 @@ $totalPage = ceil($totalCount / $perPage);
       <div class="col-md-4">
         <label class="form-label">類別</label>
         <select name="gender" id="gender" class="form-select">
-          <option value="" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
+          <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
           <?php foreach ($genders as $g): ?>
             <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
               <?= $g["gender"] ?>
@@ -282,10 +307,20 @@ $totalPage = ceil($totalCount / $perPage);
 
     <div class="p-2 rounded-2 rounded-top-0">
       <div class="msg text-bg-dark ps-1">
-        <div class="id">#</div>
+        <div class="id sortable sortBy" id="id">
+          #
+          <?php if ($sort_column === 'id'): ?>
+            <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+          <?php endif; ?>
+        </div>
         <div class="title">專輯</div>
         <div class="author">藝術家</div>
-        <div class="price">價格</div>
+        <div class="price sortable sortBy" id="price">
+          價格
+          <?php if ($sort_column === 'price'): ?>
+            <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+          <?php endif; ?>
+        </div>
         <div class="stock">庫存</div>
         <div class="genre">類別</div>
         <div class="time text-center">操作</div>
@@ -294,7 +329,8 @@ $totalPage = ceil($totalCount / $perPage);
       <?php foreach ($rows as $index => $row): ?>
         <div class="msg">
           <div class="id"><?= $index + 1 + ($page - 1) * $perPage ?></div>
-          <div class="title"><?= $row["title"] ?></div>
+          <div class="title"><a href="./vinylDetail.php?id=<?= $row["id"] ?>">
+              <?= $row["title"] ?></a></div>
           <div class="author"><a href="./index.php?author_id=<?= $row["author_id"] ?>">
               <?= $row["author"] ?> </a></div>
           <div class="price"><?= $row["price"] ?></div>
@@ -302,17 +338,25 @@ $totalPage = ceil($totalCount / $perPage);
           <div class="genre"><?= $row["gender"] ?></div>
 
           <div class="time">
-            <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">下架
-            </div>
-            <a class="btn btn-warning btn-sm" href="./vinylUpdate.php?id=<?= $row["id"] ?>">修改</a>
+            <?php if ($row["status_id"] == 0): ?>
+              <div class="btn btn-success btn-sm btn-restock" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
+                上架</div>
+              <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">刪除
+              </div>
+            <?php else: ?>
+              <div class="btn btn-danger btn-sm btn-remove" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
+                下架</div>
+              <a class="btn btn-warning btn-sm" href="./vinylUpdate.php?id=<?= $row["id"] ?>">修改</a>
+            <?php endif; ?>
           </div>
         </div>
+
       <?php endforeach; ?>
     </div>
 
     <!-- page -->
     <?php
-    function makeLink($page, $genre, $gender,$author_id, $status, $price1, $price2, $titleSearch, $authorSearch)
+    function makeLink($page, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order)
     {
       $params = ["page={$page}"];
       if ($genre > 0)
@@ -331,6 +375,10 @@ $totalPage = ceil($totalCount / $perPage);
         $params[] = "title={$titleSearch}";
       if ($authorSearch)
         $params[] = "author={$authorSearch}";
+      if ($sort_column)
+        $params[] = "sort_by={$sort_column}";
+      if ($sort_order)
+        $params[] = "sort_order={$sort_order}";
       return "./index.php?" . implode("&", $params);
     }
     ?>
@@ -338,7 +386,7 @@ $totalPage = ceil($totalCount / $perPage);
     <ul class="pagination justify-content-center my-4">
       <li class="page-item">
         <a class="page-link"
-          href="<?= makeLink(1, $genre, $gender,$author_id, $status, $price1, $price2, $titleSearch, $authorSearch) ?>">
+          href="<?= makeLink(1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
           <i class="fa-solid fa-angles-left"></i>
         </a>
       </li>
@@ -362,13 +410,13 @@ $totalPage = ceil($totalCount / $perPage);
       for ($i = $start; $i <= $end; $i++): ?>
         <li class="page-item <?= $page == $i ? "active" : "" ?>">
           <a class="page-link"
-            href="<?= makeLink($i, $genre, $gender, $author_id,$status, $price1, $price2, $titleSearch, $authorSearch) ?>"><?= $i ?></a>
+            href="<?= makeLink($i, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"><?= $i ?></a>
         </li>
       <?php endfor; ?>
 
       <li class="page-item">
         <a class="page-link"
-          href="<?= makeLink($totalPage, $genre, $gender, $author_id,$status, $price1, $price2, $titleSearch, $authorSearch) ?>">
+          href="<?= makeLink($totalPage, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
           <i class="fa-solid fa-angles-right"></i>
         </a>
       </li>
@@ -381,16 +429,64 @@ $totalPage = ceil($totalCount / $perPage);
 
   <script>
     const btnDel = document.querySelectorAll('.btn-del');
+    const btnRemove = document.querySelectorAll('.btn-remove');
+    const btnRestock = document.querySelectorAll('.btn-restock');
+
     const btnSearch = document.querySelector(".btn-search");
     const inputPrice1 = document.querySelector("input[name=price1]");
     const inputPrice2 = document.querySelector("input[name=price2]");
     const inputText = document.querySelector("input[name=search]")
 
+    const status = "<?= isset($_GET['status']) ? $_GET['status'] : '' ?>";
+    const price1 = "<?= isset($_GET['price1']) ? $_GET['price1'] : '' ?>";
+    const price2 = "<?= isset($_GET['price2']) ? $_GET['price2'] : '' ?>";
+    const genre = "<?= isset($_GET['genre']) ? $_GET['genre'] : '' ?>";
+    const gender = "<?= isset($_GET['gender']) ? $_GET['gender'] : '' ?>";
+    const author = "<?= isset($_GET['author']) ? $_GET['author'] : '' ?>";
+    const title = "<?= isset($_GET['title']) ? $_GET['title'] : '' ?>";
+    const author_id = "<?= isset($_GET['author_id']) ? $_GET['author_id'] : '' ?>";
+
+    const sort_column = "<?= $sort_column ?>";
+    const sort_order = "<?= $sort_order ?>";
+    const nextSortOrder = (sort_order === "asc") ? "desc" : "asc";
+
+
+    const sortBy = document.querySelectorAll(".sortBy")
+
+    const params = new URLSearchParams();
+    if (status && status !== "undefined") params.append("status", status);
+    if (genre && genre !== "undefined") params.append("genre", genre);
+    if (gender && gender !== "undefined") params.append("gender", gender);
+    if (price1 && price1 !== "undefined") params.append("price1", price1);
+    if (price2 && price2 !== "undefined") params.append("price2", price2);
+    if (author && author !== "undefined") params.append("author", author);
+    if (title && title !== "undefined") params.append("title", title);
+    if (author_id && author_id !== "undefined") params.append("author_id", author_id);
+
+
     btnDel.forEach((btn) => {
-      btn.addEventListener("click", doConfirm);
+      btn.addEventListener("click", doConfirmDel);
     })
 
-    function doConfirm(e) {
+    btnRemove.forEach((btn) => {
+      btn.addEventListener("click", doConfirmRemove);
+    })
+
+    btnRestock.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        window.location.href = `./doRestockVinyl.php?id=${btn.dataset.id}`
+      });
+    })
+
+    function doConfirmDel(e) {
+      const btn = e.target
+      // console.log(btn.dataset.id);
+      if (confirm(btn.dataset.title + " 確定刪除嗎?")) {
+        window.location.href = `./doDeleteVinyl.php?id=${btn.dataset.id}`
+      }
+    }
+
+    function doConfirmRemove(e) {
       const btn = e.target
       // console.log(btn.dataset.id);
       if (confirm(btn.dataset.title + " 確定下架嗎?")) {
@@ -474,6 +570,22 @@ $totalPage = ceil($totalCount / $perPage);
     statusSelect.addEventListener("change", function () {
       window.location.href = "index.php?status=" + this.value;
     });
+
+
+    sortBy.forEach((btn) => {
+      btn.addEventListener("click", function (e) {
+        console.log(e);
+        const clickedColumn = e.currentTarget.id;
+        const newSortOrder =
+          clickedColumn === sort_column && sort_order === "asc" ? "desc" : "asc";
+
+        params.set("sort_by", clickedColumn);
+        params.set("sort_order", newSortOrder);
+
+        window.location.href = `index.php?${params.toString()}`;
+      });
+
+    })
 
   </script>
 </body>
