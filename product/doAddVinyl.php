@@ -1,6 +1,7 @@
 <?php
+// ? 新增資料庫
 require_once "../components/connect.php";
-require_once "../components/utilities.php";
+require_once "../components/Utilities.php";
 
 if (!isset($_POST["title"])) {
   alertGoTo("非法進入", "./index.php");
@@ -22,6 +23,15 @@ $playlist = htmlspecialchars($_POST["playlist"]);
 
 if ($title == "" || $author == "") {
   alertGoBack("請輸入資訊");
+  exit;
+}
+
+$sqlShs_id="SELECT * from vinyl where shs_id = ?";
+$stmtShs_id = $pdo->prepare($sqlShs_id);
+$stmtShs_id->execute([$shs_id]);
+$shs_idResult = $stmtShs_id->fetch(PDO::FETCH_ASSOC);
+if ($shs_idResult) {
+  alertGoBack("代碼重複");
   exit;
 }
 
