@@ -6,8 +6,8 @@
 //     exit;
 // }
 
-require_once "./components/connect.php";
-require_once "./components/utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 $genre = intval($_GET["genre"] ?? 0);
 $gender = intval($_GET["gender"] ?? 0);

@@ -1,4 +1,5 @@
 <?php
+// ? 更新資料庫
 require_once "../components/connect.php";
 require_once "../components/utilities.php";
 
@@ -8,7 +9,7 @@ if (!isset($_POST["id"])) {
 }
 
 $id = htmlspecialchars($_POST["id"]);
-$shs_id=htmlspecialchars($_POST["shs_id"]);
+$shs_id = htmlspecialchars($_POST["shs_id"]);
 $title = trim(htmlspecialchars($_POST["title"]));
 $author = trim(htmlspecialchars($_POST["author"]));
 $price = intval($_POST["price"]);
@@ -84,35 +85,58 @@ if ($playlist !== "") {
     $values["playlist"] = $playlist;
 }
 if ($status !== "") {
-    $set[]="status_id = :status";
+    $set[] = "status_id = :status";
     $values["status"] = $status;
 }
 
 try {
     // 插入 vinyl 主表
-    $sql = "update vinyl set " .implode(", ",$set) ." where id = :id";
+    $sql = "Update vinyl set " . implode(", ", $set) . " where id = :id";
 
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($values);
 
-
+    //  ? 更改圖片與資料
     if (isset($_FILES["myFile"]) && $_FILES["myFile"]["error"] === UPLOAD_ERR_OK) {
-        $img = null;
+        $sqlImg = "SELECT * from vinyl_img where shs_id =?";
+
+        $stmtImg = $pdo->prepare($sqlImg);
+        $stmtImg->execute([$shs_id]);
+        $rowsImg=$stmtImg->fetchAll(PDO::FETCH_ASSOC);
+
         $timestamp = time();
         $ext = pathinfo($_FILES["myFile"]["name"], PATHINFO_EXTENSION);
         $img_name = "{$shs_id}_{$timestamp}.{$ext}";
         $file = "./img/{$img_name}";
 
-        if (move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)) {
-            $img = $img_name;
+        if (count($rowsImg) > 0) {
+            // 已有圖片，刪除舊檔案
+            $oldImgName = $rowsImg[0]["img_name"];
+            $oldImgPath = "./img/{$oldImgName}";
+            if(file_exists($oldImgPath)){
+                unlink($oldImgPath);
+            }
+            
+             // 更新圖片資料
+            $sqlUpdateImg = "UPDATE vinyl_img SET img_name = :name, img_path = :path WHERE shs_id = :id";
+            $stmtUpdateImg = $pdo->prepare($sqlUpdateImg);
+            $stmtUpdateImg->execute([
+                ":name" => $img_name,
+                ":path" => $file,
+                ":id" => $shs_id
+            ]);
+            
+        } else {
+            if (move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)) {
+                $sqlInsertImg = "INSERT INTO vinyl_img (shs_id, img_name, img_path) VALUES (?, ?, ?)";
+                $stmtInsertImg = $pdo->prepare($sqlInsertImg);
+                $stmtInsertImg->execute([$shs_id, $img_name, $file]);
+            }
         }
-
-        $sqlImg = "INSERT INTO vinyl_img (shs_id,img_name,img_path) VALUES (? ,? ,? );";
-        $imgValues = [$shs_id, $img_name, $file];
-
-        $stmtImg = $pdo->prepare($sqlImg);
-        $stmtImg->execute($imgValues);
+        if(move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)){
+        $img = $img_name;
+    }
     }
 
     // 顯示成功訊息
