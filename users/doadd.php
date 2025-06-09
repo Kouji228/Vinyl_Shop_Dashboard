@@ -1,7 +1,7 @@
 <?php
 // 新增會員主要程式
-require_once "connect.php";
-require_once "../Utilities.php"; //兩個點就是上一層的意思
+require_once "./connect.php";
+require_once "../components/Utilities.php";
 
 if (!isset($_POST["email"])) {
     alertGoTo("請從正常管道進入", "users/index.php"); //顯示提示文字,選擇要跳回的頁面
@@ -44,7 +44,7 @@ $password = password_hash($password, PASSWORD_BCRYPT);
 //PASSWORD_DEFAULT預設 = PASSWORD_BCRYPT
 //密碼加密 
 
-$sql = "INSERT INTO `users` (`email`, `password`, `name`) VALUES (?, ?, ?);";
+$sql = "INSERT INTO users (account, name, email, phone) VALUES (?, ?, ?, ?)";
 $values = [$email, $password, $name];
 
 
