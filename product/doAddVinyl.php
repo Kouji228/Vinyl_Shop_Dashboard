@@ -1,6 +1,6 @@
 <?php
-require_once "./components/connect.php";
-require_once "./components/utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 if (!isset($_POST["title"])) {
   alertGoTo("非法進入", "./index.php");
