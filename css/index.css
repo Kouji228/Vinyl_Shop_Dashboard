@@ -1,0 +1,933 @@
+:root {
+    --retro-indigo: #2e4057;
+    --olive-moss: #7c805e;
+    --warm-brass: #d1a65a;
+    --beige-mist: #f3efea;
+    --smoke-violet: #9b8ba8;
+    --vinyl-black: #1a1a1a;
+    --white: #ffffff;
+    --light-gray: #f8f6f3;
+    --border-color: #d1a65a33;
+    --shadow-light: 0 2px 8px #2e405714;
+    --shadow-medium: 0 4px 16px #2e40571f;
+    --shadow-heavy: 0 8px 32px #2e405729;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: linear-gradient(135deg, var(--beige-mist) 0%, var(--light-gray) 100%);
+    color: var(--vinyl-black);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+.container.d-flex {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* 手機版切換按鈕 */
+.mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1001;
+    background: var(--vinyl-black);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+    transition: all 0.3s ease;
+}
+
+.mobile-toggle:hover {
+    background: var(--retro-indigo);
+    transform: scale(1.05);
+}
+
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-overlay.active {
+    opacity: 1;
+}
+
+/* 側邊欄樣式 */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, var(--vinyl-black) 0%, #0f0f0f 100%);
+    color: var(--white);
+    padding: 2rem 0;
+    box-shadow: 4px 0 20px rgba(26, 26, 26, 0.25);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+/* 側邊欄右邊裝飾線 */
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, var(--warm-brass) 50%, transparent 100%);
+}
+
+.logo {
+    padding: 0 2rem 2rem;
+    border-bottom: 1px solid rgba(209, 166, 90, 0.3);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.logo-image {
+    max-width: 180px;
+    height: auto;
+    margin: 0 auto 1rem;
+    display: block;
+    filter: brightness(1.1);
+}
+
+/* 導航列項目 */
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+}
+
+/* 側邊欄項目 */
+.nav-item:hover {
+    background: rgba(209, 166, 90, 0.15);
+    border-left-color: var(--warm-brass);
+    color: var(--warm-brass);
+    transform: translateX(4px);
+}
+
+.nav-item.active {
+    background: rgba(209, 166, 90, 0.2);
+    border-left-color: var(--warm-brass);
+    color: var(--warm-brass);
+    transform: translateX(4px);
+}
+
+.nav-item i {
+    width: 20px;
+    margin-right: 1rem;
+    font-size: 1.1rem;
+}
+
+/* 主要內容區塊 */
+.main-content {
+    flex: 1; /* 彈性伸展，佔滿剩餘空間 */
+    padding: 2rem; /* 內距2rem */
+    overflow-y: auto; /* 垂直方向超出時出現捲軸 */
+    transition: margin-left 0.3s ease; /* margin-left 變化時加入過渡效果 */
+}
+
+/* 頁首區塊 */
+.header {
+    display: flex; /* 使用彈性盒模型 */
+    justify-content: space-between; /* 左右兩端對齊 */
+    align-items: center; /* 垂直置中 */
+    margin-bottom: 2.5rem; /* 下方外距2.5rem */
+    padding: 1.5rem 2rem; /* 上下1.5rem，左右2rem內距 */
+    background: var(--white); /* 背景色白色 */
+    border-radius: 16px; /* 圓角16px */
+    box-shadow: var(--shadow-light); /* 輕微陰影 */
+    border: 1px solid var(--border-color); /* 邊框 */
+    flex-wrap: wrap; /* 換行 */
+    gap: 1rem; /* 子元素間距1rem */
+}
+
+/* 頁首標題文字 */
+.header h2 {
+    font-family: 'Playfair Display', serif; /* 字體 */
+    font-size: 2rem; /* 字型大小2rem */
+    color: var(--retro-indigo); /* 字體顏色 */
+    font-weight: 600; /* 粗體 */
+}
+
+/* 使用者資訊區 */
+.user-info {
+    display: flex; /* 使用彈性盒模型 */
+    align-items: center; /* 垂直置中 */
+    gap: 1rem; /* 子元素間距1rem */
+}
+
+/* 使用者頭像 */
+.user-avatar {
+    width: 40px; /* 寬度40px */
+    height: 40px; /* 高度40px */
+    border-radius: 50%; /* 圓形頭像 */
+    background: linear-gradient(45deg, var(--olive-moss), var(--warm-brass)); /* 漸層背景 */
+    display: flex; /* 彈性盒模型 */
+    align-items: center; /* 垂直置中 */
+    justify-content: center; /* 水平置中 */
+    color: var(--white); /* 文字顏色白色 */
+    font-weight: 600; /* 字體粗體 */
+}
+
+/* 管理員圖片 */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.user-avatar img.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 內容區塊樣式 */
+.content-section {
+    background: var(--white); /* 背景色為白色 */
+    border-radius: 16px; /* 邊框圓角16像素 */
+    padding: 2rem; /* 內距2rem */
+    margin-bottom: 2rem; /* 下方外距2rem */
+    box-shadow: var(--shadow-light); /* 輕微陰影效果 */
+    border: 1px solid var(--border-color); /* 邊框顏色 */
+}
+
+/* 區塊標題列樣式 */
+.section-header {
+    display: flex; /* 使用彈性盒模型 */
+    justify-content: space-between; /* 左右兩端對齊 */
+    align-items: center; /* 垂直置中 */
+    margin-bottom: 2rem; /* 下方外距2rem */
+    padding-bottom: 1rem; /* 下方內距1rem */
+    border-bottom: 2px solid var(--beige-mist); /* 底部邊框 */
+    flex-wrap: wrap; /* 換行 */
+    gap: 1rem; /* 子元素間距1rem */
+}
+
+/* 區塊標題文字 */
+.section-title {
+    font-family: 'Playfair Display', serif; /* 字體 */
+    font-size: 1.5rem; /* 字型大小1.5rem */
+    color: var(--retro-indigo); /* 文字顏色 */
+    font-weight: 600; /* 粗體 */
+}
+
+/* 搜尋與篩選區塊樣式 */
+.controls-section {
+    display: flex; /* 使用彈性盒模型 */
+    flex-wrap: wrap; /* 換行 */
+    gap: 1rem; /* 子元素間距1rem */
+    margin-bottom: 2rem; /* 下方外距2rem */
+    padding: 1.5rem; /* 內距1.5rem */
+    background: var(--light-gray); /* 淺灰背景 */
+    border-radius: 12px; /* 圓角12像素 */
+    border: 1px solid var(--border-color); /* 邊框 */
+}
+
+/* 搜尋框容器 */
+.search-box {
+    flex: 1; /* 彈性佔滿剩餘空間 */
+    min-width: 250px; /* 最小寬度250像素 */
+    position: relative; /* 相對定位，方便絕對定位內部元素 */
+}
+
+/* 搜尋框輸入欄 */
+.search-box input {
+    width: 100%; /* 寬度填滿父元素 */
+    padding: 0.75rem 2.5rem 0.75rem 1rem; /* 上右下左內距 */
+    border: 2px solid var(--beige-mist); /* 邊框顏色與寬度 */
+    border-radius: 8px; /* 圓角8像素 */
+    font-family: inherit; /* 繼承字體 */
+    transition: all 0.3s ease; /* 過渡動畫 */
+    background: var(--white); /* 背景白色 */
+}
+
+/* 搜尋框聚焦時樣式 */
+.search-box input:focus {
+    outline: none; /* 取消外框 */
+    border-color: var(--warm-brass); /* 邊框變色 */
+    box-shadow: 0 0 0 3px rgba(209, 166, 90, 0.1); /* 外陰影 */
+}
+
+/* 搜尋框放大鏡圖示 */
+.search-box i {
+    position: absolute; /* 絕對定位 */
+    right: 1rem; /* 右側距離1rem */
+    top: 50%; /* 垂直置中 */
+    transform: translateY(-50%); /* 垂直偏移調整 */
+    color: var(--olive-moss); /* 顏色 */
+    cursor: pointer; /* 滑鼠變指標 */
+    transition: color 0.3s ease; /* 顏色過渡 */
+}
+
+/* 放大鏡圖示滑鼠懸停時顏色變化 */
+.search-box i:hover {
+    color: var(--warm-brass); /* 變成暖色 */
+}
+
+/* 篩選條件群組容器 */
+.filter-group {
+    display: flex; /* 彈性盒模型 */
+    gap: 1rem; /* 子元素間距 */
+    flex-wrap: wrap; /* 換行 */
+    align-items: center; /* 垂直置中 */
+}
+
+/* 篩選下拉選單 */
+.filter-group select {
+    padding: 0.75rem 1rem; /* 內距 */
+    border: 2px solid var(--beige-mist); /* 邊框 */
+    border-radius: 8px; /* 圓角 */
+    font-family: inherit; /* 繼承字體 */
+    background: var(--white); /* 背景白色 */
+    min-width: 150px; /* 最小寬度 */
+    transition: all 0.3s ease; /* 過渡動畫 */
+}
+
+/* 篩選下拉選單聚焦樣式 */
+.filter-group select:focus {
+    outline: none; /* 取消外框 */
+    border-color: var(--warm-brass); /* 邊框變色 */
+    box-shadow: 0 0 0 3px rgba(209, 166, 90, 0.1); /* 外陰影 */
+}
+
+/* 清除篩選按鈕 */
+.clear-filters {
+    padding: 0.75rem 1.5rem; /* 內距 */
+    background: var(--smoke-violet); /* 背景紫色 */
+    color: var(--white); /* 字體白色 */
+    border: none; /* 無邊框 */
+    border-radius: 8px; /* 圓角 */
+    cursor: pointer; /* 滑鼠指標 */
+    font-weight: 500; /* 中等粗體 */
+    transition: all 0.3s ease; /* 過渡動畫 */
+}
+
+/* 清除篩選按鈕懸停效果 */
+.clear-filters:hover {
+    background: #8a7a98; /* 背景變深 */
+    transform: translateY(-2px); /* 向上移動2像素 */
+}
+
+/* 按鈕樣式 */
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--warm-brass), #e8b968);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(209, 166, 90, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(209, 166, 90, 0.4);
+}
+
+.btn-warning {
+    background-color: var(--warm-brass);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(209, 166, 90, 0.3);
+}
+
+.btn-warning:hover {
+    background-color: #c18b38;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(209, 166, 90, 0.4);
+}
+
+.btn-danger {
+    background-color: var(--error-color);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-success:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-info {
+    background-color: var(--retro-indigo);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(46, 64, 87, 0.3);
+}
+
+.btn-info:hover {
+    background-color: #243447;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(46, 64, 87, 0.4);
+}
+
+.btn.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+/* 小尺寸按鈕 */
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+}
+
+.btn-xs {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 4px;
+}
+
+/* 操作按鈕群組 */
+.btn-group {
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+.btn-group .btn {
+    margin: 0;
+}
+
+/* 圖示按鈕 */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.btn-icon i {
+    font-size: 0.875rem;
+}
+
+/* 按鈕懸停效果增強 */
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(209, 166, 90, 0.3);
+}
+
+/* 特殊操作按鈕樣式 */
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.action-buttons .btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.action-buttons .btn i {
+    font-size: 0.8rem;
+}
+
+/* 表格樣式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+}
+
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.3s ease;
+}
+
+.sortable-header:hover {
+    background: var(--beige-mist);
+}
+
+.sortable-header::after {
+    content: '\f0dc';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+}
+
+.sortable-header:hover::after {
+    opacity: 0.6;
+}
+
+.sortable-header.sort-asc::after {
+    content: '\f0de';
+    opacity: 1;
+    color: var(--warm-brass);
+}
+
+.sortable-header.sort-desc::after {
+    content: '\f0dd';
+    opacity: 1;
+    color: var(--warm-brass);
+}
+
+th,
+td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--beige-mist);
+}
+
+th {
+    background: var(--light-gray);
+    color: var(--retro-indigo);
+    font-weight: 600;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center; /* 水平置中 */
+    vertical-align: middle; /* 垂直置中 */
+}
+
+tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+tbody tr td {
+    text-align: center; /* 水平置中 */
+    vertical-align: middle; /* 垂直置中 */
+}
+tbody tr:hover {
+    background: rgba(209, 166, 90, 0.05);
+}
+
+/* 查無資料提示樣式 */
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--olive-moss);
+    font-style: italic;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* 分頁樣式（Pagination） */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+    padding: 1rem;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    padding: 0.6rem 1rem;
+    border: 2px solid var(--beige-mist);
+    background: var(--white);
+    color: var(--retro-indigo);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination-btn:hover {
+    border-color: var(--warm-brass);
+    background: var(--warm-brass);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+
+.pagination-btn.active {
+    background: var(--retro-indigo);
+    border-color: var(--retro-indigo);
+    color: var(--white);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pagination-btn:disabled:hover {
+    border-color: var(--beige-mist);
+    background: var(--white);
+    color: var(--retro-indigo);
+}
+
+.pagination-info {
+    margin: 0 1rem;
+    color: var(--olive-moss);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* users-add.css */
+
+/* 表單整體區塊 */
+.content-section {
+  background-color: #fff;
+  color: #111;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 區塊標題與按鈕列 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+}
+
+/* 表單行設定 */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 220px;
+}
+
+.full-width {
+  flex: 0 0 100%;
+}
+
+/* 標籤 */
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.required::after {
+  content: " *";
+  color: red;
+}
+
+/* 表單控制項 */
+.form-control,
+.form-select {
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  background-color: #fafafa;
+  color: #111;
+}
+
+.form-control:focus {
+  border-color: #000;
+  box-shadow: none;
+}
+
+/* 錯誤提示 */
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* 小提示文字 */
+.form-text {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* 分區標題 */
+.form-section {
+  margin-top: 2rem;
+}
+
+.form-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+/* 開關勾選框 */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-check-input {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 動作按鈕列 */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+.btn i {
+  margin-right: 0.5rem;
+}
+
+/*  rwd設定 */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .controls-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-toggle {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        height: 100%;
+        width: 280px;
+        z-index: 1000;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .main-content {
+        padding: 1rem;
+        padding-top: 4rem;
+        width: 100%;
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .header h2 {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .controls-section {
+        padding: 1rem;
+    }
+
+    .search-box {
+        min-width: 100%;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group select {
+        min-width: 100%;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    th,
+    td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .pagination {
+        gap: 0.25rem;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 0.75rem;
+        min-width: 35px;
+    }
+
+    .pagination-info {
+        order: -1;
+        margin: 0 0 1rem 0;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 0.5rem;
+        padding-top: 4rem;
+    }
+
+    .content-section {
+        padding: 1rem;
+    }
+
+    .header {
+        padding: 1rem;
+    }
+
+    .controls-section {
+        padding: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
+    }
+
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+
+    th,
+    td {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
