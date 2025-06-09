@@ -1,6 +1,7 @@
 <?php
+//  ? 新增黑膠分頁
 require_once "../components/connect.php";
-require_once "../components/utilities.php";
+require_once "../components/Utilities.php";
 
 $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
@@ -37,6 +38,9 @@ try {
       background-color: #1A1A1A;
       color: #F4F1EC;
     }
+    .cursor-pointer {
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -53,7 +57,7 @@ try {
               <label class="form-label" for="shs-id">唱片編號</label>
               <div class="input-group">
                 <div class="input-group-text">
-                  <span class="random-id" id="random-id">隨機</span>
+                  <span class="random-id cursor-pointer" id="random-id">隨機</span>
                 </div>
                 <input required name="shs-id" id="shs-id" type="text" class="form-control" placeholder="編號" readonly>
               </div>
@@ -140,7 +144,7 @@ try {
       </div>
 
       <div class="col-md-1"></div>
-      
+
       <div class="col-md-3" id="previewImage">
       </div>
     </div>

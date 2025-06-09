@@ -1,4 +1,5 @@
 <?php
+// ? 更新黑膠分頁
 require_once "../components/connect.php";
 require_once "../components/utilities.php";
 
