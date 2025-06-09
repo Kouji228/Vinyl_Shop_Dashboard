@@ -1,5 +1,5 @@
 :root {
-    --retro-indigo: #2e4057;
+    --retro-indigo: #736347;
     --olive-moss: #7c805e;
     --warm-brass: #d1a65a;
     --beige-mist: #f3efea;
@@ -30,14 +30,23 @@ body {
     overflow-x: hidden;
 }
 
-.container {
+/* .container {
     display: flex;
     min-height: 100vh;
     position: relative;
+      padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .container.d-flex {
     width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+} */
+
+/* 原本的.container */
+.dashboard-wrapper {
+    width: 100%;
     height: 100vh;
     overflow: hidden;
 }
@@ -658,126 +667,126 @@ tbody tr:hover {
 
 /* 表單整體區塊 */
 .content-section {
-  background-color: #fff;
-  color: #111;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    color: #111;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 /* 區塊標題與按鈕列 */
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #000;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #000;
 }
 
 /* 表單行設定 */
 .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .form-group {
-  flex: 1;
-  min-width: 220px;
+    flex: 1;
+    min-width: 220px;
 }
 
 .full-width {
-  flex: 0 0 100%;
+    flex: 0 0 100%;
 }
 
 /* 標籤 */
 .form-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
 }
 
 .required::after {
-  content: " *";
-  color: red;
+    content: ' *';
+    color: red;
 }
 
 /* 表單控制項 */
 .form-control,
 .form-select {
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  background-color: #fafafa;
-  color: #111;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    background-color: #fafafa;
+    color: #111;
 }
 
 .form-control:focus {
-  border-color: #000;
-  box-shadow: none;
+    border-color: #000;
+    box-shadow: none;
 }
 
 /* 錯誤提示 */
 .error-message {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
+    color: red;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
 }
 
 /* 小提示文字 */
 .form-text {
-  font-size: 0.875rem;
-  color: #666;
+    font-size: 0.875rem;
+    color: #666;
 }
 
 /* 分區標題 */
 .form-section {
-  margin-top: 2rem;
+    margin-top: 2rem;
 }
 
 .form-section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
 }
 
 /* 開關勾選框 */
 .form-check {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .form-check-input {
-  width: 1rem;
-  height: 1rem;
+    width: 1rem;
+    height: 1rem;
 }
 
 /* 動作按鈕列 */
 .form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
 .btn {
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
 }
 
 .btn i {
-  margin-right: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 /*  rwd設定 */
