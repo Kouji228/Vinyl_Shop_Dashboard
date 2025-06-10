@@ -13,3 +13,5 @@ img/content/*
 .env
 vendor/
 node_modules/
+
+components/connect.php

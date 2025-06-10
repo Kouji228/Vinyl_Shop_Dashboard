@@ -9,6 +9,13 @@
 require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
+
+$pageTitle = "黑膠商品列表";
+$cssList = ["../css/index.css", "css/product.css"];
+include "../vars.php";
+include "../template_top.php";
+include "../template_main.php";
+
 $genre = intval($_GET["genre"] ?? 0);
 $gender = intval($_GET["gender"] ?? 0);
 $status = isset($_GET["status"]) ? intval($_GET["status"]) : null;
@@ -82,7 +89,7 @@ $perPage = 20;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
 
-$select = "vinyl.id AS id,title,author_id,vinyl_author.author AS author,company,price,stock,vinyl_gender.gender AS gender,status_id FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id";
+$select = "vinyl.id AS id,title,author_id,vinyl_author.author AS author,company,price,stock,vinyl_genre.genre AS genre,vinyl_gender.gender AS gender,status_id FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_genre on vinyl_genre.id = vinyl.genre_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id";
 
 $sql = "SELECT $select $whereSQL ORDER BY $sort_column $sort_order LIMIT $perPage OFFSET $pageStart";
 $sqlAll = "SELECT $select  $whereSQL ";
@@ -123,12 +130,8 @@ $genders = array_filter($rowsGender, fn($g) => $g["genre_id"] == $genre);
 $totalPage = ceil($totalCount / $perPage);
 ?>
 
-<!-- <pre><?php var_dump($sql, $values); ?></pre> -->
 
-<!doctype html>
-<html lang="en">
-
-<head>
+<!-- <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>黑膠唱片</title>
@@ -166,6 +169,7 @@ $totalPage = ceil($totalCount / $perPage);
     .title {
       padding-left: 10px;
       flex: 1;
+
       a {
         color: #e6c068;
       }
@@ -184,6 +188,7 @@ $totalPage = ceil($totalCount / $perPage);
 
     .author {
       width: 320px;
+
       /* text-align: center; */
       a {
         color: #e6c068;
@@ -205,10 +210,12 @@ $totalPage = ceil($totalCount / $perPage);
       align-items: center;
       cursor: pointer;
       color: #fff;
-      &#id{
+
+      &#id {
         padding-left: 10px;
       }
-      i{
+
+      i {
         padding-left: 5px;
       }
     }
@@ -217,393 +224,446 @@ $totalPage = ceil($totalCount / $perPage);
       width: 200px;
     }
   </style>
-</head>
-
-<body>
-  <div class="container mt-3">
-
-    <div class="d-flex">
-      <h1>黑膠商品列表</h1>
-      <div class="ms-auto">
-        <a class="btn btn-primary btn-sm btn-add" href="./vinylAdd.php">增加黑膠唱片</a>
-      </div>
-    </div>
-    <!-- <div class="d-flex">
-        <img class="head" src="./users/uploads/<?= $_SESSION["user"]["img"] ?>" alt="">
-        <div class="ms-3"><?= $_SESSION["user"]["name"] ?> 您好 !</div>
-        <a href="./users/doLogout.php" class="btn btn-danger btn-sm ms-auto">登出</a>
-    </div> -->
+</head> -->
 
 
-    <div class="my-2 d-flex align-items-center">
-      <span class="me-auto">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span>
+<div class="content-section ">
 
-      <div class="me-1-lg-1 mb-1 mb-lg-0 ms-auto">
-        <div class="input-group input-group-sm">
+  <!-- 小標題 -->
+  <div class="section-header d-flex justify-content-between align-items-center">
+    <h3 class="section-title">黑膠商品列表</h3>
+    <a href="./vinylAdd.php" class="btn btn-primary">增加黑膠唱片</a>
+  </div>
 
-          <div class="input-group-text">
-            <label for="searchType3">價格區間</label>
-          </div>
-          <input name="price1" type="number" class="form-control" placeholder="<?= $price1 ?>">
-          <div class="input-group-text"> ~
-          </div>
+  <!-- 內容 -->
+  <div class="controls-section">
+    <!-- <span class="me-auto">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span> -->
+
+    <!-- 篩選與搜尋 -->
+    <div class="controls-section  flex-center">
+
+      <div class="search row gap-1">
+        <div class="col-auto flex-center">
+          <label class="form-label" for="price1">價格區間</label>
+        </div>
+
+        <div class="col-auto">
+          <input name="price1" id="price1" type="number" class="form-control" placeholder="<?= $price1 ?>">
+        </div>
+        <div class="col-auto"> ~ </div>
+        <div class="col-auto">
           <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
+        </div>
 
-          <div class="input-group-text">
-            <input name="searchType" id="searchType1" type="radio" class="form-check-input" value="title" checked>
-            <label for="searchType1" class="me-2">專輯</label>
-            <input name="searchType" id="searchType2" type="radio" class="form-check-input" value="author">
-            <label for="searchType2">創作者</label>
+        <div class="col-auto d-flex">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="searchType" id="searchType1" value="title" checked>
+            <label class="form-check-label" for="searchType1">專輯</label>
           </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="searchType" id="searchType2" value="author">
+            <label class="form-check-label" for="searchType2">創作者</label>
+          </div>
+        </div>
+
+        <div class="col-auto">
           <?php
           $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
           ?>
-          <input name="search" type="text" class="form-control form-control-sm"
-            placeholder="<?= htmlspecialchars($searchHolder) ?>">
-          <div class="btn btn-primary btn-sm btn-search me-2">搜尋</div>
-
+          <div class="search-box d-flex">
+            <input name="search" type="text" class="form-control me-4" placeholder="<?= htmlspecialchars($searchHolder) ?>">
+            <div class="btn btn-primary btn-search ps-5 wh50"><i class="fa fa-search"></i></div>
+            <!-- <i class="fas fa-search btn-search"></i> -->
+          </div>
         </div>
       </div>
 
-    </div>
+      <div class="filter-group ">
+        <div class="row flex-center">
 
-    <div class="row mb-3">
-      <div class="col-md-4">
-        <label class="form-label">風格</label>
-        <select name="genre" id="genre" class="form-select">
-          <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
-          <?php foreach ($rowsGenre as $row): ?>
-            <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
-              <?= $row["genre"] ?>
-            </option>
-          <?php endforeach ?>
-        </select>
-      </div>
+          <div class="col-auto">
+            <label for="genre" class="form-label">風格</label>
+          </div>
+          <div class="col-auto">
+            <select name="genre" id="genre" class="form-select">
+              <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
+              <?php foreach ($rowsGenre as $row): ?>
+                <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
+                  <?= $row["genre"] ?>
+                </option>
+              <?php endforeach ?>
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label class="form-label">類別</label>
-        <select name="gender" id="gender" class="form-select">
-          <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
-          <?php foreach ($genders as $g): ?>
-            <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
-              <?= $g["gender"] ?>
-            </option>
-          <?php endforeach ?>
-        </select>
-      </div>
+          <div class="col-auto">
+            <label for="gender" class="form-label">類別</label>
+          </div>
+          <div class="col-auto">
+            <select name="gender" id="gender" class="form-select">
+              <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
+              <?php foreach ($genders as $g): ?>
+                <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
+                  <?= $g["gender"] ?>
+                </option>
+              <?php endforeach ?>
+            </select>
+          </div>
 
-      <div class="col-md-4">
-        <label class="form-label">狀態</label>
-        <select name="status" id="status" class="form-select">
-          <option value="" disabled <?= ($status === null || $status === '') ? 'selected' : '' ?>>請選擇狀態</option>
-          <?php foreach ($rowsStatus as $row): ?>
-            <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
-              <?= $row["status"] ?>
-            </option>
-          <?php endforeach ?>
-        </select>
-      </div>
-    </div>
-
-    <div class="p-2 rounded-2 rounded-top-0">
-      <div class="msg text-bg-dark ps-1">
-        <div class="id sortable sortBy" id="id">
-          #
-          <?php if ($sort_column === 'id'): ?>
-            <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
-          <?php endif; ?>
-        </div>
-        <div class="title">專輯</div>
-        <div class="author">藝術家</div>
-        <div class="price sortable sortBy" id="price">
-          價格
-          <?php if ($sort_column === 'price'): ?>
-            <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
-          <?php endif; ?>
-        </div>
-        <div class="stock">庫存</div>
-        <div class="genre">類別</div>
-        <div class="time text-center">操作</div>
-      </div>
-
-      <?php foreach ($rows as $index => $row): ?>
-        <div class="msg">
-          <div class="id"><?= $index + 1 + ($page - 1) * $perPage ?></div>
-          <div class="title"><a href="./vinylDetail.php?id=<?= $row["id"] ?>">
-              <?= $row["title"] ?></a></div>
-          <div class="author"><a href="./index.php?author_id=<?= $row["author_id"] ?>">
-              <?= $row["author"] ?> </a></div>
-          <div class="price"><?= $row["price"] ?></div>
-          <div class="stock"><?= $row["stock"] ?></div>
-          <div class="genre"><?= $row["gender"] ?></div>
-
-          <div class="time">
-            <?php if ($row["status_id"] == 0): ?>
-              <div class="btn btn-success btn-sm btn-restock" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
-                上架</div>
-              <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">刪除
-              </div>
-            <?php else: ?>
-              <div class="btn btn-danger btn-sm btn-remove" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
-                下架</div>
-              <a class="btn btn-warning btn-sm" href="./vinylUpdate.php?id=<?= $row["id"] ?>">修改</a>
-            <?php endif; ?>
+          <div class="col-auto">
+            <label for="status" class="form-label">狀態</label>
+          </div>
+          <div class="col-auto">
+            <select name="status" id="status" class="form-select">
+              <?php foreach ($rowsStatus as $row): ?>
+                <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
+                  <?= $row["status"] ?>
+                </option>
+              <?php endforeach ?>
+            </select>
           </div>
         </div>
 
-      <?php endforeach; ?>
+      </div>
+
     </div>
+  </div>
 
-    <!-- page -->
-    <?php
-    function makeLink($page, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order)
-    {
-      $params = ["page={$page}"];
-      if ($genre > 0)
-        $params[] = "genre={$genre}";
-      if ($gender > 0)
-        $params[] = "gender={$gender}";
-      if ($status > -1)
-        $params[] = "status={$status}";
-      if ($author_id !== "")
-        $params[] = "author_id={$author_id}";
-      if ($price1 !== "")
-        $params[] = "price1={$price1}";
-      if ($price2 !== "")
-        $params[] = "price2={$price2}";
-      if ($titleSearch)
-        $params[] = "title={$titleSearch}";
-      if ($authorSearch)
-        $params[] = "author={$authorSearch}";
-      if ($sort_column)
-        $params[] = "sort_by={$sort_column}";
-      if ($sort_order)
-        $params[] = "sort_order={$sort_order}";
-      return "./index.php?" . implode("&", $params);
-    }
-    ?>
 
-    <ul class="pagination justify-content-center my-4">
-      <li class="page-item">
-        <a class="page-link"
+  <!-- 商品列表 -->
+  <div class="table-container table-responsive w-100">
+    <table class="table table-bordered table-striped align-middle w-100 ">
+      <thead class="table-dark">
+        <tr>
+          <th class="id sortable sortBy" id="id">
+            編號
+            <?php if ($sort_column === 'id'): ?>
+              <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+            <?php endif; ?>
+          </th>
+          <th class="title">專輯</th>
+          <th class="author">藝術家</th>
+          <th class="price sortable sortBy" id="price">
+            價格
+            <?php if ($sort_column === 'price'): ?>
+              <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+            <?php endif; ?>
+          </th>
+          <th class="stock">庫存</th>
+          <th class="genre">風格</th>
+          <th class="gender">類別</th>
+          <th class="time text-center">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (count($rows) > 0): ?>
+          <?php foreach ($rows as $index => $row): ?>
+            <tr>
+              <td><?= $index + 1 + ($page - 1) * $perPage ?></td>
+              <td class="title">
+                <a href="./vinylDetail.php?id=<?= $row["id"] ?>">
+                  <?= htmlspecialchars($row["title"]) ?>
+                </a>
+              </td>
+              <td class="author">
+                <a href="./index.php?author_id=<?= $row["author_id"] ?>">
+                  <?= htmlspecialchars($row["author"]) ?>
+                </a>
+              </td>
+              <td><?= htmlspecialchars($row["price"]) ?></td>
+              <td><?= htmlspecialchars($row["stock"]) ?></td>
+              <td><?= htmlspecialchars($row["genre"]) ?></td>
+              <td><?= htmlspecialchars($row["gender"]) ?></td>
+
+              <td class="time">
+                <?php if ($row["status_id"] == 0): ?>
+                  <div class="btn btn-success btn-sm btn-restock" data-id="<?= $row["id"] ?>"
+                    data-title="<?= $row["title"] ?>">
+                    上架</div>
+                  <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
+                    <i class="fas fa-trash-alt"></i>
+                  </div>
+                <?php else: ?>
+                  <div class="btn btn-danger btn-sm btn-remove" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
+                    下架</div>
+                  <a class="btn btn-warning btn-sm" href="./vinylUpdate.php?id=<?= $row["id"] ?>">
+                    <!-- <i class="fas fa-edit"></i> -->
+                    編輯
+                  </a>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <tr>
+            <td colspan="7" class="text-center">目前無資料</td>
+          </tr>
+        <?php endif; ?>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 分頁 -->
+  <div class="w-100">
+    <div class="pagination  d-flex justify-content-center">
+      <?php
+      function makeLink($page, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order)
+      {
+        $params = ["page={$page}"];
+        if ($genre > 0)
+          $params[] = "genre={$genre}";
+        if ($gender > 0)
+          $params[] = "gender={$gender}";
+        if ($status > -1)
+          $params[] = "status={$status}";
+        if ($author_id !== "")
+          $params[] = "author_id={$author_id}";
+        if ($price1 !== "")
+          $params[] = "price1={$price1}";
+        if ($price2 !== "")
+          $params[] = "price2={$price2}";
+        if ($titleSearch)
+          $params[] = "title={$titleSearch}";
+        if ($authorSearch)
+          $params[] = "author={$authorSearch}";
+        if ($sort_column)
+          $params[] = "sort_by={$sort_column}";
+        if ($sort_order)
+          $params[] = "sort_order={$sort_order}";
+        return "./index.php?" . implode("&", $params);
+      }
+      ?>
+
+      <?php if ($totalCount > 0): ?>
+        <a class="pagination-btn"
           href="<?= makeLink(1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
           <i class="fa-solid fa-angles-left"></i>
         </a>
-      </li>
 
-      <?php
-      if ($totalPage <= 5) {
-        $start = 1;
-        $end = $totalPage;
-      } else {
-        if ($page <= 2) {
+        <?php if ($page > 1): ?>
+          <a href="<?= makeLink($page - 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"
+            class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
+        <?php endif; ?>
+
+        <?php
+        if ($totalPage <= 5) {
           $start = 1;
-          $end = 5;
-        } elseif ($page >= $totalPage - 1) {
-          $start = $totalPage - 4;
           $end = $totalPage;
         } else {
-          $start = $page - 2;
-          $end = $page + 2;
+          if ($page <= 2) {
+            $start = 1;
+            $end = 5;
+          } elseif ($page >= $totalPage - 1) {
+            $start = $totalPage - 4;
+            $end = $totalPage;
+          } else {
+            $start = $page - 2;
+            $end = $page + 2;
+          }
         }
-      }
-      for ($i = $start; $i <= $end; $i++): ?>
-        <li class="page-item <?= $page == $i ? "active" : "" ?>">
-          <a class="page-link"
+        for ($i = $start; $i <= $end; $i++): ?>
+          <a class="pagination-btn <?= $page == $i ? "active" : "" ?>"
             href="<?= makeLink($i, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"><?= $i ?></a>
-        </li>
-      <?php endfor; ?>
+        <?php endfor; ?>
 
-      <li class="page-item">
-        <a class="page-link"
+        <?php if ($page < $totalPage): ?>
+          <a href="<?= makeLink($page + 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"
+            class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
+        <?php endif; ?>
+
+        <a class="pagination-btn"
           href="<?= makeLink($totalPage, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
           <i class="fa-solid fa-angles-right"></i>
         </a>
-      </li>
-    </ul>
+      <?php endif; ?>
 
+    </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-    crossorigin="anonymous"></script>
-
-  <script>
-    const btnDel = document.querySelectorAll('.btn-del');
-    const btnRemove = document.querySelectorAll('.btn-remove');
-    const btnRestock = document.querySelectorAll('.btn-restock');
-
-    const btnSearch = document.querySelector(".btn-search");
-    const inputPrice1 = document.querySelector("input[name=price1]");
-    const inputPrice2 = document.querySelector("input[name=price2]");
-    const inputText = document.querySelector("input[name=search]")
-
-    const status = "<?= isset($_GET['status']) ? $_GET['status'] : '' ?>";
-    const price1 = "<?= isset($_GET['price1']) ? $_GET['price1'] : '' ?>";
-    const price2 = "<?= isset($_GET['price2']) ? $_GET['price2'] : '' ?>";
-    const genre = "<?= isset($_GET['genre']) ? $_GET['genre'] : '' ?>";
-    const gender = "<?= isset($_GET['gender']) ? $_GET['gender'] : '' ?>";
-    const author = "<?= isset($_GET['author']) ? $_GET['author'] : '' ?>";
-    const title = "<?= isset($_GET['title']) ? $_GET['title'] : '' ?>";
-    const author_id = "<?= isset($_GET['author_id']) ? $_GET['author_id'] : '' ?>";
-
-    const sort_column = "<?= $sort_column ?>";
-    const sort_order = "<?= $sort_order ?>";
-    const nextSortOrder = (sort_order === "asc") ? "desc" : "asc";
+</div>
 
 
-    const sortBy = document.querySelectorAll(".sortBy")
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
-    const params = new URLSearchParams();
-    if (status && status !== "undefined") params.append("status", status);
-    if (genre && genre !== "undefined") params.append("genre", genre);
-    if (gender && gender !== "undefined") params.append("gender", gender);
-    if (price1 && price1 !== "undefined") params.append("price1", price1);
-    if (price2 && price2 !== "undefined") params.append("price2", price2);
-    if (author && author !== "undefined") params.append("author", author);
-    if (title && title !== "undefined") params.append("title", title);
-    if (author_id && author_id !== "undefined") params.append("author_id", author_id);
+<script>
+  const btnDel = document.querySelectorAll('.btn-del');
+  const btnRemove = document.querySelectorAll('.btn-remove');
+  const btnRestock = document.querySelectorAll('.btn-restock');
+
+  const btnSearch = document.querySelector(".btn-search");
+  const inputPrice1 = document.querySelector("input[name=price1]");
+  const inputPrice2 = document.querySelector("input[name=price2]");
+  const inputText = document.querySelector("input[name=search]")
+
+  const status = "<?= isset($_GET['status']) ? $_GET['status'] : '' ?>";
+  const price1 = "<?= isset($_GET['price1']) ? $_GET['price1'] : '' ?>";
+  const price2 = "<?= isset($_GET['price2']) ? $_GET['price2'] : '' ?>";
+  const genre = "<?= isset($_GET['genre']) ? $_GET['genre'] : '' ?>";
+  const gender = "<?= isset($_GET['gender']) ? $_GET['gender'] : '' ?>";
+  const author = "<?= isset($_GET['author']) ? $_GET['author'] : '' ?>";
+  const title = "<?= isset($_GET['title']) ? $_GET['title'] : '' ?>";
+  const author_id = "<?= isset($_GET['author_id']) ? $_GET['author_id'] : '' ?>";
+
+  const sort_column = "<?= $sort_column ?>";
+  const sort_order = "<?= $sort_order ?>";
+  const nextSortOrder = (sort_order === "asc") ? "desc" : "asc";
+
+  const sortBy = document.querySelectorAll(".sortBy")
+
+  const params = new URLSearchParams();
+  if (status && status !== "undefined") params.append("status", status);
+  if (genre && genre !== "undefined") params.append("genre", genre);
+  if (gender && gender !== "undefined") params.append("gender", gender);
+  if (price1 && price1 !== "undefined") params.append("price1", price1);
+  if (price2 && price2 !== "undefined") params.append("price2", price2);
+  if (author && author !== "undefined") params.append("author", author);
+  if (title && title !== "undefined") params.append("title", title);
+  if (author_id && author_id !== "undefined") params.append("author_id", author_id);
 
 
-    btnDel.forEach((btn) => {
-      btn.addEventListener("click", doConfirmDel);
-    })
+  btnDel.forEach((btn) => {
+    btn.addEventListener("click", doConfirmDel);
+  })
 
-    btnRemove.forEach((btn) => {
-      btn.addEventListener("click", doConfirmRemove);
-    })
+  btnRemove.forEach((btn) => {
+    btn.addEventListener("click", doConfirmRemove);
+  })
 
-    btnRestock.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        window.location.href = `./doRestockVinyl.php?id=${btn.dataset.id}`
-      });
-    })
+  btnRestock.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      window.location.href = `./doRestockVinyl.php?id=${btn.dataset.id}`
+    });
+  })
 
-    function doConfirmDel(e) {
-      const btn = e.target
-      // console.log(btn.dataset.id);
-      if (confirm(btn.dataset.title + " 確定刪除嗎?")) {
-        window.location.href = `./doDeleteVinyl.php?id=${btn.dataset.id}`
+  function doConfirmDel(e) {
+    const btn = e.target
+    // console.log(btn.dataset.id);
+    if (confirm(btn.dataset.title + " 確定刪除嗎?")) {
+      window.location.href = `./doDeleteVinyl.php?id=${btn.dataset.id}`
+    }
+  }
+
+  function doConfirmRemove(e) {
+    const btn = e.target
+    // console.log(btn.dataset.id);
+    if (confirm(btn.dataset.title + " 確定下架嗎?")) {
+      window.location.href = `./doRemoveVinyl.php?id=${btn.dataset.id}`
+    }
+  }
+
+  btnSearch.addEventListener("click", () => {
+    const queryType = document.querySelector('input[name=searchType]:checked').value;
+
+    let params = [];
+
+    // 處理價格區間
+    if (inputPrice1.value !== "") {
+      params.push(`price1=${encodeURIComponent(inputPrice1.value)}`);
+    }
+    if (inputPrice2.value !== "") {
+      params.push(`price2=${encodeURIComponent(inputPrice2.value)}`);
+    }
+
+    // 處理搜尋字串
+    if (inputText.value.trim() !== "") {
+      if (queryType === "title") {
+        params.push(`title=${encodeURIComponent(inputText.value.trim())}`);
+      } else if (queryType === "author") {
+        params.push(`author=${encodeURIComponent(inputText.value.trim())}`);
       }
     }
 
-    function doConfirmRemove(e) {
-      const btn = e.target
-      // console.log(btn.dataset.id);
-      if (confirm(btn.dataset.title + " 確定下架嗎?")) {
-        window.location.href = `./doRemoveVinyl.php?id=${btn.dataset.id}`
+    // 組合 URL
+    const queryString = params.join("&");
+    const url = `./index.php?${queryString}`;
+
+    // 導向新頁面
+    window.location.href = url;
+  });
+
+  // 放你的 JS 代碼（包括 event listener）
+  const genderSelect = document.getElementById("gender");
+  const genreSelect = document.getElementById("genre");
+  const statusSelect = document.getElementById("status")
+
+  const genderOptionsRaw = <?= json_encode($rowsGender) ?>;
+
+  // 轉換為 genre_id => [gender, gender, ...]
+  const genderOptions = {};
+  genderOptionsRaw.forEach(row => {
+    const genreId = row.genre_id;
+
+    if (!genderOptions[genreId]) {
+      genderOptions[genreId] = [];
+    }
+    genderOptions[genreId].push({
+      id: row.id,
+      gender: row.gender
+    });
+    // console.log(genderOptions[genreId]);
+
+  });
+
+  genreSelect.addEventListener("change", function () {
+    if (this.value) {
+      window.location.href = "index.php?genre=" + this.value;
+    } else {
+      window.location.href = "index.php";
+    }
+  });
+
+  genderSelect.addEventListener("change", function () {
+    const genre = genreSelect.value;
+    const gender = this.value;
+
+    // 更新參數
+    if (genre) params.set("genre", genre);
+    else params.delete("genre");
+
+    if (gender) params.set("gender", gender);
+    else params.delete("gender");
+
+    // 重新組裝 URL，將 genre 和 gender 放前面
+    const finalParams = new URLSearchParams();
+
+    // 先放 genre 和 gender
+    if (params.has("genre")) finalParams.set("genre", params.get("genre"));
+    if (params.has("gender")) finalParams.set("gender", params.get("gender"));
+
+    // 再放其他參數（不重複 genre 和 gender）
+    for (const [key, value] of params.entries()) {
+      if (key !== "genre" && key !== "gender") {
+        finalParams.append(key, value);
       }
     }
 
-    btnSearch.addEventListener("click", () => {
-      const queryType = document.querySelector('input[name=searchType]:checked').value;
+    window.location.href = `index.php?${finalParams.toString()}`;
+  });
 
-      let params = [];
+  statusSelect.addEventListener("change", function () {
+    if (this.value) {
+      params.set("status", this.value);
+    } else {
+      params.delete("status");
+    }
 
-      // 處理價格區間
-      if (inputPrice1.value !== "") {
-        params.push(`price1=${encodeURIComponent(inputPrice1.value)}`);
-      }
-      if (inputPrice2.value !== "") {
-        params.push(`price2=${encodeURIComponent(inputPrice2.value)}`);
-      }
+    window.location.href = "index.php?" + params.toString();
+  });
 
-      // 處理搜尋字串
-      if (inputText.value.trim() !== "") {
-        if (queryType === "title") {
-          params.push(`title=${encodeURIComponent(inputText.value.trim())}`);
-        } else if (queryType === "author") {
-          params.push(`author=${encodeURIComponent(inputText.value.trim())}`);
-        }
-      }
+  sortBy.forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      console.log(e);
+      const clickedColumn = e.currentTarget.id;
+      const newSortOrder =
+        clickedColumn === sort_column && sort_order === "asc" ? "desc" : "asc";
 
-      // 組合 URL
-      const queryString = params.join("&");
-      const url = `./index.php?${queryString}`;
+      params.set("sort_by", clickedColumn);
+      params.set("sort_order", newSortOrder);
 
-      // 導向新頁面
-      window.location.href = url;
+      window.location.href = `index.php?${params.toString()}`;
     });
 
-    // 放你的 JS 代碼（包括 event listener）
-    const genderSelect = document.getElementById("gender");
-    const genreSelect = document.getElementById("genre");
-    const statusSelect = document.getElementById("status")
+  })
 
-    const genderOptionsRaw = <?= json_encode($rowsGender) ?>;
+</script>
 
-    // 轉換為 genre_id => [gender, gender, ...]
-    const genderOptions = {};
-    genderOptionsRaw.forEach(row => {
-      const genreId = row.genre_id;
-
-      if (!genderOptions[genreId]) {
-        genderOptions[genreId] = [];
-      }
-      genderOptions[genreId].push({
-        id: row.id,
-        gender: row.gender
-      });
-      // console.log(genderOptions[genreId]);
-
-    });
-
-    genreSelect.addEventListener("change", function () {
-      if (this.value) {
-        window.location.href = "index.php?genre=" + this.value;
-      } else {
-        window.location.href = "index.php";
-      }
-    });
-
-    genderSelect.addEventListener("change", function () {
-      const genre = genreSelect.value;
-      const gender = this.value;
-
-      if (this.value) {
-        window.location.href = "index.php?genre=" + genre + "&gender=" + gender;
-      } else {
-        window.location.href = "index.php?genre=" + genre
-      }
-
-    });
-
-    statusSelect.addEventListener("change", function () {
-      window.location.href = "index.php?status=" + this.value;
-    });
-
-
-    sortBy.forEach((btn) => {
-      btn.addEventListener("click", function (e) {
-        console.log(e);
-        const clickedColumn = e.currentTarget.id;
-        const newSortOrder =
-          clickedColumn === sort_column && sort_order === "asc" ? "desc" : "asc";
-
-        params.set("sort_by", clickedColumn);
-        params.set("sort_order", newSortOrder);
-
-        window.location.href = `index.php?${params.toString()}`;
-      });
-
-    })
-
-  </script>
-</body>
-
-</html>
-
-<!-- <pre>
-  <?= var_dump($rowsGenre) ?>
-</pre>
-
-<pre>
-  <?= var_dump($rowsGender) ?>
-</pre> -->
-
-<!-- <?php
-echo "status: $status";
-echo "<pre>";
-print_r($conditions);
-print_r($values);
-echo "</pre>";
-?> -->
+<?php include "../template_btm.php"; ?>
