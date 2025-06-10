@@ -18,70 +18,70 @@ include "../template_main.php";
     <form id="addusers" action="./doadd.php" method="POST" enctype="multipart/form-data">
         <div class="form-section">
             <h4 class="form-section-title">基本資訊</h4>
-        <div class="form-row avatar-row">
-            <div class="form-group avatar-group">
-                <label for="memberAvatar" class="form-label"></label>
-                <div class="avatar-upload-container">
-                    <div class="avatar-preview">
-                        <img id="avatarPreview" src="" alt="預覽圖片">
+            <div class="form-row avatar-row">
+                <div class="form-group avatar-group">
+                    <label for="memberAvatar" class="form-label"></label>
+                    <div class="avatar-upload-container">
+                        <div class="avatar-preview">
+                            <img id="avatarPreview" src="" alt="預覽圖片">
+                        </div>
+                        <input type="file" id="memberAvatar" name="avatar" class="form-control" accept="image/*"
+                            onchange="previewImage(this)">
+                        <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
                     </div>
-                    <input type="file" id="memberAvatar" name="avatar" class="form-control" accept="image/*"
-                        onchange="previewImage(this)">
-                    <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
+                </div>
+                <div class="form-group info-group">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="memberName" class="form-label required">會員姓名</label>
+                            <input type="text" id="memberName" name="name" class="form-control" required>
+                            <div class="error-message" id="nameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memberEmail" class="form-label required">Email</label>
+                            <input type="email" id="memberEmail" name="email" class="form-control" required>
+                            <div class="error-message" id="emailError"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="memberPhone" class="form-label">電話號碼</label>
+                            <input type="tel" id="memberPhone" name="phone" class="form-control"
+                                pattern="[0-9\-\+\s\(\)]{8,15}" placeholder="例：0912-345-678">
+                            <div class="error-message" id="phoneError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memberBirthday" class="form-label">生日</label>
+                            <input type="date" id="memberBirthday" name="birthday" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="memberGender" class="form-label">性別</label>
+                            <select id="memberGender" name="gender" class="form-control">
+                                <option value="">請選擇</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="memberLevel" class="form-label required">會員等級</label>
+                            <select id="memberLevel" name="level" class="form-control" required>
+                                <option value="">請選擇等級</option>
+                                <option value="一般會員">一般會員</option>
+                                <option value="VIP會員">VIP會員</option>
+                                <option value="黑膠收藏家">黑膠收藏家</option>
+                            </select>
+                            <div class="error-message" id="levelError"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="form-group info-group">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="memberName" class="form-label required">會員姓名</label>
-                        <input type="text" id="memberName" name="name" class="form-control" required>
-                        <div class="error-message" id="nameError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memberEmail" class="form-label required">Email</label>
-                        <input type="email" id="memberEmail" name="email" class="form-control" required>
-                        <div class="error-message" id="emailError"></div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="memberPhone" class="form-label">電話號碼</label>
-                        <input type="tel" id="memberPhone" name="phone" class="form-control"
-                            pattern="[0-9\-\+\s\(\)]{8,15}" placeholder="例：0912-345-678">
-                        <div class="error-message" id="phoneError"></div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memberBirthday" class="form-label">生日</label>
-                        <input type="date" id="memberBirthday" name="birthday" class="form-control">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="memberGender" class="form-label">性別</label>
-                        <select id="memberGender" name="gender" class="form-control">
-                            <option value="">請選擇</option>
-                            <option value="男">男</option>
-                            <option value="女">女</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="memberLevel" class="form-label required">會員等級</label>
-                        <select id="memberLevel" name="level" class="form-control" required>
-                            <option value="">請選擇等級</option>
-                            <option value="一般會員">一般會員</option>
-                            <option value="VIP會員">VIP會員</option>
-                            <option value="黑膠收藏家">黑膠收藏家</option>
-                        </select>
-                        <div class="error-message" id="levelError"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         </div>
 
@@ -152,7 +152,7 @@ include "../template_main.php";
             </div>
         </div>
 
-        
+
 
         <div class="form-actions">
             <button type="button" class="btn btn-secondary" onclick="window.location.href='usersindex.php'">

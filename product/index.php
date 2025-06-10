@@ -89,7 +89,7 @@ $perPage = 20;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
 
-$select = "vinyl.id AS id,title,author_id,vinyl_author.author AS author,company,price,stock,vinyl_genre.genre AS genre,vinyl_gender.gender AS gender,status_id FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_genre on vinyl_genre.id = vinyl.genre_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id";
+$select = "vinyl.id AS id,title,vinyl_img.img_name AS img_name,author_id,vinyl_author.author AS author,company,price,stock,vinyl_genre.genre AS genre,vinyl_gender.gender AS gender,status_id FROM `vinyl` JOIN vinyl_author ON vinyl_author.id = vinyl.author_id JOIN vinyl_genre on vinyl_genre.id = vinyl.genre_id JOIN vinyl_gender on vinyl_gender.id = vinyl.gender_id JOIN vinyl_img on vinyl_img.shs_id = vinyl.shs_id";
 
 $sql = "SELECT $select $whereSQL ORDER BY $sort_column $sort_order LIMIT $perPage OFFSET $pageStart";
 $sqlAll = "SELECT $select  $whereSQL ";
@@ -227,7 +227,7 @@ $totalPage = ceil($totalCount / $perPage);
 </head> -->
 
 
-<div class="content-section ">
+<div class="content-section">
 
   <!-- 小標題 -->
   <div class="section-header d-flex justify-content-between align-items-center">
@@ -235,23 +235,61 @@ $totalPage = ceil($totalCount / $perPage);
     <a href="./vinylAdd.php" class="btn btn-primary">增加黑膠唱片</a>
   </div>
 
-  <!-- 內容 -->
+  <!--搜尋與分類 -->
   <div class="controls-section">
-    <!-- <span class="me-auto">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span> -->
+    <div class="w-100 d-flex">
+      <span class="">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span>
+      <div class="ms-auto d-flex w100">
+        <select name="status" id="status" class="form-select">
+          <?php foreach ($rowsStatus as $row): ?>
+            <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
+              <?= $row["status"] ?>
+            </option>
+          <?php endforeach ?>
+        </select>
+      </div>
+    </div>
 
     <!-- 篩選與搜尋 -->
-    <div class="controls-section  flex-center">
+    <div class="w-100 flex-center gap-3">
+      <div class="filter-group flex-center gap-3">
+        <label for="genre" class="form-label">風格</label>
 
-      <div class="search row gap-1">
-        <div class="col-auto flex-center">
-          <label class="form-label" for="price1">價格區間</label>
+        <div class="col-auto">
+          <select name="genre" id="genre" class="form-select w50">
+            <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
+            <?php foreach ($rowsGenre as $row): ?>
+              <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
+                <?= $row["genre"] ?>
+              </option>
+            <?php endforeach ?>
+          </select>
         </div>
 
         <div class="col-auto">
-          <input name="price1" id="price1" type="number" class="form-control" placeholder="<?= $price1 ?>">
+          <label for="gender" class="form-label">類別</label>
+        </div>
+        <div class="col-auto">
+          <select name="gender" id="gender" class="form-select">
+            <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
+            <?php foreach ($genders as $g): ?>
+              <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
+                <?= $g["gender"] ?>
+              </option>
+            <?php endforeach ?>
+          </select>
+        </div>
+      </div>
+
+      <div class="search flex-center gap-2">
+        <div class="col-auto flex-center">
+          <label class="form-label" for="price1">價格</label>
+        </div>
+        <div class="col-auto w200">
+          <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
         </div>
         <div class="col-auto"> ~ </div>
-        <div class="col-auto">
+        <div class="col-auto w200">
           <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
         </div>
 
@@ -271,63 +309,16 @@ $totalPage = ceil($totalCount / $perPage);
           $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
           ?>
           <div class="search-box d-flex">
-            <input name="search" type="text" class="form-control me-4" placeholder="<?= htmlspecialchars($searchHolder) ?>">
+            <input name="search" type="text" class="form-control me-4"
+              placeholder="<?= htmlspecialchars($searchHolder) ?>">
             <div class="btn btn-primary btn-search ps-5 wh50"><i class="fa fa-search"></i></div>
             <!-- <i class="fas fa-search btn-search"></i> -->
           </div>
         </div>
       </div>
-
-      <div class="filter-group ">
-        <div class="row flex-center">
-
-          <div class="col-auto">
-            <label for="genre" class="form-label">風格</label>
-          </div>
-          <div class="col-auto">
-            <select name="genre" id="genre" class="form-select">
-              <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
-              <?php foreach ($rowsGenre as $row): ?>
-                <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
-                  <?= $row["genre"] ?>
-                </option>
-              <?php endforeach ?>
-            </select>
-          </div>
-
-          <div class="col-auto">
-            <label for="gender" class="form-label">類別</label>
-          </div>
-          <div class="col-auto">
-            <select name="gender" id="gender" class="form-select">
-              <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
-              <?php foreach ($genders as $g): ?>
-                <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
-                  <?= $g["gender"] ?>
-                </option>
-              <?php endforeach ?>
-            </select>
-          </div>
-
-          <div class="col-auto">
-            <label for="status" class="form-label">狀態</label>
-          </div>
-          <div class="col-auto">
-            <select name="status" id="status" class="form-select">
-              <?php foreach ($rowsStatus as $row): ?>
-                <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
-                  <?= $row["status"] ?>
-                </option>
-              <?php endforeach ?>
-            </select>
-          </div>
-        </div>
-
-      </div>
-
     </div>
-  </div>
 
+  </div>
 
   <!-- 商品列表 -->
   <div class="table-container table-responsive w-100">
@@ -340,8 +331,17 @@ $totalPage = ceil($totalCount / $perPage);
               <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
             <?php endif; ?>
           </th>
-          <th class="title">專輯</th>
-          <th class="author">藝術家</th>
+          <th class="img">圖片</th>
+          <th class="title sortable sortBy" id="title">專輯
+            <?php if ($sort_column === 'title'): ?>
+              <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+            <?php endif; ?>
+          </th>
+          <th class="author sortable sortBy" id="author">藝術家
+            <?php if ($sort_column === 'author'): ?>
+              <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
+            <?php endif; ?>
+          </th>
           <th class="price sortable sortBy" id="price">
             價格
             <?php if ($sort_column === 'price'): ?>
@@ -359,6 +359,7 @@ $totalPage = ceil($totalCount / $perPage);
           <?php foreach ($rows as $index => $row): ?>
             <tr>
               <td><?= $index + 1 + ($page - 1) * $perPage ?></td>
+              <td><img class="wh50" src="/product/img/<?= $row["img_name"] ?>" alt="" srcset=""></td>
               <td class="title">
                 <a href="./vinylDetail.php?id=<?= $row["id"] ?>">
                   <?= htmlspecialchars($row["title"]) ?>
@@ -380,7 +381,7 @@ $totalPage = ceil($totalCount / $perPage);
                     data-title="<?= $row["title"] ?>">
                     上架</div>
                   <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
-                    <i class="fas fa-trash-alt"></i>
+                    刪除
                   </div>
                 <?php else: ?>
                   <div class="btn btn-danger btn-sm btn-remove" data-id="<?= $row["id"] ?>" data-title="<?= $row["title"] ?>">
@@ -395,7 +396,7 @@ $totalPage = ceil($totalCount / $perPage);
           <?php endforeach; ?>
         <?php else: ?>
           <tr>
-            <td colspan="7" class="text-center">目前無資料</td>
+            <td colspan="9" class="text-center">目前無資料</td>
           </tr>
         <?php endif; ?>
       </tbody>
