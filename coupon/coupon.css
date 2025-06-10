@@ -1,0 +1,259 @@
+/* =================================================================== */
+/* coupon.css - 最終修正版                                           */
+/* =================================================================== */
+
+
+/* ================================================== */
+/* I. 優惠卷列表頁：控制項與篩選列 (Controls Section)   */
+/* ================================================== */
+
+.controls-actions {
+    margin-top: 0;
+    flex-grow: 1;
+
+    /* 為了讓按鈕在空間不足時能對齊右側，可以加上這行 */
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    /* 給按鈕之間一點間距 */
+}
+
+/* 優惠卷列表頁特定的搜尋框寬度 (註：此 class 未在 index.php 中使用) */
+.search-box-coupon {
+    flex-grow: 1.5;
+}
+
+/* 日期選擇器的容器樣式 
+  - 這是修正的核心 -
+*/
+.date-group {
+    /* 基本排版 */
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+
+}
+
+/* 容器內部輸入框的彈性設定 */
+.date-group .date-input {
+    /* 讓輸入框在已經延展的 date-group 容器內再次延展 */
+    flex-grow: 1;
+    /* 每個輸入框的理想基礎寬度 */
+    flex-basis: 150px;
+}
+
+
+/* 自訂日期輸入框樣式 */
+.date-input {
+    /* 參考 index.css 中 .filter-group select 的樣式以求統一 */
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--beige-mist);
+    border-radius: 8px;
+    font-family: inherit;
+    background: var(--white);
+    transition: all 0.3s ease;
+
+    /* 針對 date input 的微調 */
+    line-height: normal;
+    /* 重設行高以改善文字對齊 */
+    color: var(--retro-indigo);
+}
+
+.date-input:focus {
+    /* 參考 index.css 的 :focus 樣式 */
+    outline: none;
+    border-color: var(--warm-brass);
+    box-shadow: 0 0 0 3px rgba(209, 166, 90, 0.1);
+}
+
+
+/* ================================================== */
+/* II. 優惠卷列表頁：表格內容 (Table Content)         */
+/* ================================================== */
+
+/* 狀態徽章樣式 */
+.status-badge {
+    padding: 0.4em 0.8em;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--white);
+    text-align: center;
+    display: inline-block;
+    min-width: 60px;
+    /* 給予一個最小寬度，讓視覺更一致 */
+}
+
+/* 根據不同狀態設定背景色 */
+.status-badge.status-active {
+    background-color: var(--success-color, #28a745);
+    color: black;
+}
+
+.status-badge.status-pending {
+    background-color: var(--warning-color, #ffc107);
+}
+
+.status-badge.status-inactive {
+    background-color: var(--error-color, #f44336);
+}
+
+.status-badge.status-unknown {
+    background-color: var(--bs-gray-500, #6c757d);
+}
+
+/* 優惠碼徽章樣式 */
+.coupon-code-badge {
+    font-family: monospace;
+    background-color: var(--bs-gray-200, #e9ecef);
+    /* 淺灰色背景 */
+    padding: 0.2em 0.4em;
+    border-radius: 0.2rem;
+    color: var(--bs-gray-700, #495057);
+    /* 深灰色文字 */
+    font-size: 1em;
+}
+
+/* 優惠卷列表頁操作欄位的標題寬度 (註：此 class 未在 index.php 中使用) */
+.th-actions {
+    width: 150px;
+}
+
+/* 優惠卷列表頁優惠卷說明欄位的樣式 (註：此 class 未在 index.php 中使用) */
+.td-coupon-content {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 操作按鈕：使用絕對定位 (Absolute Positioning) 置中圖示 */
+.action-buttons .btn.btn-icon-absolute {
+    /* 1. 讓自己成為子層圖示的「定位基準」 */
+    position: relative;
+
+    /* 2. 再次確保按鈕尺寸，使其不受其他樣式影響 */
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    /* 必須移除內邊距 */
+    box-sizing: border-box;
+}
+
+.action-buttons .btn.btn-icon-absolute i {
+    /* 3. 設定為「絕對定位」脫離正常排版 */
+    position: absolute;
+
+    /* 4. 將圖示的左上角移動到父層按鈕的中心點 */
+    top: 50%;
+    left: 50%;
+
+    /* 5. 使用 transform 將圖示往左、往上拉回自身宽高的一半，達成完美置中 */
+    transform: translate(-50%, -50%);
+
+    /* 6. 確保圖示本身不會有奇怪的 margin 或大小問題 */
+    margin: 0;
+    line-height: 1;
+    /* 重設行高 */
+    font-size: 14px;
+    /* 可在此微調圖示大小 */
+}
+
+
+/* ================================================== */
+/* III. 優惠卷詳情頁樣式 (Coupon Details Page Styles)  */
+/* ================================================== */
+
+.details-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    margin-top: 1.5rem;
+    overflow: hidden;
+    /* 確保圓角效果正常 */
+}
+
+.details-header {
+    background: var(--retro-indigo);
+    color: var(--white);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.details-main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.details-id {
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.details-body {
+    padding: 2rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+}
+
+.details-column {
+    min-width: 0;
+}
+
+.details-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--retro-indigo);
+    border-bottom: 2px solid var(--beige-mist);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.details-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    /* 標題寬度自適應，內容佔滿剩餘空間 */
+    gap: 0.75rem 1.5rem;
+    /* row-gap, column-gap */
+}
+
+.details-list dt {
+    font-weight: 600;
+    color: var(--olive-moss);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.details-list dd {
+    margin: 0;
+    word-break: break-all;
+}
+
+/* RWD for details page */
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .details-body {
+        padding: 1.5rem;
+    }
+
+    .details-list dt {
+        text-align: left;
+    }
+}

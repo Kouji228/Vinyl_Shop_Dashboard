@@ -2,351 +2,287 @@
 
 require_once "./connect.php";
 require_once "./Utilities.php";
+require_once "./couponMaps.php"; // 引入共用的 Map 陣列
 
-// 分頁功能
-$perPage = 10;
-$page = intval($_GET["page"] ?? 1);
-$pageStart = ($page - 1) * $perPage;
-$statusMap = [
-    'active' => '生效中',
-    'pending' => '待上架',
-    'inactive' => '已停用'
+$pageTitle = "優惠卷管理";
+$cssList = ["../css/index.css", "./coupon.css"]; //
+include "../vars.php";
+include "../template_top.php";
+include "../template_main.php";
+
+// --- 參數設定 ---
+$perPage = 15; //
+$page = isset($_GET["page"]) ? max(1, (int) $_GET["page"]) : 1;
+$pageStart = ($page - 1) * $perPage; //
+
+// --- 集中接收與管理所有篩選條件 ---
+$filters = [
+    'status_filter' => $_GET['status_filter'] ?? '',
+    'search' => $_GET['search'] ?? '',
+    'qType' => $_GET['qType'] ?? 'name',
+    'date_start' => $_GET['date_start'] ?? '',
+    'date_end' => $_GET['date_end'] ?? ''
 ];
 
-// 獲取篩選參數
-$statusFilter = $_GET['status_filter'] ?? '';
-$search = $_GET['search'] ?? '';
-$qType = $_GET['qType'] ?? 'name';
-$dateStart = $_GET['date_start'] ?? '';
-$dateEnd = $_GET['date_end'] ?? '';
-
-$whereConditions = ["coupons.`is_valid` = 1"]; // 基本條件：只選取有效的優惠卷
-$bindings = [];
+// --- 動態建立 SQL WHERE 條件 ---
+$whereConditions = ["coupons.`is_valid` = 1"]; // 基礎條件：只選取有效的優惠卷
+$bindings = []; // 用於 PDO prepare statement 的參數綁定
 
 // 狀態篩選
-if (!empty($statusFilter)) {
+if (!empty($filters['status_filter'])) {
     $whereConditions[] = "coupons.`status` = :status_filter";
-    $bindings[':status_filter'] = $statusFilter;
+    $bindings[':status_filter'] = $filters['status_filter'];
 }
 
-// 日期篩選 (獨立處理)
-if (!empty($dateStart) || !empty($dateEnd)) {
-    // 情況 1: 同時提供了開始和結束日期
-    if (!empty($dateStart) && !empty($dateEnd)) {
-        $bindings[':filter_date_start_query'] = $dateStart . " 00:00:00";
-        $bindings[':filter_date_end_query'] = $dateEnd . " 23:59:59";
-        $whereConditions[] = "(coupons.`start_at` <= :filter_date_end_query AND coupons.`end_at` >= :filter_date_start_query)";
-        // 情況 2: 只提供了開始日期
-    } elseif (!empty($dateStart) && empty($dateEnd)) {
-        $bindings[':filter_date_start_query'] = $dateStart . " 00:00:00";
-        // 優惠卷的結束時間晚於或等於篩選的開始日期，或者優惠卷沒有結束日期 (視為持續有效)
-        // 假設 coupons.end_at IS NULL 代表優惠卷沒有明確的結束日期
-        $whereConditions[] = "(coupons.`end_at` >= :filter_date_start_query OR coupons.`end_at` IS NULL)";
-        // 情況 3: 只提供了結束日期
-    } elseif (empty($dateStart) && !empty($dateEnd)) {
-        $bindings[':filter_date_end_query'] = $dateEnd . " 23:59:59";
-        // 優惠卷的開始時間早於或等於篩選的結束日期
-        $whereConditions[] = "coupons.`start_at` <= :filter_date_end_query";
-    }
-}
-// 關鍵字搜尋 (獨立處理)
-if (!empty($search) && ($qType === 'name' || $qType === 'code')) {
-    $columnToSearch = ($qType === 'name') ? 'coupons.`name`' : 'coupons.`code`';
+// 關鍵字搜尋 (依據名稱或優惠碼)
+if (!empty($filters['search']) && in_array($filters['qType'], ['name', 'code'])) {
+    $columnToSearch = 'coupons.`' . $filters['qType'] . '`';
     $whereConditions[] = "$columnToSearch LIKE :search";
-    $bindings[':search'] = "%" . $search . "%";
+    $bindings[':search'] = "%" . $filters['search'] . "%";
 }
 
-$whereClause = "";
-if (count($whereConditions) > 0) {
-    $whereClause = "WHERE " . implode(" AND ", $whereConditions);
+// 日期區間篩選邏輯優化：尋找活動時間與所選區間有重疊的優惠卷
+// 這樣處理比原始的 if/elseif 更簡潔且邏輯相同
+if (!empty($filters['date_start'])) {
+    // 條件：優惠卷的結束時間晚於篩選的開始日期 (或沒有結束時間，視為永久)
+    $whereConditions[] = "(coupons.`end_at` >= :date_start OR coupons.`end_at` IS NULL)";
+    $bindings[':date_start'] = $filters['date_start'] . " 00:00:00";
+}
+if (!empty($filters['date_end'])) {
+    // 條件：優惠卷的開始時間早於篩選的結束日期
+    $whereConditions[] = "coupons.`start_at` <= :date_end";
+    $bindings[':date_end'] = $filters['date_end'] . " 23:59:59";
 }
 
-$sql = "SELECT coupons.*,
-               coupon_rules.discount_value, 
-               coupon_rules.discount_type
-        FROM `coupons`
-        LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id
-        $whereClause
-        ORDER BY coupons.id ASC
-        -- ORDER BY coupons.id DESC
-        LIMIT $perPage OFFSET $pageStart";
+$whereClause = "WHERE " . implode(" AND ", $whereConditions);
 
-$sqlAll = "SELECT COUNT(coupons.id) as total FROM `coupons` LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id $whereClause";
-
+// --- 資料庫查詢 ---
 try {
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($bindings);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    // 查詢總筆數 (用於分頁)
+    $sqlAll = "SELECT COUNT(coupons.id) as total FROM `coupons` LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id $whereClause"; //
     $stmtAll = $pdo->prepare($sqlAll);
     $stmtAll->execute($bindings);
-    $totalCountResult = $stmtAll->fetch(PDO::FETCH_ASSOC);
-    $totalCount = $totalCountResult['total'] ?? 0;
+    $totalCount = $stmtAll->fetch(PDO::FETCH_ASSOC)['total'] ?? 0; //
+
+    // 查詢當前頁面的資料
+    $sql = "SELECT coupons.*,
+                   coupon_rules.discount_value, 
+                   coupon_rules.discount_type
+            FROM `coupons`
+            LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id
+            $whereClause
+            ORDER BY coupons.id ASC
+            LIMIT $perPage OFFSET $pageStart"; //
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($bindings);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); //
 
 } catch (PDOException $e) {
-    echo "錯誤: {{$e->getMessage()}}";
-    exit;
+    die("資料庫查詢失敗: " . $e->getMessage()); // 發生錯誤時中斷並顯示訊息
 }
 
-$totalPage = ceil($totalCount / $perPage);
+$totalPage = ceil($totalCount / $perPage); //
 ?>
 
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>優惠卷系統</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <style>
-        .msg {
-            display: flex;
-            margin-bottom: 2px;
-        }
-
-        .id {
-            width: 30px;
-        }
-
-        .name {
-            flex: 1;
-        }
-
-        .code {
-            flex: 1;
-        }
-
-        .content {
-            flex: 2;
-        }
-
-        .status {
-            flex: 1;
-        }
-
-        .total_quantity {
-            flex: 1;
-        }
-
-        .per_user_limit {
-            flex: 1;
-        }
-
-        .uses_per_instance {
-            flex: 1;
-        }
-
-        .discount_value {
-            flex: 1;
-        }
-
-        .start_at {
-            width: 120px;
-        }
-
-        .end_at {
-            width: 120px;
-        }
-
-        .time {
-            width: 150px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container mt-3">
-        <h1>優惠卷列表</h1>
-        <div class="my-2 d-flex">
-            <span class="me-auto align-self-center">目前共 <?= $totalCount ?> 筆資料</span>
-
-            <div class="me-lg-1 mb-1 mb-lg-0 ms-auto">
-                <div class="input-group input-group-sm">
-                    <!-- 狀態篩選 -->
-                    <span class="input-group-text">狀態</span>
-                    <select name="status_filter" class="form-select form-select-sm" style="max-width: 120px;">
-                        <option value="">全部</option>
-                        <?php foreach ($statusMap as $value => $displayText): ?>
-                            <option value="<?= htmlspecialchars($value) ?>" <?= ($statusFilter === $value) ? "selected" : "" ?>>
-                                <?= htmlspecialchars($displayText) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-
-                    <!-- 日期篩選 -->
-                    <span class="input-group-text ms-2">活動區間</span>
-                    <input type="date" name="date_start" class="form-control form-control-sm"
-                        value="<?= htmlspecialchars($dateStart) ?>" id="dateStartInput">
-                    <span class="input-group-text">~</span>
-                    <input type="date" name="date_end" class="form-control form-control-sm"
-                        value="<?= htmlspecialchars($dateEnd) ?>" id="dateEndInput">
-
-                    <!-- 名稱/優惠碼 Radio & 關鍵字 -->
-                    <span class="input-group-text ms-2">搜尋</span>
-                    <div class="input-group-text">
-                        <input name="qType" id="qTypeName" type="radio" class="form-check-input" value="name"
-                            <?= ($qType === 'name' || empty($qType)) ? 'checked' : '' ?>>
-                        <label for="qTypeName" class="ms-1">名稱</label>
-                    </div>
-                    <div class="input-group-text">
-                        <input name="qType" id="qTypeCode" type="radio" class="form-check-input" value="code"
-                            <?= $qType === 'code' ? 'checked' : '' ?>>
-                        <label for="qTypeCode" class="ms-1">優惠碼</label>
-                    </div>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="關鍵字"
-                        value="<?= htmlspecialchars($search) ?>" id="searchText">
-
-                    <div id="btnCouponSearch" class="btn btn-primary btn-sm">搜尋</div>
-                    <a href="index.php" class="btn btn-secondary btn-sm ms-1">清除</a>
-                </div>
-            </div>
-            <a class="btn btn-primary btn-sm btn-add ms-2" href="./add.php">增加資料</a>
-        </div>
-
-        <div class="msg text-bg-dark ps-1">
-            <div class="id">#</div>
-            <div class="name">優惠卷名稱</div>
-            <div class="code">優惠碼</div>
-            <div class="content">優惠卷說明</div>
-            <div class="discount_value">折扣值</div>
-            <div class="status">狀態</div>
-            <div class="total_quantity">總數</div>
-            <!-- <div class="per_user_limit">限領張數</div> -->
-            <div class="uses_per_instance">可用次數</div>
-            <div class="start_at">開始時間</div>
-            <div class="end_at">結束時間</div>
-            <div class="time">操作</div>
-        </div>
-
-        <?php foreach ($rows as $index => $row): ?>
-            <div class="msg">
-                <div class="id"><?= $index + 1 + ($page - 1) * $perPage ?></div>
-                <div class="name"><?= $row["name"] ?></div>
-                <div class="code"><?= $row["code"] ?></div>
-                <div class="content"><?= $row["content"] ?></div>
-                <div class="discount_value">
-                    <?php
-                    if ($row["discount_value"] !== null && $row["discount_value"] !== '') {
-                        echo htmlspecialchars($row["discount_value"]);
-                        if ($row["discount_type"] === 'percent') {
-                            echo '%';
-                        } elseif ($row["discount_type"] === 'fixed') {
-                            echo '元';
-                        }
-                    } else {
-                        echo '無';
-                    }
-                    ?>
-                </div>
-                <div class="status">
-                    <?= $statusMap[$row['status']] ?? '無狀態' ?>
-                </div>
-
-                <div class="total_quantity"><?= $row["total_quantity"] ?></div>
-                <!-- <div class="per_user_limit">$row["per_user_limit"]</div> -->
-                <div class="uses_per_instance"><?= $row["uses_per_instance"] ?></div>
-                <div class="start_at"><?= $row["start_at"] ?></div>
-                <div class="end_at"><?= $row["end_at"] ?></div>
-                <div class="time">
-                    <a class="btn btn-info btn-sm" href="./coupon_details_page.php?id=<?= $row["id"] ?>">詳細</a>
-                    <a class="btn btn-warning btn-sm" href="./update.php?id=<?= $row["id"] ?>">修改</a>
-                    <div class="btn btn-danger btn-sm btn-del" data-id="<?= $row["id"] ?>">刪除</div>
-                </div>
-            </div>
-        <?php endforeach; ?>
-        <!-- 分頁點擊切換 -->
-        <ul class="pagination pagination-sm justify-content-center">
-            <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-                <li class="page-item <?= $page == $i ? "active" : "" ?>">
-                    <?php
-                    $linkParams = ['page' => $i];
-                    if (!empty($statusFilter))
-                        $linkParams['status_filter'] = $statusFilter;
-
-                    // 關鍵字搜尋參數
-                    if (!empty($search)) {
-                        $linkParams['search'] = $search;
-                        $linkParams['qType'] = $qType;
-                    } elseif (!empty($qType) && !empty($statusFilter) && $qType !== 'name') {
-                        $linkParams['qType'] = $qType;
-                    }
-                    // 日期參數
-                    if (!empty($dateStart))
-                        $linkParams['date_start'] = $dateStart;
-                    if (!empty($dateEnd))
-                        $linkParams['date_end'] = $dateEnd;
-
-                    $link = "?" . http_build_query($linkParams);
-                    ?>
-                    <a class="page-link" href="<?= $link ?>"><?= $i ?></a>
-                </li>
-            <?php endfor; ?>
-        </ul>
-
+<div class="content-section">
+    <div class="section-header d-flex justify-content-between align-items-center">
+        <h3 class="section-title">優惠卷列表</h3>
+        <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料</span>
+        <a href="./add.php" class="btn btn-primary">增加資料</a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-        crossorigin="anonymous"></script>
-    <script>
-        // DOM Elements
-        const statusSelect = document.querySelector("select[name=status_filter]");
-        const btnCouponSearch = document.getElementById("btnCouponSearch");
-        const qTypeRadios = document.querySelectorAll("input[name=qType]");
-        const searchText = document.getElementById("searchText");
-        const dateStartInput = document.getElementById("dateStartInput");
-        const dateEndInput = document.getElementById("dateEndInput");
 
-        const btnDels = document.querySelectorAll(".btn-del");
-        btnDels.forEach((btn) => {
-            btn.addEventListener("click", doConfirm);
-        });
+    <div class="controls-section">
+        <div class="filter-group">
+            <select name="qType" id="qTypeSelect" class="form-select">
+                <option value="name" <?= ($filters['qType'] === 'name') ? 'selected' : '' ?>>名稱</option>
+                <option value="code" <?= ($filters['qType'] === 'code') ? 'selected' : '' ?>>優惠碼</option>
+            </select>
+        </div>
+        <div class="search-box">
+            <input type="text" name="search" class="form-control" placeholder="關鍵字搜尋..."
+                value="<?= htmlspecialchars($filters['search']) ?>" id="searchText">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="filter-group">
+            <select name="status_filter" id="statusFilterSelect" class="form-select">
+                <option value="">全部狀態</option>
+                <?php foreach ($statusMap as $value => $displayText): ?>
+                    <option value="<?= htmlspecialchars($value) ?>" <?= ($filters['status_filter'] === $value) ? "selected" : "" ?>>
+                        <?= htmlspecialchars($displayText) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="date-group">
+            <input type="date" name="date_start" class="date-input"
+                value="<?= htmlspecialchars($filters['date_start']) ?>" id="dateStartInput" title="開始日期">
+            <input type="date" name="date_end" class="date-input" value="<?= htmlspecialchars($filters['date_end']) ?>"
+                id="dateEndInput" title="結束日期">
+        </div>
 
+        <div class="form-actions controls-actions">
+            <button id="btnCouponSearch" class="btn btn-primary">搜尋</button>
+            <button type="button" class="clear-filters" onclick="window.location.href='index.php'">清除篩選</button>
+        </div>
+    </div>
 
-        function doConfirm(e) {
-            const btn = e.target;
-            if (confirm("確定要刪除嗎?")) {
-                window.location.href = `./doDelete.php?id=${btn.dataset.id}`;
+    <div class="table-container table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>編號</th>
+                    <th>優惠卷名稱</th>
+                    <th>優惠碼</th>
+                    <th>折扣值</th>
+                    <th>狀態</th>
+                    <th>總數</th>
+                    <th>可用次數</th>
+                    <th>開始時間</th>
+                    <th>結束時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (count($rows) > 0): ?>
+                    <?php foreach ($rows as $index => $row): ?>
+                        <tr>
+                            <td><?= $index + 1 + ($page - 1) * $perPage ?></td>
+                            <td><?= htmlspecialchars($row["name"]) ?></td>
+                            <td>
+                                <?php if (!empty($row["code"])): ?>
+                                    <span class="coupon-code-badge"><?= htmlspecialchars($row["code"]) ?></span>
+                                <?php else: ?>
+                                    <span class="text-muted">無</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php
+                                if ($row["discount_value"] !== null && $row["discount_value"] !== '') {
+                                    echo htmlspecialchars($row["discount_value"]);
+                                    if ($row["discount_type"] === 'percent') {
+                                        echo '%';
+                                    } elseif ($row["discount_type"] === 'fixed') {
+                                        echo '元';
+                                    }
+                                } else {
+                                    echo '<span class="text-muted">無</span>';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <span class="status-badge status-<?= htmlspecialchars(strtolower($row['status'])) ?>">
+                                    <?= htmlspecialchars($statusMap[$row['status']] ?? '未知') ?>
+                                </span>
+                            </td>
+                            <td><?= htmlspecialchars($row["total_quantity"]) ?></td>
+                            <td><?= htmlspecialchars($row["uses_per_instance"]) ?></td>
+                            <td><?= htmlspecialchars($row["start_at"] ? date("Y-m-d H:i", strtotime($row["start_at"])) : 'N/A') ?>
+                            </td>
+                            <td><?= htmlspecialchars($row["end_at"] ? date("Y-m-d H:i", strtotime($row["end_at"])) : 'N/A') ?>
+                            </td>
+                            <td class="text-center">
+                                <div class="action-buttons">
+                                    <a class="btn btn-sm btn-info btn-icon-absolute"
+                                        href="./coupon_details_page.php?id=<?= $row["id"] ?>" title="詳細">
+                                        <i class="fas fa-fw fa-eye"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-warning btn-icon-absolute" href="./update.php?id=<?= $row["id"] ?>"
+                                        title="修改">
+                                        <i class="fas fa-fw fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger btn-del btn-icon-absolute" data-id="<?= $row["id"] ?>"
+                                        title="刪除">
+                                        <i class="fas fa-fw fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="11" class="text-center">目前無資料</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if ($totalPage > 0): ?>
+        <div class="pagination"> <?php if ($page > 1):
+            $prevLinkParams = array_filter($filters); // 清除空值
+            $prevLinkParams['page'] = $page - 1;
+            ?>
+                <a href="?<?= http_build_query($prevLinkParams) ?>" class="pagination-btn"><i
+                        class="fas fa-chevron-left"></i></a>
+            <?php else: ?>
+                <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPage; $i++):
+                $pageLinkParams = array_filter($filters);
+                $pageLinkParams['page'] = $i;
+                ?>
+                <a href="?<?= http_build_query($pageLinkParams) ?>"
+                    class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <?php if ($page < $totalPage):
+                $nextLinkParams = array_filter($filters);
+                $nextLinkParams['page'] = $page + 1;
+                ?>
+                <a href="?<?= http_build_query($nextLinkParams) ?>" class="pagination-btn"><i
+                        class="fas fa-chevron-right"></i></a>
+            <?php else: ?>
+                <button class="pagination-btn" disabled><i class="fas fa-chevron-right"></i></button>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+    const btnDels = document.querySelectorAll(".btn-del"); //
+    btnDels.forEach((btn) => {
+        btn.addEventListener("click", doConfirm); //
+    });
+
+    function doConfirm(e) {
+        const btn = e.target.closest('.btn-del'); //
+        if (btn && confirm("確定要刪除嗎?")) {
+            window.location.href = `./doDelete.php?id=${btn.dataset.id}`; //
+        }
+    }
+
+    const btnCouponSearch = document.getElementById("btnCouponSearch");
+    if (btnCouponSearch) {
+        btnCouponSearch.addEventListener("click", function () { //
+            let params = new URLSearchParams();
+
+            const statusVal = document.getElementById("statusFilterSelect").value;
+            const qTypeVal = document.getElementById("qTypeSelect").value;
+            const searchVal = document.getElementById("searchText").value;
+            const dateStartVal = document.getElementById("dateStartInput").value;
+            const dateEndVal = document.getElementById("dateEndInput").value;
+
+            if (statusVal) {
+                params.append('status_filter', statusVal);
             }
-        }
+            if (searchVal) {
+                params.append('search', searchVal);
+                params.append('qType', qTypeVal);
+            }
+            if (dateStartVal) {
+                params.append('date_start', dateStartVal);
+            }
+            if (dateEndVal) {
+                params.append('date_end', dateEndVal);
+            }
 
+            window.location.href = 'index.php?' + params.toString(); //
+        });
+    }
+</script>
 
-        // Main search button click handler
-        if (btnCouponSearch) {
-            btnCouponSearch.addEventListener("click", function () {
-                let params = new URLSearchParams();
-
-                const statusVal = statusSelect.value;
-                const selectedQTypeRadio = document.querySelector("input[name=qType]:checked");
-                const qTypeVal = selectedQTypeRadio ? selectedQTypeRadio.value : 'name';
-                const searchVal = searchText.value;
-                const dateStartVal = dateStartInput.value;
-                const dateEndVal = dateEndInput.value;
-
-                if (statusVal) {
-                    params.append('status_filter', statusVal);
-                }
-
-                if (searchVal) {
-                    params.append('search', searchVal);
-                    params.append('qType', qTypeVal);
-                } else if (qTypeVal && qTypeVal !== 'name') {
-                    params.append('qType', qTypeVal);
-                }
-
-                // 日期參數
-                if (dateStartVal) {
-                    params.append('date_start', dateStartVal);
-                }
-                if (dateEndVal) {
-                    params.append('date_end', dateEndVal);
-                }
-
-                window.location.href = 'index.php?' + params.toString();
-            });
-        }
-    </script>
-</body>
-
-</html>
+<?php
+include "../template_btm.php";
+?>
