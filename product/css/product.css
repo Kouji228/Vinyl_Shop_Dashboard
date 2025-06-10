@@ -1,0 +1,37 @@
+.title,
+.author {
+    a {
+        color: #d1a65a;
+    }
+}
+.title {
+    width: 600px;
+}
+.author {
+    width: 220px;
+}
+
+* {
+    /* border: 2px solid red; */
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wh50 {
+    width: 50px;
+    height: 50px;
+}
+
+.w50 {
+    width: 50px;
+}
+.w100 {
+    width: 100px;
+}
+.w200 {
+    width: 150px;
+}
