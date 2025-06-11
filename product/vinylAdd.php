@@ -3,8 +3,10 @@
 require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
+$sqlVinyl = "SELECT * FROM vinyl";
 $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
+$sqlAuthor = "SELECT * From vinyl_author";
 
 $pageTitle = "新增黑膠唱片";
 $cssList = ["../css/index.css", "css/product.css"];
@@ -20,6 +22,14 @@ try {
   $stmtGender = $pdo->prepare($sqlGender);
   $stmtGender->execute();
   $rowsGender = $stmtGender->fetchAll(PDO::FETCH_ASSOC);
+
+  $stmtAuthor = $pdo->prepare($sqlAuthor);
+  $stmtAuthor->execute();
+  $rowsAuthor = $stmtAuthor->fetchAll(PDO::FETCH_ASSOC);
+
+  $stmtVinyl = $pdo->prepare($sqlVinyl);
+  $stmtVinyl->execute();
+  $rowsVinyl = $stmtVinyl->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
   // echo "錯誤: {{$e->getMessage()}} <br>";
   // exit;
@@ -31,113 +41,146 @@ try {
 
   <!-- 小標題 -->
   <div class="section-header">
-    <h3 class="section-title">增加黑膠唱片</h3>
+    <h3 class="section-title">新增黑膠唱片</h3>
     <a href="./index.php" class="btn btn-secondary">回商品列表</a>
   </div>
 
-  <div class="row">
-    <div class="col-md-8">
-      <form action="./doAddVinyl.php" method="post" enctype="multipart/form-data">
-        <!-- 唱片 -->
-        <div class="form-section">
-          <!-- <h4 class="form-section-title">基本資訊</h4> -->
-          <div class="row mb-3">
-            <div class="col-3">
-              <label class="form-label" for="shs-id">唱片編號</label>
+
+  <form action="./doAddVinyl.php" method="post" enctype="multipart/form-data">
+    <!-- 唱片 -->
+    <div class="form-section">
+      <h4 class="form-section-title">唱片資訊</h4>
+      <div class="form-row avatar-row">
+        <div class="form-group avatar-group">
+          <label for="memberAvatar" class="form-label"></label>
+          <div class="avatar-upload-container">
+            <div class="avatar-preview" id="previewImage">
+              <img id="avatarPreview" src="./img/59C26E03_1749437439.jpg" alt="預覽圖片">
+            </div>
+            <input type="file" id="imageInput" name="myFile" class="form-control mt-4" accept="image/*">
+            <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
+          </div>
+        </div>
+
+        <div class="form-group info-group">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required" for="shs-id">唱片編號</label>
               <div class="input-group">
                 <div class="input-group-text">
                   <span class="random-id cursor-pointer" id="random-id">隨機</span>
                 </div>
                 <input required name="shs-id" id="shs-id" type="text" class="form-control" placeholder="編號" readonly>
               </div>
+              <div class="error-message" id="nameError"></div>
             </div>
-            <div class="col-9">
-              <label class="form-label col-4">唱片名稱</label>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">唱片名稱</label>
               <input required name="title" type="text" class="form-control" placeholder="唱片名稱">
+              <!-- <div class="error-message" id="phoneError"></div> -->
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="author" class="form-label required">藝術家</label>
+              <input required name="author" id="author" type="text" class="form-control" placeholder="藝術家"
+                list="authorList">
+              <datalist id="authorList">
+                <?php foreach ($rowsAuthor as $row): ?>
+                  <option value="<?= $row["author"] ?>"></option>
+                <?php endforeach ?>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="company" class="form-label required">公司</label>
+              <input required name="company" id="company" type="text" class="form-control" placeholder="公司名稱">
+              <div class="error-message" id="levelError"></div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">風格</label>
+              <select name="genre" id="genre" class="form-select" required>
+                <option value selected disabled>請選擇</option>
+                <?php foreach ($rows as $row): ?>
+                  <option value="<?= $row["id"] ?>"><?= $row["genre"] ?></option>
+                <?php endforeach ?>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required">類別</label>
+              <select name="gender" id="gender" class="form-select" required>
+                <option value selected disabled>請選擇</option>
+              </select>
+              <!-- <div class="error-message" id="levelError"></div> -->
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required">價格</label>
+              <input required name="price" type="number" class="form-control" placeholder="價格">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required">庫存</label>
+              <input required name="stock" type="number" class="form-control" placeholder="庫存數量">
+              <!-- <div class="error-message" id="levelError"></div> -->
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">發行日期</label>
+              <input name="release_date" type="date" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required">規格</label>
+              <input required name="format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
+              <!-- <div class="error-message" id="levelError"></div> -->
             </div>
           </div>
         </div>
-
-        <!-- 藝術家 / 公司 / 價格 -->
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">藝術家</label>
-            <input required name="author" type="text" class="form-control" placeholder="藝術家">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">公司</label>
-            <input required name="company" type="text" class="form-control" placeholder="公司名稱">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">價格</label>
-            <input required name="price" type="number" class="form-control" placeholder="價格">
-          </div>
-        </div>
-
-        <!-- 風格 / 類別 -->
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label">風格</label>
-            <select name="genre" id="genre" class="form-select" required>
-              <option value selected disabled>請選擇</option>
-              <?php foreach ($rows as $row): ?>
-                <option value="<?= $row["id"] ?>"><?= $row["genre"] ?></option>
-              <?php endforeach ?>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">類別</label>
-            <select name="gender" id="gender" class="form-select" required>
-              <option value selected disabled>請選擇</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 發行日期 / 規格 / 庫存 -->
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">發行日期</label>
-            <input name="release_date" type="date" class="form-control">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">規格</label>
-            <input required name="format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">庫存</label>
-            <input required name="stock" type="number" class="form-control" placeholder="庫存數量">
-          </div>
-        </div>
-
-        <!-- 上傳檔案 -->
-        <div class="mb-3">
-          <label class="form-label">上傳圖片</label>
-          <input name="myFile" type="file" class="form-control" accept=".png,.jpg,.jpeg" id="imageInput">
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">介紹</label>
-          <textarea name="desc_text" class="form-control" rows="4" placeholder="專輯介紹"></textarea>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">歌曲清單</label>
-          <textarea name="playlist" class="form-control" rows="6" placeholder="每首歌換行輸入"></textarea>
-        </div>
-
-        <!-- 按鈕 -->
-        <div class="text-end">
-          <button type="submit" class="btn btn-info">送出</button>
-          <a class="btn btn-secondary" href="./index.php">取消</a>
-        </div>
-      </form>
+      </div>
     </div>
 
-    <div class="col-md-1"></div>
 
-    <div class="col-md-3" id="previewImage">
+    <div class="form-section">
+      <div class="form-group mb-3">
+        <label class="form-label">介紹</label>
+        <textarea name="desc_text" class="form-control" rows="4" placeholder="專輯介紹"></textarea>
+      </div>
     </div>
-  </div>
+
+    <div class="form-section">
+      <div class="form-group mb-3">
+        <label class="form-label">歌曲清單</label>
+        <textarea name="playlist" class="form-control" rows="6" placeholder="每首歌換行輸入"></textarea>
+      </div>
+    </div>
+
+    <!-- 按鈕 -->
+    <div class="text-end">
+      <button type="submit" class="btn btn-info">送出</button>
+      <a class="btn btn-secondary" href="./index.php">取消</a>
+    </div>
+  </form>
+
+
+
+
+
+
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>

@@ -21,7 +21,7 @@ $stock = htmlspecialchars($_POST["stock"]);
 $desc_text = htmlspecialchars($_POST["desc_text"]);
 $playlist = htmlspecialchars($_POST["playlist"]);
 
-if ($title == "" || $author == "") {
+if ($title == "" || $author == "" || $shs_id == "") {
   alertGoBack("請輸入資訊");
   exit;
 }

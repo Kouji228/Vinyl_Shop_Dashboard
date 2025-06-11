@@ -1,7 +1,7 @@
 <?php
 $menu_items = [
   ["id" => "members", "icon" => "fas fa-users", "label" => "會員管理"],
-  ["id" => "products", "icon" => "fas fa-compact-disc", "label" => "商品管理"],
+  ["id" => "product", "icon" => "fas fa-compact-disc", "label" => "商品管理"],
   ["id" => "secondhand", "icon" => "fas fa-repeat", "label" => "二手商品管理"],
   ["id" => "coupons", "icon" => "fas fa-ticket", "label" => "優惠券管理"],
   ["id" => "articles", "icon" => "fas fa-file-pen", "label" => "文章管理"],

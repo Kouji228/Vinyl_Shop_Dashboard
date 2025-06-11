@@ -13,6 +13,7 @@ $id = $_GET["id"];
 
 $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
+$sqlAuthorList="SELECT * FROM vinyl_author";
 
 $sqlVinyl = "SELECT * FROM vinyl WHERE id = ?";
 $sqlAuthor = "SELECT * FROM vinyl_author where id = ?";
@@ -31,6 +32,10 @@ try {
     $stmtAuthor = $pdo->prepare($sqlAuthor);
     $stmtAuthor->execute([$rowsVinyl["author_id"]]);
     $rowsAuthor = $stmtAuthor->fetch(PDO::FETCH_ASSOC);
+
+    $stmtAuthorList = $pdo->prepare($sqlAuthorList);
+    $stmtAuthorList->execute();
+    $rowsAuthorList = $stmtAuthorList->fetchAll(PDO::FETCH_ASSOC);
 
     $stmtStatus = $pdo->prepare($sqlStatus);
     $stmtStatus->execute();
@@ -61,7 +66,7 @@ try {
         <h3 class="section-title">修改<?= $rowsVinyl["title"] ?></h3>
         <a href="./index.php" class="btn btn-secondary">回商品列表</a>
     </div>
-    
+
     <div class="row">
         <div class="col-md-3" id="previewImage">
             <?php if ($rowsImg): ?>
@@ -98,8 +103,13 @@ try {
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">藝術家</label>
-                        <input name="author" type="text" class="form-control"
-                            placeholder="<?= $rowsAuthor["author"] ?>">
+                        <input name="author" type="text" class="form-control" placeholder="<?= $rowsAuthor["author"] ?>"
+                            list="authorList">
+                        <datalist id="authorList">
+                            <?php foreach ($rowsAuthorList as $row): ?>
+                                <option value="<?= htmlspecialchars($row["author"]) ?>"></option>
+                            <?php endforeach ?>
+                        </datalist>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">公司</label>
