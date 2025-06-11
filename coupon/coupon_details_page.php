@@ -1,32 +1,31 @@
 <?php
 require_once "./connect.php";
-require_once "./Utilities.php"; // 用於 alertGoTo 等函式
+require_once "./Utilities.php";
+require_once "./couponMaps.php";
 
+// --- 樣板需要的設定 ---
+$pageTitle = "優惠卷詳細資訊";
+// 確保載入 index.css 和 coupon.css
+$cssList = ["../css/index.css", "./coupon.css"];
+include "../vars.php";
+include "../template_top.php";
+include "../template_main.php";
+
+// --- PHP 資料處理邏輯 (與先前版本相同) ---
 if (!isset($_GET["id"])) {
     alertGoTo("請從正常管道進入", "./index.php");
     exit;
 }
-
 $id = $_GET["id"];
 
-$discountTypeMap = [
-    'fixed' => '固定金額',
-    'percent' => '百分比'
-];
-
-// 用於顯示文字的映射
-$statusMap = [
-    'active' => '生效中',
-    'pending' => '待上架',
-    'inactive' => '已停用'
-];
-
-
-$sql = "SELECT c.*, 
-               cr.id AS rule_id, cr.min_spend, cr.discount_type, cr.discount_value, cr.max_discount_amount, cr.free_shipping 
-        FROM `coupons` c
-        LEFT JOIN `coupon_rules` cr ON c.id = cr.coupon_id
-        WHERE c.`id` = ? AND c.`is_valid` = 1"; // 假設只顯示 is_valid = 1 的優惠卷
+$sql = "SELECT coupons.*, 
+               coupon_rules.id AS rule_id, coupon_rules.min_spend, coupon_rules.discount_type, 
+               coupon_rules.discount_value, coupon_rules.max_discount_amount, coupon_rules.free_shipping,
+               coupon_targets.target_type, coupon_targets.target_value
+        FROM `coupons`
+        LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id
+        LEFT JOIN `coupon_targets` ON coupons.id = coupon_targets.coupon_id
+        WHERE coupons.id = ? AND coupons.is_valid = 1";
 
 try {
     $stmt = $pdo->prepare($sql);
@@ -38,112 +37,116 @@ try {
         exit;
     }
 
-    // 準備顯示用的文字
-    $coupon['status_text'] = $statusMap[$coupon['status']] ?? '未知狀態';
-    if ($coupon['rule_id'] && isset($coupon['discount_type'])) { // 檢查 discount_type 是否存在
-        $coupon['discount_type_text'] = $discountTypeMap[$coupon['discount_type']] ?? '未定義類型';
+    $display = [];
+    $display['status'] = $statusMap[$coupon['status']] ?? '未知狀態';
+    $display['start_at'] = $coupon['start_at'] ? date('Y-m-d H:i', strtotime($coupon['start_at'])) : '未設定';
+    $display['end_at'] = $coupon['end_at'] ? date('Y-m-d H:i', strtotime($coupon['end_at'])) : '未設定';
+    $display['code'] = $coupon['code'] ?? '無';
+    $display['content'] = nl2br(htmlspecialchars($coupon['content'] ?? '無'));
+
+    if ($coupon['rule_id']) {
+        $display['min_spend'] = $coupon['min_spend'] !== null ? '$' . number_format($coupon['min_spend']) . ' 元' : '無門檻';
+        $display['discount_type'] = $discountTypeMap[$coupon['discount_type']] ?? '未定義';
+        if ($coupon['discount_value'] !== null) {
+            $unit = ($coupon['discount_type'] === 'percent') ? '%' : '元';
+            $display['discount_value'] = $coupon['discount_value'] . ' ' . $unit;
+        } else {
+            $display['discount_value'] = '未設定';
+        }
+        $display['max_discount_amount'] = ($coupon['discount_type'] === 'percent' && $coupon['max_discount_amount'] !== null) ? '$' . number_format($coupon['max_discount_amount']) . ' 元' : '無上限';
+        $display['free_shipping'] = ($coupon['free_shipping'] == 1) ? '是' : '否';
+    }
+
+    if (!empty($coupon['target_type'])) {
+        $display['target_type'] = $targetTypeMap[$coupon['target_type']] ?? '未定義類型';
+        $map = ($coupon['target_type'] === 'product') ? $targetProductMap : (($coupon['target_type'] === 'member') ? $targetMemberMap : null);
+        if ($map && isset($coupon['target_value'])) {
+            $display['target_value'] = $map[$coupon['target_value']] ?? '未定義次類型';
+        }
     }
 
 } catch (PDOException $e) {
-    alertGoTo("查詢資料時發生錯誤，請稍後再試。", "./index.php");
+    alertGoTo("查詢資料時發生錯誤：" . $e->getMessage(), "./index.php");
     exit;
 }
 ?>
-<!doctype html>
-<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>優惠卷詳細資訊 - <?= htmlspecialchars($coupon['name'] ?? '詳細資料') ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-</head>
+<div class="content-section">
+    <div class="section-header">
+        <h3 class="section-title">優惠卷詳細資訊</h3>
+        <a href="./index.php" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> 返回列表
+        </a>
+    </div>
 
-<body>
-    <div class="container mt-3 mb-5">
-        <h1>優惠卷詳細資訊</h1>
-        <div class="card">
-            <div class="card-header">
-                <h3><?= htmlspecialchars($coupon['name'] ?? 'N/A') ?></h3>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 class="card-title mb-3">基本資料</h5>
-                        <dl class="row">
-                            <dt class="col-sm-4">ID:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['id']) ?></dd>
+    <div class="details-card">
+        <div class="details-header">
+            <h4 class="details-main-title"><?= htmlspecialchars($coupon['name'] ?? 'N/A') ?></h4>
+            <span class="details-id">ID: <?= htmlspecialchars($coupon['id']) ?></span>
+        </div>
+        <div class="details-body">
+            <div class="details-grid">
+                <div class="details-column">
+                    <h5 class="details-section-title">基本資料</h5>
+                    <dl class="details-list">
+                        <dt>優惠碼</dt>
+                        <dd><?= htmlspecialchars($display['code']) ?></dd>
 
-                            <dt class="col-sm-4">優惠碼:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['code'] ?? '無') ?></dd>
+                        <dt>狀態</dt>
+                        <dd><?= htmlspecialchars($display['status']) ?></dd>
 
-                            <dt class="col-sm-4">說明:</dt>
-                            <dd class="col-sm-8"><?= nl2br(htmlspecialchars($coupon['content'] ?? '無')) ?></dd>
+                        <dt>總發放數量</dt>
+                        <dd><?= htmlspecialchars($coupon['total_quantity'] ?? '未設定') ?></dd>
 
-                            <dt class="col-sm-4">狀態:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['status_text']) ?></dd>
+                        <dt>每張可用次數</dt>
+                        <dd><?= htmlspecialchars($coupon['uses_per_instance'] ?? '未設定') ?></dd>
 
-                            <dt class="col-sm-4">總發放數量:</dt>
-                            <dd class="col-sm-8"><?= $coupon['total_quantity'] !== null ? htmlspecialchars($coupon['total_quantity']) : '未設定' ?></dd>
+                        <dt>有效期間</dt>
+                        <dd><?= htmlspecialchars($display['start_at']) ?> ~ <?= htmlspecialchars($display['end_at']) ?>
+                        </dd>
 
-                            <dt class="col-sm-4">每張可用次數:</dt>
-                            <dd class="col-sm-8"><?= $coupon['uses_per_instance'] !== null ? htmlspecialchars($coupon['uses_per_instance']) : '未設定' ?></dd>
-
-                            <dt class="col-sm-4">開始時間:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['start_at'] ?? '未設定') ?></dd>
-
-                            <dt class="col-sm-4">結束時間:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['end_at'] ?? '未設定') ?></dd>
-
-                            <dt class="col-sm-4">建立時間:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['created_at'] ?? 'N/A') ?></dd>
-
-                            <dt class="col-sm-4">最後更新時間:</dt>
-                            <dd class="col-sm-8"><?= htmlspecialchars($coupon['updated_at'] ?? 'N/A') ?></dd>
-                        </dl>
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="card-title mb-3">優惠條件</h5>
-                        <?php if ($coupon['rule_id']): ?>
-                            <dl class="row">
-                                <dt class="col-sm-5">規則 ID:</dt>
-                                <dd class="col-sm-7"><?= htmlspecialchars($coupon['rule_id']) ?></dd>
-
-                                <dt class="col-sm-5">最低消費門檻:</dt>
-                                <dd class="col-sm-7"><?= $coupon['min_spend'] !== null ? htmlspecialchars($coupon['min_spend']) . ' 元' : '無門檻' ?></dd>
-
-                                <dt class="col-sm-5">折扣類型:</dt>
-                                <dd class="col-sm-7"><?= htmlspecialchars($coupon['discount_type_text'] ?? '未設定') ?></dd>
-
-                                <dt class="col-sm-5">折扣值:</dt>
-                                <dd class="col-sm-7">
-                                    <?= $coupon['discount_value'] !== null ? htmlspecialchars($coupon['discount_value']) : 'N/A' ?>
-                                    <?= $coupon['discount_type'] === 'percent' ? '%' : ($coupon['discount_type'] === 'fixed' ? '元' : '') ?>
-                                </dd>
-
-                                <dt class="col-sm-5">最大折扣金額 (百分比時):</dt>
-                                <dd class="col-sm-7">
-                                    <?= ($coupon['discount_type'] === 'percent' && $coupon['max_discount_amount'] !== null) ? htmlspecialchars($coupon['max_discount_amount']) . ' 元' : '無上限' ?>
-                                </dd>
-
-                                <dt class="col-sm-5">免運費:</dt>
-                                <dd class="col-sm-7"><?= $coupon['free_shipping'] == 1 ? '是' : '否' ?></dd>
-                            </dl>
-                        <?php else: ?>
-                            <p>未設定優惠條件。</p>
-                        <?php endif; ?>
-                    </div>
+                        <dt>優惠說明</dt>
+                        <dd><?= $display['content'] ?></dd>
+                    </dl>
                 </div>
-            </div>
-            <div class="card-footer text-muted">
-                <a href="./index.php" class="btn btn-primary">返回列表</a>
+                <div class="details-column">
+                    <h5 class="details-section-title">優惠與限制</h5>
+                    <?php if (isset($coupon['rule_id'])): ?>
+                        <dl class="details-list">
+                            <dt>最低消費</dt>
+                            <dd><?= htmlspecialchars($display['min_spend']) ?></dd>
+                            <dt>折扣類型</dt>
+                            <dd><?= htmlspecialchars($display['discount_type']) ?></dd>
+                            <dt>折扣值</dt>
+                            <dd><?= htmlspecialchars($display['discount_value']) ?></dd>
+                            <dt>最高折抵</dt>
+                            <dd><?= htmlspecialchars($display['max_discount_amount']) ?></dd>
+                            <dt>免運費</dt>
+                            <dd><?= htmlspecialchars($display['free_shipping']) ?></dd>
+                        </dl>
+                    <?php else: ?>
+                        <p class="text-muted">未設定優惠條件。</p>
+                    <?php endif; ?>
+
+                    <?php if (isset($display['target_type'])): ?>
+                        <dl class="details-list mt-4">
+                            <dt>限制類型</dt>
+                            <dd><?= htmlspecialchars($display['target_type']) ?></dd>
+                            <?php if (isset($display['target_value'])): ?>
+                                <dt>限制目標</dt>
+                                <dd><?= htmlspecialchars($display['target_value']) ?></dd>
+                            <?php endif; ?>
+                        </dl>
+                    <?php else: ?>
+                        <p class="text-muted mt-4">未設定限制條件。</p>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-        crossorigin="anonymous"></script>
-</body>
+</div>
 
-</html>
+<?php
+// 引入統一的頁尾
+include "../template_btm.php";
+?>

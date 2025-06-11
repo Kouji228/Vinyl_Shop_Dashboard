@@ -2,212 +2,193 @@
 
 require_once "./connect.php";
 require_once "./Utilities.php";
+require_once "./couponMaps.php"; // 引入共用的 Map 陣列
 
-// 定義狀態映射
-$statusMap = [
-    'pending' => '待上架',
-    'active' => '生效中',
-    'inactive' => '已停用'
-];
-// 定義折扣類型映射
-$discountTypeMap = [
-    'fixed' => '固定金額',
-    'percent' => '百分比'
-];
-// 定義免運費選項映射
-$freeShippingMap = [
-    '0' => '否',
-    '1' => '是'
-];
-
-$targetTypeMap = [
-    'product' => '產品類型',
-    'member' => '會員行為'
-];
-
-$targetProductMap = [
-    '99' => '全品項',
-    '1' => '古典',
-    '2' => '發燒',
-    '3' => '爵士',
-    '4' => '西洋',
-    '5' => '華語',
-    '6' => '日韓',
-    '7' => '原聲帶'
-];
-
-$targetMemberMap = [
-    'm0' => '生日',
-    'm1' => '周年禮金',
-    'm2' => '回饋金',
-    'm3' => 'VIP贈送'
-];
+$pageTitle = "新增優惠卷";
+$cssList = ["../css/index.css", "../css/add.css", "./coupon.css"];
+include "../vars.php";
+include "../template_top.php";
+include "../template_main.php";
 
 ?>
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>新增優惠卷</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-</head>
-
-<body>
-    <div class="container mt-3">
-        <h1>新增優惠卷</h1>
-        <form action="./doAdd.php" method="post" enctype="multipart/form-data">
-            <div class="input-group mb-1">
-                <span class="input-group-text">優惠卷名稱</span>
-                <input name="name" type="text" class="form-control" placeholder="優惠卷名稱">
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">優惠碼</span>
-                <input name="code" type="text" class="form-control" placeholder="優惠碼設定">
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">優惠卷說明</span>
-                <input name="content" type="text" class="form-control" placeholder="優惠描述" rows="3">
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">狀態</span>
-                <select name="status" class="form-select">
-                    <option value="" selected disabled>請選擇</option>
-                    <?php foreach ($statusMap as $value => $displayText): ?>
-                        <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">總發放數量</span>
-                <input name="total_quantity" type="number" class="form-control" placeholder="總發放數量">
-            </div>
-
-            <!-- <div class="input-group mb-1">
-                <span class="input-group-text">每人限領張數</span>
-                <input name="per_user_limit" type="number" class="form-control" placeholder="每人限領張數">
-            </div> -->
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">每張可用次數</span>
-                <input name="uses_per_instance" type="number" class="form-control" placeholder="每張可用次數">
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">開始時間</span>
-                <input name="start_at" type="datetime-local" class="form-control">
-                <span class="input-group-text">結束時間</span>
-                <input name="end_at" type="datetime-local" class="form-control">
-            </div>
-
-            <!-- 規則區 -->
-            <h2 class="mt-4 h5">優惠條件</h2>
-            <div class="input-group mb-1">
-                <span class="input-group-text">低消門檻</span>
-                <input name="min_spend" type="number" class="form-control" placeholder="可不填寫，為無門檻">
-            </div>
-            <div class="input-group mb-1">
-                <span class="input-group-text">折扣類型</span>
-
-                <select name="discount_type" class="form-select">
-                    <option value="" selected disabled>請選擇</option>
-                    <?php foreach ($discountTypeMap as $value => $displayText): ?>
-                        <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
-                    <?php endforeach; ?>
-                </select>
-
-                <span class="input-group-text">折扣值(整數)</span>
-                <input name="discount_value" type="number" class="form-control" placeholder="折扣金額 或 百分比(例:10為10%)">
-
-                <span class="input-group-text">最大折扣金額</span>
-                <input name="max_discount_amount" type="number" class="form-control" placeholder="可不填寫，為無上限">
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">免運費</span>
-                <select name="free_shipping" class="form-select">
-                    <?php foreach ($freeShippingMap as $value => $displayText): ?>
-                        <option value="<?= htmlspecialchars($value) ?>" <?= ($value === '0') ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($displayText) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="input-group mb-1">
-                <span class="input-group-text">限制類型</span>
-                <select name="target_type" id="target_type_select" class="form-select">
-                    <option value="" selected disabled>請選擇</option>
-                    <?php foreach ($targetTypeMap as $value => $displayText): ?>
-                        <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- Dynamic Sub-type based on Target Type -->
-            <div id="target_value_group" class="input-group mb-1">
-                <span class="input-group-text">次類型</span>
-                <select name="target_value" id="target_value_select" class="form-select">
-                    <option value="" selected disabled>請選擇</option>
-                    <!-- Options will be populated by JavaScript -->
-                </select>
-            </div>
-
-            <!-- 規則區 -->
-
-            <div class="mt-1 text-end">
-                <button type="submit" class="btn btn-info btn-send">送出</button>
-                <a class="btn btn-primary" href="./index.php">取消</a>
-            </div>
-        </form>
+<div class="content-section">
+    <div class="section-header">
+        <h3 class="section-title">新增優惠卷</h3>
+        <a href="./index.php" class="btn btn-secondary">返回列表</a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
-        crossorigin="anonymous"></script>
-    <script>
-        const targetProductMapJs = <?= json_encode($targetProductMap) ?>;
-        const targetMemberMapJs = <?= json_encode($targetMemberMap) ?>;
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const targetTypeSelect = document.getElementById('target_type_select');
-            const targetValueGroup = document.getElementById('target_value_group');
-            const targetValueSelect = document.getElementById('target_value_select');
+    <form action="./doAdd.php" method="post" enctype="multipart/form-data">
+        <div class="form-section">
+            <h4 class="form-section-title">基本資訊</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="couponName" class="form-label required">優惠卷名稱</label>
+                    <input id="couponName" name="name" type="text" class="form-control" placeholder="優惠卷名稱" required>
+                </div>
+                <div class="form-group">
+                    <label for="couponCode" class="form-label">優惠碼</label>
+                    <input id="couponCode" name="code" type="text" class="form-control" placeholder="優惠碼設定 (可選)">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="couponContent" class="form-label">優惠卷說明</label>
+                    <textarea id="couponContent" name="content" class="form-control" placeholder="優惠內容描述"
+                        rows="3"></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="couponStatus" class="form-label required">狀態</label>
+                    <select id="couponStatus" name="status" class="form-select" required>
+                        <option value="" selected disabled>請選擇</option>
+                        <?php foreach ($statusMap as $value => $displayText): ?>
+                            <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="couponTotalQuantity" class="form-label required">總發放數量</label>
+                    <input id="couponTotalQuantity" name="total_quantity" type="number" class="form-control"
+                        placeholder="總發放數量" required min="0">
+                </div>
+                <div class="form-group">
+                    <label for="couponUsesPerInstance" class="form-label required">每張可用次數</label>
+                    <input id="couponUsesPerInstance" name="uses_per_instance" type="number" class="form-control"
+                        placeholder="每張可用次數" required min="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="couponStartAt" class="form-label">開始時間</label>
+                    <input id="couponStartAt" name="start_at" type="datetime-local" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="couponEndAt" class="form-label">結束時間</label>
+                    <input id="couponEndAt" name="end_at" type="datetime-local" class="form-control">
+                </div>
+            </div>
+        </div>
 
-            targetTypeSelect.addEventListener('change', function () {
-                const selectedType = this.value;
+        <div class="form-section">
+            <h4 class="form-section-title">優惠條件</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ruleMinSpend" class="form-label">低消門檻</label>
+                    <input id="ruleMinSpend" name="min_spend" type="number" class="form-control" placeholder="可不填寫，為無門檻"
+                        min="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ruleDiscountType" class="form-label required">折扣類型</label>
+                    <select id="ruleDiscountType" name="discount_type" class="form-select" required>
+                        <option value="" selected disabled>請選擇</option>
+                        <?php foreach ($discountTypeMap as $value => $displayText): ?>
+                            <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ruleDiscountValue" class="form-label required">折扣值 (整數)</label>
+                    <input id="ruleDiscountValue" name="discount_value" type="number" class="form-control"
+                        placeholder="金額或百分比(例:10為10%)" required>
+                </div>
+                <div class="form-group">
+                    <label for="ruleMaxDiscountAmount" class="form-label">最大折扣金額</label>
+                    <input id="ruleMaxDiscountAmount" name="max_discount_amount" type="number" class="form-control"
+                        placeholder="百分比折扣時適用 (可選)" min="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ruleFreeShipping" class="form-label">免運費</label>
+                    <select id="ruleFreeShipping" name="free_shipping" class="form-select">
+                        <?php foreach ($freeShippingMap as $value => $displayText): ?>
+                            <option value="<?= htmlspecialchars($value) ?>" <?= ($value === '0') ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($displayText) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                // Reset target_value select
-                targetValueSelect.innerHTML = '<option value="" selected disabled>請選擇</option>'; // Clear previous options and add default
-                targetValueSelect.disabled = true;
+        <div class="form-section">
+            <h4 class="form-section-title">限制條件</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="targetTypeSelect" class="form-label required">限制類型</label>
+                    <select name="target_type" id="target_type_select" class="form-select" required>
+                        <option value="" selected disabled>請選擇</option>
+                        <?php foreach ($targetTypeMap as $value => $displayText): ?>
+                            <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($displayText) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="targetValueSelect" class="form-label required">次類型</label>
+                    <select name="target_value" id="target_value_select" class="form-select" required disabled>
+                        <option value="" selected disabled>請先選擇限制類型</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                let optionsMap = null;
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 儲存優惠卷
+            </button>
+            <button type="reset" class="btn btn-secondary">
+                <i class="fas fa-undo"></i> 重置
+            </button>
+            <a class="btn btn-danger" href="./index.php">
+                <i class="fas fa-times"></i> 取消
+            </a>
+        </div>
 
-                if (selectedType === 'product') {
-                    optionsMap = targetProductMapJs;
-                } else if (selectedType === 'member') {
-                    optionsMap = targetMemberMapJs;
-                }
+    </form>
+</div>
 
-                if (optionsMap) {
-                    for (const value in optionsMap) {
-                        if (optionsMap.hasOwnProperty(value)) {
-                            const option = document.createElement('option');
-                            option.value = value;
-                            option.textContent = optionsMap[value];
-                            targetValueSelect.appendChild(option);
-                        }
+<script>
+    // 將 PHP 陣列轉換為 JavaScript 可用的物件
+    const targetProductMapJs = <?= json_encode($targetProductMap) ?>;
+    const targetMemberMapJs = <?= json_encode($targetMemberMap) ?>;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const targetTypeSelect = document.getElementById('target_type_select');
+        const targetValueSelect = document.getElementById('target_value_select');
+
+        // 當「限制類型」改變時，更新「次類型」的選項
+        targetTypeSelect.addEventListener('change', function () {
+            const selectedType = this.value;
+
+            // 清空並禁用次類型選單
+            targetValueSelect.innerHTML = '<option value="" selected disabled>請選擇</option>';
+            targetValueSelect.disabled = true;
+
+            let optionsMap = null;
+            if (selectedType === 'product') {
+                optionsMap = targetProductMapJs;
+            } else if (selectedType === 'member') {
+                optionsMap = targetMemberMapJs;
+            }
+
+            // 如果有對應的選項，則填入並啟用選單
+            if (optionsMap) {
+                for (const value in optionsMap) {
+                    if (optionsMap.hasOwnProperty(value)) {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = optionsMap[value];
+                        targetValueSelect.appendChild(option);
                     }
-                    targetValueSelect.disabled = false;
                 }
-            });
+                targetValueSelect.disabled = false;
+            }
         });
-    </script>
-</body>
-
-</html>
+    });
+</script>
+<?php
+include "../template_btm.php";
+?>
