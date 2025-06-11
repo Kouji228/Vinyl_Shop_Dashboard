@@ -131,102 +131,6 @@ $totalPage = ceil($totalCount / $perPage);
 ?>
 
 
-<!-- <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>黑膠唱片</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <style>
-    body {
-      background-color: #1A1A1A;
-      color: #F4F1EC;
-    }
-
-    .msg {
-      display: flex;
-      padding: 2px;
-      padding-bottom: 3px;
-      color: #e6c068;
-      background-color: #1A1A1A;
-      border: 1px solid #A3472A;
-    }
-
-    .msg .title:nth-child(odd) {
-      border-right: 1px solid #e6c068;
-    }
-
-    .id {
-      width: 40px;
-      text-align: center;
-    }
-
-    .title {
-      padding-left: 10px;
-      flex: 1;
-
-      a {
-        color: #e6c068;
-      }
-    }
-
-    .msg:nth-of-type(odd) {
-      background-color: #0a0a0a;
-    }
-
-    .genre {
-      width: 120px;
-      /* text-align: center; */
-      margin-left: 2px;
-      margin-right: 2px;
-    }
-
-    .author {
-      width: 320px;
-
-      /* text-align: center; */
-      a {
-        color: #e6c068;
-      }
-    }
-
-    .price,
-    .stock {
-      width: 75px;
-      /* text-align: center; */
-    }
-
-    .time {
-      width: 100px;
-    }
-
-    .sortable {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      color: #fff;
-
-      &#id {
-        padding-left: 10px;
-      }
-
-      i {
-        padding-left: 5px;
-      }
-    }
-
-    .wpx200 {
-      width: 200px;
-    }
-  </style>
-</head> -->
-
-
 <div class="content-section">
 
   <!-- 小標題 -->
@@ -297,11 +201,11 @@ $totalPage = ceil($totalCount / $perPage);
       <div class="col-auto flex-center">
         <label class="form-label" for="price1">價格</label>
       </div>
-      <div class="col-auto w200">
+      <div class="col-auto w180">
         <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
       </div>
       <div class="col-auto"> ~ </div>
-      <div class="col-auto w200">
+      <div class="col-auto w180">
         <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
       </div>
     </div>

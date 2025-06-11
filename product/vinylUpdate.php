@@ -13,7 +13,7 @@ $id = $_GET["id"];
 
 $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
-$sqlAuthorList="SELECT * FROM vinyl_author";
+$sqlAuthorList = "SELECT * FROM vinyl_author";
 
 $sqlVinyl = "SELECT * FROM vinyl WHERE id = ?";
 $sqlAuthor = "SELECT * FROM vinyl_author where id = ?";
@@ -67,130 +67,141 @@ try {
         <a href="./index.php" class="btn btn-secondary">回商品列表</a>
     </div>
 
-    <div class="row">
-        <div class="col-md-3" id="previewImage">
-            <?php if ($rowsImg): ?>
-                <img id="previewImage" class="img-fluid my-3" src="./img/<?= $rowsImg[0]["img_name"] ?>" alt="" srcset="">
-            <?php endif; ?>
-        </div>
-
-        <div class="col-md-1"></div>
-
-        <div class="col-md-8">
-            <form action="./doUpdateVinyl.php" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="id" value="<?= $rowsVinyl["id"] ?>">
-                <input type="hidden" name="shs_id" value="<?= $rowsVinyl["shs_id"] ?>">
-                <!-- 唱片 -->
-                <div class="row mb-3">
-                    <div class="col-md-10">
-                        <label class="form-label col-4">唱片名稱</label>
-                        <input name="title" type="text" class="form-control" placeholder="<?= $rowsVinyl["title"] ?>">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">狀態</label>
-                        <select name="status" id="status" class="form-select">
-                            <?php $status = $rowsVinyl["status_id"] ?>
-                            <?php foreach ($rowsStatus as $row): ?>
-                                <option value="<?= $row["id"] ?>" <?= $row["id"] == $status ? 'selected' : "" ?>>
-                                    <?= $row["status"] ?>
-                                </option>
-                            <?php endforeach ?>
-                        </select>
+    <form action="./doUpdateVinyl.php" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<?= $rowsVinyl["id"] ?>">
+        <input type="hidden" name="shs_id" value="<?= $rowsVinyl["shs_id"] ?>">
+        <!-- 唱片 -->
+        <div class="form-section">
+            <div class="form-row avatar-row">
+                <div class="form-group avatar-group">
+                    <label for="memberAvatar" class="form-label"></label>
+                    <div class="avatar-upload-container">
+                        <div class="avatar-preview" id="previewImage">
+                            <img id="previewImage" class="img-fluid my-3" src="./img/<?= $rowsImg[0]["img_name"] ?>"
+                                alt="" srcset="">
+                        </div><input name="myFile" id="imageInput" type="file" class="form-control"
+                            accept=".png,.jpg,.jpeg">
+                        <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
                     </div>
                 </div>
 
-                <!-- 藝術家 / 公司 / 價格 -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">藝術家</label>
-                        <input name="author" type="text" class="form-control" placeholder="<?= $rowsAuthor["author"] ?>"
-                            list="authorList">
-                        <datalist id="authorList">
-                            <?php foreach ($rowsAuthorList as $row): ?>
-                                <option value="<?= htmlspecialchars($row["author"]) ?>"></option>
-                            <?php endforeach ?>
-                        </datalist>
+                <div class="form-group info-group">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">唱片名稱</label>
+                            <input name="title" type="text" class="form-control"
+                                placeholder="<?= $rowsVinyl["title"] ?>">
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">公司</label>
-                        <input name="company" type="text" class="form-control"
-                            placeholder="<?= $rowsVinyl["company"] ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">價格</label>
-                        <input name="price" type="number" class="form-control" placeholder="<?= $rowsVinyl["price"] ?>">
-                    </div>
-                </div>
 
-                <!-- 風格 / 類別 -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">風格</label>
-                        <select name="genre" id="genre" class="form-select" required>
-                            <?php foreach ($rows as $row): ?>
-                                <option value="<?= $row["id"] ?>" <?= $row["id"] == $rowsVinyl["genre_id"] ? 'selected' : "" ?>><?= $row["genre"] ?></option>
-                            <?php endforeach ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">類別</label>
-                        <select name="gender" id="gender" class="form-select" required>
-                            <?php foreach ($rowsGender as $row): ?>
-                                <?php if ($row["genre_id"] == $rowsVinyl["genre_id"]): ?>
-                                    <option value="<?= $row["id"] ?>">
-                                        <?= $row["gender"] ?>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">狀態</label>
+                            <select name="status" id="status" class="form-select">
+                                <?php $status = $rowsVinyl["status_id"] ?>
+                                <?php foreach ($rowsStatus as $row): ?>
+                                    <option value="<?= $row["id"] ?>" <?= $row["id"] == $status ? 'selected' : "" ?>>
+                                        <?= $row["status"] ?>
                                     </option>
-                                <?php endif; ?>
-                            <?php endforeach ?>
-                        </select>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 藝術家 / 公司 / 價格 -->
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">藝術家</label>
+                            <input name="author" type="text" class="form-control"
+                                placeholder="<?= $rowsAuthor["author"] ?>" list="authorList">
+                            <datalist id="authorList">
+                                <?php foreach ($rowsAuthorList as $row): ?>
+                                    <option value="<?= htmlspecialchars($row["author"]) ?>"></option>
+                                <?php endforeach ?>
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">公司</label>
+                            <input name="company" type="text" class="form-control"
+                                placeholder="<?= $rowsVinyl["company"] ?>">
+                        </div>
+                    </div>
+
+
+                    <!-- 風格 / 類別 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">風格</label>
+                            <select name="genre" id="genre" class="form-select" required>
+                                <?php foreach ($rows as $row): ?>
+                                    <option value="<?= $row["id"] ?>" <?= $row["id"] == $rowsVinyl["genre_id"] ? 'selected' : "" ?>><?= $row["genre"] ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">類別</label>
+                            <select name="gender" id="gender" class="form-select" required>
+                                <?php foreach ($rowsGender as $row): ?>
+                                    <?php if ($row["genre_id"] == $rowsVinyl["genre_id"]): ?>
+                                        <option value="<?= $row["id"] ?>">
+                                            <?= $row["gender"] ?>
+                                        </option>
+                                    <?php endif; ?>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 發行日期 / 規格 / 庫存 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">庫存</label>
+                            <input name="stock" type="number" class="form-control"
+                                placeholder="<?= $rowsVinyl["stock"] ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">價格</label>
+                            <input name="price" type="number" class="form-control"
+                                placeholder="<?= $rowsVinyl["price"] ?>">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">發行日期</label>
+                            <input name="release_date" type="date" class="form-control"
+                                value="<?= $rowsVinyl["release_date"] ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">規格</label>
+                            <input name="format" type="text" class="form-control"
+                                placeholder="<?= $rowsVinyl["format"] ?>">
+                        </div>
                     </div>
                 </div>
-
-                <!-- 發行日期 / 規格 / 庫存 -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">發行日期</label>
-                        <input name="release_date" type="date" class="form-control"
-                            value="<?= $rowsVinyl["release_date"] ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">規格</label>
-                        <input name="format" type="text" class="form-control" placeholder="<?= $rowsVinyl["format"] ?>">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">庫存</label>
-                        <input name="stock" type="number" class="form-control" placeholder="<?= $rowsVinyl["stock"] ?>">
-                    </div>
-                </div>
-
-                <!-- 上傳檔案 -->
-                <div class="mb-3">
-                    <label class="form-label">上傳圖片</label>
-                    <input name="myFile" id="imageInput" type="file" class="form-control" accept=".png,.jpg,.jpeg">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">介紹</label>
-                    <textarea name="desc_text" class="form-control"
-                        rows="4"><?= htmlspecialchars($rowsVinyl["desc_text"]) ?></textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">歌曲清單</label>
-                    <textarea name="playlist" class="form-control"
-                        rows="6"><?= htmlspecialchars($rowsVinyl["playlist"]) ?></textarea>
-                </div>
-
-                <!-- 按鈕 -->
-                <div class="text-end">
-                    <button type="submit" class="btn btn-info">送出</button>
-                    <a class="btn btn-secondary" href="./index.php">取消</a>
-                </div>
-            </form>
+            </div>
+        </div>
+        <div class="form-section mb-3">
+            <label class="form-label">介紹</label>
+            <textarea name="desc_text" class="form-control"
+                rows="4"><?= htmlspecialchars($rowsVinyl["desc_text"]) ?></textarea>
         </div>
 
-    </div>
+        <div class="form-section mb-3">
+            <label class="form-label">歌曲清單</label>
+            <textarea name="playlist" class="form-control"
+                rows="6"><?= htmlspecialchars($rowsVinyl["playlist"]) ?></textarea>
+        </div>
 
+        <!-- 按鈕 -->
+        <div class="text-end">
+            <button type="submit" class="btn btn-info">送出</button>
+            <a class="btn btn-secondary" href="./index.php">取消</a>
+        </div>
+    </form>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
