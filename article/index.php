@@ -1,10 +1,10 @@
 <?php
-include "../components/connect.php";
-include "../vars.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 
 $pageTitle = "文章管理";
-
 $cssList = ["../css/index.css", "../css/article.css"];
+include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
 
@@ -16,9 +16,12 @@ $date2 = $_GET["date2"] ?? "";
 $searchTitle = $_GET["titleKeyword"] ?? "";
 $searchCategory = $_GET["categoryKeyword"] ?? "";
 $searchTag = $_GET["tagKeyword"] ?? "";
+$searchStatus = $_GET["statusKeyword"] ?? "";
 $searchDate = isset($_GET["searchDate"]) ? true : false;
-$page = intval($_GET["page"] ?? 1);
+
+// 分頁邏輯
 $perPage = 10;
+$page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
 
 
@@ -40,7 +43,7 @@ try {
 }
 
 // 初始化查詢條件和參數
-$whereConditions = [];
+$whereConditions = ["a.is_deleted = 0"];  // 添加軟刪除條件
 $params = [];
 
 // 標題搜尋
@@ -69,6 +72,12 @@ if (!empty($searchTag)) {
         AND t2.id = :tagId
     )";
     $params[':tagId'] = $searchTag;
+}
+
+// 狀態搜尋
+if (!empty($searchStatus)) {
+    $whereConditions[] = "s.status = :status";
+    $params[':status'] = $searchStatus;
 }
 
 // 日期篩選
@@ -149,84 +158,68 @@ try {
 
 
     <div class="content-section">
-        <h1>文章列表</h1>
-
-        <!-- 整合搜尋區域 -->
-        <div class="controls-section">
-            <form method="GET" class="row g-3">
-                <div class="col-12">
-                    <div class="search-conditions mb-3">
-                        <div class="row g-3">
-
-                            <!-- 標題搜尋 -->
-                            <div class="col-md-4">
-                                <label class="form-label">標題搜尋</label>
-                                <input name="titleKeyword" type="text" class="form-control" placeholder="輸入標題關鍵字" value="<?= htmlspecialchars($_GET['titleKeyword'] ?? '') ?>">
-                            </div>
-
-
-                            <!-- 分類搜尋 -->
-                            <div class="col-md-4">
-                                <label class="form-label">分類搜尋</label>
-                                <select name="categoryKeyword" class="form-select">
-                                    <option value="">選擇分類</option>
-                                    <?php foreach ($allCategories as $category): ?>
-                                        <option value="<?= $category['id'] ?>" <?= ($searchCategory == $category['id']) ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($category['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <!-- 標籤搜尋 -->
-                            <div class="col-md-4">
-                                <label class="form-label">標籤搜尋</label>
-                                <select name="tagKeyword" class="form-select">
-                                    <option value="">選擇標籤</option>
-                                    <?php foreach ($allTags as $tag): ?>
-                                        <option value="<?= $tag['id'] ?>" <?= ($searchTag == $tag['id']) ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($tag['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <!-- 日期搜尋 -->
-                            <div class="col-md-4">
-                                <label class="form-label">更新時間搜尋</label>
-                                <div class="input-group">
-                                    <input name="date1" type="date" class="form-control" value="<?= htmlspecialchars($_GET['date1'] ?? '') ?>">
-                                    <span class="input-group-text">~</span>
-                                    <input name="date2" type="date" class="form-control" value="<?= htmlspecialchars($_GET['date2'] ?? '') ?>">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">搜尋</button>
-                        <a href="index.php" class="btn btn-secondary">重置篩選條件</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <div class="d-flex">
-            <a href="/article/form.php" class="btn btn-primary btn-sm ms-auto">新增文章</a>
-        </div>
-
-        <!-- 顯示總筆數 -->
-        <div class="total-count">
-            目前共 <?= $totalCount ?> 筆資料
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <h3 class="section-title">文章列表</h3>
+            <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料
             <?php if (!empty($searchTitle) || !empty($searchCategory) || !empty($searchTag) || !empty($date1) || !empty($date2)): ?>
                 (已篩選)
-            <?php endif; ?>
+            <?php endif; ?></span>
+            <div class="d-flex gap-2">
+                <a href="/article/trash.php" class="btn btn-secondary">回收站</a>
+                <a href="/article/form.php" class="btn btn-primary">新增文章</a>
+            </div>
         </div>
+
+        <!-- 整合搜尋區域 -->
+        <div class="controls-section d-flex align-items-end flex-wrap gap-2">
+            <div class="search-box flex-grow-1">
+                <input name="titleKeyword" type="text" class="form-control" placeholder="搜尋標題關鍵字" value="<?= htmlspecialchars($_GET['titleKeyword'] ?? '') ?>">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="filter-group">
+                <select name="categoryKeyword">
+                    <option value="">全部分類</option>
+                    <?php foreach ($allCategories as $category): ?>
+                        <option value="<?= $category['id'] ?>" <?= ($searchCategory == $category['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($category['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="tagKeyword">
+                    <option value="">全部標籤</option>
+                    <?php foreach ($allTags as $tag): ?>
+                        <option value="<?= $tag['id'] ?>" <?= ($searchTag == $tag['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($tag['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="statusKeyword">
+                    <option value="">文章狀態</option>
+                    <option value="draft" <?= ($searchStatus == 'draft') ? 'selected' : '' ?>>草稿</option>
+                    <option value="published" <?= ($searchStatus == 'published') ? 'selected' : '' ?>>已發布</option>
+                    <option value="scheduled" <?= ($searchStatus == 'scheduled') ? 'selected' : '' ?>>排程發布</option>
+                </select>
+            </div>
+            <div class="search-box">
+                <div class="input-group">
+                    <input name="date1" type="date" class="form-control" value="<?= htmlspecialchars($_GET['date1'] ?? '') ?>">
+                    <span class="input-group-text">~</span>
+                    <input name="date2" type="date" class="form-control" value="<?= htmlspecialchars($_GET['date2'] ?? '') ?>">
+                </div>
+            </div>
+            <button type="button" class="accept-filters" id="articleSearchBtn">搜尋</button>
+            <a href="index.php" class="clear-filters">清除篩選</a>
+        </div>
+
 
         <!-- 文章列表 -->
         <div class="table-container table-responsive">
-            <table class="table">
-                <thead>
+            <table class="table table-bordered table-striped align-middle ">
+                <thead class="table-dark">
                     <tr>
                         <th style="width: 50px;">
                             <input type="checkbox" class="form-check-input" id="selectAll">
@@ -235,7 +228,6 @@ try {
                         <th>文章封面</th>
                         <th>分類</th>
                         <th>標籤</th>
-                        <th>建立時間</th>
                         <th>更新時間</th>
                         <th>狀態</th>
                         <th style="width: 120px;">操作</th>
@@ -275,7 +267,7 @@ try {
                                 foreach ($tagPairs as $tagPair):
                                     list($tagName, $tagColor) = explode(':', $tagPair);
                                 ?>
-                                    <span class="tag-badge" style="background-color: <?= htmlspecialchars($tagColor) ?>">
+                                    <span class="tag-badge">
                                         <?= htmlspecialchars($tagName) ?>
                                     </span>
                                 <?php endforeach; ?>
@@ -283,7 +275,6 @@ try {
                                 <span class="text-muted">無標籤</span>
                             <?php endif; ?>
                         </td>
-                        <td><?=$article["created_at"]?></td>
                         <td><?=$article["updated_at"]?></td>
                         <td>
                             <?php if (!empty($article["status"])): ?>
@@ -310,8 +301,8 @@ try {
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <a href="#" class="btn btn-danger btn-sm delete-btn" data-id="<?=$article["id"]?>">刪除</a>
-                                <a href="/article/form.php?id=<?=$article["id"]?>" class="btn btn-primary btn-sm">修改</a>
+                                <a href="/article/form.php?id=<?=$article["id"]?>" class="btn btn-sm btn-warning" title="修改"><i class="fas fa-edit"></i></a>
+                                <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="<?=$article["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
                             </div>
                         </td>
                     </tr>
@@ -384,7 +375,8 @@ try {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    確定要刪除這篇文章嗎？此操作無法復原。
+                    <p>確定要刪除這篇文章嗎？</p>
+                    <p class="text-muted mb-0">此操作會將文章移至回收站，您可以稍後在回收站中恢復或永久刪除。</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -394,18 +386,6 @@ try {
         </div>
     </div>
 
-    <!-- 添加標籤選擇器的樣式 -->
-    <style>
-    .form-select option {
-        padding: 8px;
-        margin: 2px 0;
-    }
-
-    .form-select option:checked {
-        background-color: var(--warm-brass);
-        color: white;
-    }
-    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -459,11 +439,32 @@ try {
         });
 
         // 初始化時檢查搜尋類型
-        const currentSearchDate = document.querySelector('input[name="searchDate"]:checked').checked;
-        if (currentSearchDate) {
+        var searchDateInput = document.querySelector('input[name="searchDate"]:checked');
+        if (searchDateInput && searchDateInput.checked) {
             document.querySelector('.date-range').style.display = 'flex';
             document.querySelector('input[name="titleKeyword"]').style.display = 'none';
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('articleSearchBtn').addEventListener('click', function() {
+                const params = new URLSearchParams();
+                const title = document.querySelector('input[name="titleKeyword"]').value;
+                const category = document.querySelector('select[name="categoryKeyword"]').value;
+                const tag = document.querySelector('select[name="tagKeyword"]').value;
+                const status = document.querySelector('select[name="statusKeyword"]').value;
+                const date1 = document.querySelector('input[name="date1"]').value;
+                const date2 = document.querySelector('input[name="date2"]').value;
+
+                if (title) params.append('titleKeyword', title);
+                if (category) params.append('categoryKeyword', category);
+                if (tag) params.append('tagKeyword', tag);
+                if (status) params.append('statusKeyword', status);
+                if (date1) params.append('date1', date1);
+                if (date2) params.append('date2', date2);
+
+                window.location.href = 'index.php?' + params.toString();
+            });
+        });
     </script>
 
 

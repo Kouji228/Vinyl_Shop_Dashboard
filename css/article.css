@@ -1,68 +1,79 @@
-/* 原有的樣式保持不變 */
-
-.flex1 {
-  flex: 1;
-}
-
-/* 縮圖樣式 */
-.thumbnail {
-  width: 150px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.image-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* 狀態標籤樣式 */
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.status-draft {
-  background-color: #e9ecef;
-  color: #495057;
-}
-
-.status-published {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-scheduled {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-/* 標籤和分類樣式 */
-.tag-badge,
-.category-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  margin: 2px;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  color: rgb(251, 247, 247);
-}
-
-.category-badge {
-  background-color: #cfe2ff;
-  color: #084298;
-}
-
-/* 搜尋區域樣式 */
+/* =====================
+   搜尋區域樣式
+====================== */
 .search-area {
   margin-bottom: 20px;
   padding: 15px;
   background-color: #f8f9fa;
   border-radius: 5px;
+}
+
+.search-conditions-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.search-conditions-horizontal > .search-box,
+.search-conditions-horizontal > .filter-group,
+.search-conditions-horizontal > .form-actions {
+  flex: 1 1 180px;
+  min-width: 180px;
+  margin-bottom: 0;
+}
+@media (max-width: 900px) {
+  .search-conditions-horizontal {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .search-conditions-horizontal > * {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.search-conditions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px 32px;
+  align-items: end;
+  width: 100%;
+}
+.search-conditions-grid .search-title-wide {
+  grid-column: span 2;
+  min-width: 320px;
+}
+.search-conditions-grid .search-narrow {
+  min-width: 120px;
+  max-width: 220px;
+}
+@media (max-width: 900px) {
+  .search-conditions-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .search-conditions-grid .search-title-wide {
+    grid-column: span 1;
+    min-width: 180px;
+  }
+  .search-conditions-grid .search-narrow {
+    min-width: 100px;
+    max-width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+}
+
+.date-range-inline {
+  min-width: 260px;
+  max-width: 340px;
+  flex: 0 1 340px;
 }
 
 .total-count {
@@ -73,11 +84,91 @@
   font-weight: 500;
 }
 
-/* 日期範圍樣式 */
-.date-range {
-  min-width: 300px;
+/* =====================
+   標籤、分類樣式
+====================== */
+.tag-badge,
+.category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: rgb(49, 47, 47);
+}
+.category-badge {
+  background-color: #cfe2ff;
+  color: #084298;
 }
 
-.date-range input[type='date'] {
-  width: 130px;
+/* =====================
+   狀態標籤樣式
+====================== */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.status-draft {
+  background-color: #e9ecef;
+  color: #495057;
+}
+.status-published {
+  background-color: #d4edda;
+  color: #155724;
+}
+.status-scheduled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* =====================
+   縮圖與圖片
+====================== */
+.thumbnail {
+  width: 150px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.image-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =====================
+   其他輔助
+====================== */
+.flex1 {
+  flex: 1;
+}
+
+/* 清除篩選按鈕 */
+.accept-filters {
+  /* 繼承 clear-filters 大小設定 */
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  box-shadow: var(--shadow-light);
+  background-color: var(--warm-brass);
+  color: #fff;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 清除篩選按鈕懸停效果 */
+.accept-filters:hover {
+  transform: translateY(-2px); /* 向上移動2像素 */
+  background-color: #b88a2b;
+  color: #fff;
+}
+
+.clear-filters {
+  text-decoration: none;
+}
+.clear-filters:hover {
+  text-decoration: none;
 }

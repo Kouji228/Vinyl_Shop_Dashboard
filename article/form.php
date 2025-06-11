@@ -1,5 +1,12 @@
 <?php
 include "../components/connect.php";
+include "../components/Utilities.php";
+
+$pageTitle = "文章管理";
+$cssList = ["../css/index.css", "../css/add.css","../css/articleAdd.css"];
+include "../vars.php";
+include "../template_top.php";
+include "../template_main.php";
 
 $id = $_GET['id'] ?? null;
 $article = null;
@@ -50,159 +57,111 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
-<!DOCTYPE html>
-<html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><?= $id ? '編輯文章' : '新增文章' ?></title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
-      crossorigin="anonymous"
-    />
-    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.0/classic/ckeditor.js"></script>
-    <style>
-      .ck-editor__editable_inline {
-        width: 100% !important;
-        min-height: 400px !important;
-        height: 400px !important;
-        box-sizing: border-box;
-        max-width: 100%;
-      }
-      .tag-checkbox {
-        margin-right: 10px;
-      }
-      .tag-container {
-        max-height: 100px;
-        overflow-x: auto;
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        padding: 10px;
-        white-space: nowrap;
-      }
-      .tag-item {
-        display: inline-block;
-        margin-right: 15px;
-        margin-bottom: 5px;
-      }
-      .tag-item:last-child {
-        margin-right: 0;
-      }
-      .form-check {
-        display: inline-block;
-        margin-bottom: 0;
-      }
-      .cover-image-container {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-radius: 0.375rem;
-      }
-      .cover-image-preview {
-        width: 200px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
-      }
-      .cover-image-input {
-        flex: 1;
-      }
-      /* 圖片上傳按鈕樣式 */
-      .ck.ck-button.ck-button_with-text {
-        background-color: #0d6efd;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      .ck.ck-button.ck-button_with-text:hover {
-        background-color: #0b5ed7;
-      }
-    </style>
-  </head>
 
-  <body>
-    <div class="container">
-      <h1><?= $id ? '編輯文章' : '新增文章' ?></h1>
-      <div class="input-group mb-1">
-        <div class="input-group-text">標題</div>
-        <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($article['title'] ?? '') ?>" />
+<head>
+    <title><?= $id ? '編輯文章' : '新增文章' ?></title>
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.0/classic/ckeditor.js"></script>
+</head>
+
+    <div class="content-section">
+      <div class="section-header">
+        <h3 class="section-title"><?= $id ? '編輯文章' : '新增文章' ?></h3>
+        <a href="./index.php" class="btn btn-secondary">回文章列表</a>
       </div>
-      <div class="cover-image-container mb-3">
-        <div class="input-group-text">封面圖片</div>
-        <div class="cover-image-input">
-          <input type="file" id="coverFileInput" accept="image/*" class="form-control mb-2">
-          <input type="text" name="cover_image_url" class="form-control" value="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" placeholder="請輸入圖片網址" />
-        </div>
-        <img src="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" alt="封面圖片" class="cover-image-preview" style="max-width:200px;">
-      </div>
-      <div class="input-group mb-1">
-        <div class="input-group-text">分類</div>
-        <div class="tag-container flex-grow-1">
-          <?php foreach ($categories as $category): ?>
-            <div class="tag-item">
-              <div class="form-check">
-                <input class="form-check-input tag-checkbox" type="checkbox"
-                       name="categories[]" value="<?=$category['id']?>"
-                       id="category_<?=$category['id']?>"
-                       <?= in_array($category['id'], $article['category_ids'] ?? []) ? 'checked' : '' ?>>
-                <label class="form-check-label" for="tag_<?=$tag['id']?>">
-                  <?=$category['name']?>
-                </label>
+      <form id="articleForm" method="POST" enctype="multipart/form-data">
+        <div class="form-section">
+          <h4 class="form-section-title">文章內容</h4>
+          <div class="form-row">
+            <div class="form-group flex-grow-1">
+              <label class="form-label required">標題</label>
+              <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($article['title'] ?? '') ?>" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-grow-1">
+              <label class="form-label">封面圖片</label>
+              <input type="file" id="coverFileInput" accept="image/*" class="form-control mb-2">
+              <input type="text" name="cover_image_url" class="form-control" value="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" placeholder="請輸入圖片網址" />
+              <img src="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" alt="封面圖片" class="cover-image-preview mt-2" style="max-width:200px;">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-grow-1">
+              <label class="form-label">分類</label>
+              <div class="tag-container">
+                <?php foreach ($categories as $category): ?>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input tag-checkbox" type="checkbox"
+                           name="categories[]" value="<?=$category['id']?>"
+                           id="category_<?=$category['id']?>"
+                           <?= in_array($category['id'], $article['category_ids'] ?? []) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="category_<?=$category['id']?>">
+                      <?=$category['name']?>
+                    </label>
+                  </div>
+                <?php endforeach; ?>
               </div>
             </div>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <div class="input-group mb-1">
-        <div class="input-group-text">標籤</div>
-          <div class="tag-container flex-grow-1">
-            <?php foreach ($tags as $tag): ?>
-              <div class="tag-item">
-                <div class="form-check">
-                  <input class="form-check-input tag-checkbox" type="checkbox"
-                        name="tags[]" value="<?=$tag['id']?>"
-                        id="tag_<?=$tag['id']?>"
-                        <?= in_array($tag['id'], $article['tag_ids'] ?? []) ? 'checked' : '' ?>>
-                  <label class="form-check-label" for="tag_<?=$tag['id']?>">
-                    <?=$tag['name']?>
-                  </label>
-                </div>
-              </div>
-            <?php endforeach; ?>
           </div>
-      </div>
-      <div id="editor">
-        <?= $article['content'] ?? '<p>這裡是內容</p>' ?>
-      </div>
-      <div class="input-group mb-1">
-        <div class="input-group-text">設定狀態</div>
-        <select name="status" class="form-select" id="statusSelect">
-          <option value="draft" <?= ($article['current_status'] ?? '') === 'draft' ? 'selected' : '' ?>>草稿</option>
-          <option value="published" <?= ($article['current_status'] ?? '') === 'published' ? 'selected' : '' ?>>已發布</option>
-          <option value="scheduled" <?= ($article['current_status'] ?? '') === 'scheduled' ? 'selected' : '' ?>>排程發布</option>
-        </select>
-      </div>
-      <div class="input-group mb-1" id="scheduledDateGroup" style="display: none;">
-        <div class="input-group-text">發布時間安排</div>
-        <input type="datetime-local" name="scheduled_at" class="form-control"
-               value="<?= !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : '' ?>" />
-      </div>
-      <div class="input-group mb-1" id="publishedDateGroup" style="display: none;">
-        <div class="input-group-text">發布時間</div>
-        <input type="text" class="form-control" readonly
-               value="<?= !empty($article['status_updated_at']) ? date('Y-m-d H:i', strtotime($article['status_updated_at'])) : '' ?>" />
-      </div>
-      <div class="d-flex gap-2">
-        <div class="btn btn-sm btn-primary btn-send">送出</div>
-        <a href="./index.php" class="btn btn-sm btn-secondary">取消</a>
-      </div>
+          <div class="form-row">
+            <div class="form-group flex-grow-1">
+              <label class="form-label">標籤</label>
+              <div class="tag-container">
+                <?php foreach ($tags as $tag): ?>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input tag-checkbox" type="checkbox"
+                          name="tags[]" value="<?=$tag['id']?>"
+                          id="tag_<?=$tag['id']?>"
+                          <?= in_array($tag['id'], $article['tag_ids'] ?? []) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="tag_<?=$tag['id']?>">
+                      <?=$tag['name']?>
+                    </label>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-grow-1">
+              <label class="form-label">內文</label>
+              <div id="editor">
+                <?= $article['content'] ?? '<p>這裡是內容</p>' ?>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-section">
+          <h4 class="form-section-title">狀態設定</h4>
+          <div class="form-row row g-3">
+            <div class="form-group col-12 col-md-6">
+              <label class="form-label">設定狀態</label>
+              <select name="status" class="form-select" id="statusSelect">
+                <option value="draft" <?= ($article['current_status'] ?? '') === 'draft' ? 'selected' : '' ?>>草稿</option>
+                <option value="published" <?= ($article['current_status'] ?? '') === 'published' ? 'selected' : '' ?>>已發布</option>
+                <option value="scheduled" <?= ($article['current_status'] ?? '') === 'scheduled' ? 'selected' : '' ?>>排程發布</option>
+              </select>
+            </div>
+            <div class="form-group col-12 col-md-6" id="scheduledDateGroup" style="display: none;">
+              <label class="form-label">發布時間安排</label>
+              <input type="datetime-local" name="scheduled_at" class="form-control"
+                    value="<?= !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : '' ?>" />
+            </div>
+            <div class="form-group col-12 col-md-6" id="publishedDateGroup" style="display: none;">
+              <label class="form-label">實際發布時間</label>
+              <input type="text" class="form-control" readonly
+                    value="<?= !empty($article['status_updated_at']) ? date('Y-m-d H:i', strtotime($article['status_updated_at'])) : '' ?>" />
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='./index.php'">
+            <i class="fas fa-times"></i> 取消
+          </button>
+          <button type="submit" class="btn btn-primary btn-send">
+            <i class="fas fa-save"></i> 儲存文章
+          </button>
+        </div>
+      </form>
     </div>
 
     <script
@@ -417,5 +376,8 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
         }
       });
     </script>
-  </body>
-</html>
+
+
+<?php
+include "../template_btm.php";
+?>
