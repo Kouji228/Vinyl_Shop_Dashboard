@@ -1,40 +1,10 @@
 <?php
 require_once "./connect.php";
 require_once "./Utilities.php";
-//搜尋功能
-$search=($_GET["search"] ?? "");
-$values = [];
-$searchSQL = "";
-if($search != ""){
-  $searchSQL = "(v.name LIKE :search OR v.desc LIKE :search OR cp.name LIKE :search OR mc.title LIKE :search OR sc.title LIKE :search) AND ";
-  $values["search"] = "%$search%";
-}
-// 分頁
-$perPage = 10; // 每頁顯示的資料筆數
+
+$perPage = 10;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
-// 篩選主類別
-$cid = intval($_GET["cid"] ?? 0);
-
-// 如果有分類ID，則加入 WHERE 條件
-if($cid==0){
-$cateSQL="";
-$sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` v 
-             LEFT JOIN `main_category` mc ON v.main_category_id = mc.id
-             LEFT JOIN `company` cp ON v.company_id = cp.id
-             LEFT JOIN `sub_category` sc ON v.sub_category_id = sc.id
-             WHERE $searchSQL v.`is_valid` = 1";
-  $valuesAll = $values;
-}else{
- $cateSQL="mc.id= :cid and";
- $values["cid"]=$cid;
-  $sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` v 
-             LEFT JOIN `main_category` mc ON v.main_category_id = mc.id
-             LEFT JOIN `company` cp ON v.company_id = cp.id
-             LEFT JOIN `sub_category` sc ON v.sub_category_id = sc.id
-             WHERE $cateSQL $searchSQL v.`is_valid` = 1";
-  $valuesAll = $values;
-}
 
 // 取得黑膠資料，使用 JOIN 來取得分類名稱
 $sql = "SELECT v.*, 
@@ -53,25 +23,26 @@ $sql = "SELECT v.*,
         LEFT JOIN `lp` ON v.lp_id = lp.id
         LEFT JOIN `condition` cd ON v.condition_id = cd.id
         LEFT JOIN `status` st ON v.status_id = st.id
-        WHERE $cateSQL $searchSQL v.`is_valid` = 1 
+        WHERE v.`is_valid` = 0 
         ORDER BY v.id 
         LIMIT $perPage OFFSET $pageStart";
 
-;
+
+$sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` WHERE `is_valid` = 1";
 $sqlCate = "SELECT * FROM `main_category`";
 
 try {
   $stmt = $pdo->prepare($sql);
-  $stmt->execute($values);
+  $stmt->execute();
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-  $stmtCate = $pdo->prepare($sqlCate);
+   $stmtCate = $pdo->prepare($sqlCate);
   $stmtCate->execute();
   $rowsCate = $stmtCate->fetchAll(PDO::FETCH_ASSOC);
 
-$stmtAll = $pdo->prepare($sqlAll);
-$stmtAll->execute($valuesAll);
-$totalCount = $stmtAll->fetchColumn();
+  $stmtAll = $pdo->prepare($sqlAll);
+  $stmtAll->execute();
+  $totalCount = $stmtAll->fetchColumn();
 } catch (PDOException $e) {
   echo "錯誤: {$e->getMessage()}";
   exit;
@@ -195,29 +166,13 @@ $totalPage = ceil($totalCount / $perPage);
 <body>
   <div class="container-fluid mt-3">
     <h1>二手商品列表</h1>
-
     <div class="my-2 d-flex">
       <span class="me-auto">目前共 <?= $totalCount ?> 筆資料</span>
-      <a class="btn btn-primary btn-sm btn-add" href="./add.php">
-        <i class="fas fa-plus"></i> 增加資料
+      <a class="btn btn-primary btn-sm btn-add" href="./index.php">
+        <i class="fa-solid fa-house"></i></i> 回首頁
       </a>
     </div>
-    <!-- 搜尋 -->
-    <div class="me-1">
-    <div class="input-group input-group-sm">
-      <input name="search" type="text" class="form-control form-control-sm" placeholder="搜尋">
-      <div class="btn btn-primary btn-sm btn-search">送出搜尋</div>
-    </div>
-  </div>
-    <!-- 分類 -->
-    <div class="nav nav-tabs">
-      <a class="nav-link <?= $cid == 0 ? "active" : "" ?>" href="./index.php">全部</a>
-      <?php foreach ($rowsCate as $rowCate): ?>
-        <a class="nav-link <?= $cid == $rowCate["id"] ? "active" : "" ?>" href="./index.php?cid=<?= $rowCate["id"] ?>">
-          <?= htmlspecialchars($rowCate["title"]) ?>
-        </a>
-      <?php endforeach; ?>
-    </div>
+
     <!-- 表頭 -->
     <div class="msg ps-1">
       <div class="id">#</div>
@@ -233,14 +188,15 @@ $totalPage = ceil($totalCount / $perPage);
       <div class="release_date">發行日</div>
       <div class="main_category">主分類</div>
       <div class="sub_category">次分類</div>
-      <div class="choice">建立時間</div>
-      <div class="actions">操作</div>
+       <div class="choice">建立時間</div>
+       <div class="actions">操作</div>
     </div>
 
     <!-- 資料列 -->
     <?php foreach ($rows as $index => $row): ?>
       <div class="msg">
-         <div class="id"><?= $perPage * ($page-1) + $index+1 ?></div>
+        <div class="id"><?=$row["id"]?></div>
+        
         <!-- 圖片 -->
         <div class="img">
           <?php if (!empty($row["imge_url"])): ?>
@@ -266,16 +222,16 @@ $totalPage = ceil($totalCount / $perPage);
 
         <!-- 狀態 -->
         <div class="choice"><?= htmlspecialchars($row["status_name"] ?? '未知') ?></div>
-
+        
         <!-- 狀況 -->
         <div class="choice"><?= htmlspecialchars($row["condition_name"] ?? '未知') ?></div>
-
+        
         <!-- 庫存 -->
         <div class="choice"><?= intval($row["stock"] ?? 0) ?></div>
-
+        
         <!-- 尺寸 -->
         <div class="choice"><?= htmlspecialchars($row["lp_size"] ?? '未知') ?></div>
-
+        
         <!-- 公司 -->
         <div class="choice" title="<?= htmlspecialchars($row["company_name"] ?? '未知公司') ?>">
           <?= htmlspecialchars($row["company_name"] ?? '未知') ?>
@@ -283,22 +239,19 @@ $totalPage = ceil($totalCount / $perPage);
 
         <!-- 價格 -->
         <div class="price">$<?= number_format($row["price"]) ?></div>
-
+        
         <div class="release_date"><?= $row["release_date"] ?></div>
         <div class="main_category"><?= htmlspecialchars($row["main_category_title"] ?? '未分類') ?></div>
         <div class="sub_category"><?= htmlspecialchars($row["sub_category_title"] ?? '未分類') ?></div>
         <!-- 更新時間 -->
-        <div class="choice"><?= $row["creatTime"] ?></div>
-
+        <div class="choice"><?= $row["creatTime"]?></div>
+        
         <div class="actions">
           <button class="btn btn-danger btn-sm btn-del me-1" data-id="<?= $row["id"] ?>">
             <i class="fas fa-trash"></i> 刪除
           </button>
-          <a class="btn btn-warning btn-sm me-1" href="./update.php?id=<?= $row["id"] ?>">
-            <i class="fas fa-edit"></i> 編輯
-          </a>
-          <a class="btn btn-info btn-sm" href="./view.php?id=<?= $row["id"] ?>">
-            <i class="fas fa-eye"></i> 檢視
+          <a class="btn btn-warning btn-sm me-1" href="./doReturn.php?id=<?= $row["id"] ?>">
+            <i class="fa-solid fa-rotate-right"></i>復原
           </a>
         </div>
       </div>
@@ -309,15 +262,13 @@ $totalPage = ceil($totalCount / $perPage);
       <ul class="pagination pagination-sm justify-content-center">
         <?php for ($i = 1; $i <= $totalPage; $i++): ?>
           <li class="page-item <?= $page == $i ? "active" : "" ?>">
-          <a class="page-link" href="./index.php?page=<?= $i ?>&cid=<?= $cid > 0 ? $cid : 0 ?>&search=<?= $search !== "" ? $search : "" ?>"><?= $i ?></a>
+            <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
           </li>
         <?php endfor; ?>
       </ul>
     </nav>
-    <div class="delcon"><a class="btn btn-warning btn-sm justify-content-start" href="./delete.php">
-        <i class="fas fa-trash"></i> 回收桶
-      </a></div>
-
+         
+           
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
@@ -325,26 +276,16 @@ $totalPage = ceil($totalCount / $perPage);
     crossorigin="anonymous"></script>
   <script>
     const btnDels = document.querySelectorAll(".btn-del");
-    const btnSearch = document.querySelector(".btn-search");
-    
-    //搜尋
-    btnSearch.addEventListener("click",function (){
-      const query=document.querySelector("input[name=search]").value;
-      window.location.href=`./index.php?search=${query}`;
-    })
-
-    //刪除
     btnDels.forEach((btn) => {
       btn.addEventListener("click", doConfirm);
     });
 
     function doConfirm(e) {
       const btn = e.target.closest('.btn-del');
-      if (confirm("確定要刪除嗎?")) {
-        window.location.href = `./doSoftDelete.php?id=${btn.dataset.id}`;
+      if (confirm("確定要永久刪除?")) {
+        window.location.href = `./doRelyDelete.php?id=${btn.dataset.id}`;
       }
     }
-    
   </script>
 </body>
 
