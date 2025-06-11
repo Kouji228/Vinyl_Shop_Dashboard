@@ -22,7 +22,7 @@ $status = isset($_GET["status"]) ? intval($_GET["status"]) : null;
 
 // ? 修改排序
 // 1. 定義允許排序的欄位
-$valid_columns = ['id', 'price', 'title', 'author'];  // 根據你實際資料表欄位調整
+$valid_columns = ['id', 'price', 'title', 'author'];
 
 // 2. 取得 GET 參數
 $sort_by = $_GET['sort_by'] ?? '';
@@ -231,7 +231,19 @@ $totalPage = ceil($totalCount / $perPage);
 
   <!-- 小標題 -->
   <div class="section-header d-flex justify-content-between align-items-center">
-    <h3 class="section-title">黑膠商品列表</h3>
+    <?php
+    if (isset($status) && $status !== '') {
+      foreach ($rowsStatus as $row) {
+        if ($row["id"] == $status) {
+          $statusName = $row["status"];
+          break;
+        }
+      }
+    } else {
+      $statusName = "上架";
+    }
+    ?>
+    <h3 class="section-title"><?= $statusName ?>商品列表</h3>
     <a href="./vinylAdd.php" class="btn btn-primary">增加黑膠唱片</a>
   </div>
 
@@ -251,72 +263,75 @@ $totalPage = ceil($totalCount / $perPage);
     </div>
 
     <!-- 篩選與搜尋 -->
-    <div class="w-100 flex-center gap-3">
-      <div class="filter-group flex-center gap-3">
-        <label for="genre" class="form-label">風格</label>
+    <!-- <div class="w-100 flex-center gap-3"> -->
+    <div class="filter-group gap-3">
+      <label for="genre" class="form-label">風格</label>
 
-        <div class="col-auto">
-          <select name="genre" id="genre" class="form-select w50">
-            <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
-            <?php foreach ($rowsGenre as $row): ?>
-              <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
-                <?= $row["genre"] ?>
-              </option>
-            <?php endforeach ?>
-          </select>
-        </div>
+      <div class="col-auto">
+        <select name="genre" id="genre" class="form-select w50">
+          <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
+          <?php foreach ($rowsGenre as $row): ?>
+            <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
+              <?= $row["genre"] ?>
+            </option>
+          <?php endforeach ?>
+        </select>
+      </div>
 
-        <div class="col-auto">
-          <label for="gender" class="form-label">類別</label>
+      <div class="col-auto">
+        <label for="gender" class="form-label">類別</label>
+      </div>
+      <div class="col-auto">
+        <select name="gender" id="gender" class="form-select">
+          <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
+          <?php foreach ($genders as $g): ?>
+            <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
+              <?= $g["gender"] ?>
+            </option>
+          <?php endforeach ?>
+        </select>
+      </div>
+    </div>
+
+    <div class="price flex-center gap-2">
+      <div class="col-auto flex-center">
+        <label class="form-label" for="price1">價格</label>
+      </div>
+      <div class="col-auto w200">
+        <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
+      </div>
+      <div class="col-auto"> ~ </div>
+      <div class="col-auto w200">
+        <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
+      </div>
+    </div>
+
+    <div class="search flex-center gap-2">
+
+      <div class="col-auto d-flex">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="searchType" id="searchType1" value="title" checked>
+          <label class="form-check-label" for="searchType1">專輯</label>
         </div>
-        <div class="col-auto">
-          <select name="gender" id="gender" class="form-select">
-            <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
-            <?php foreach ($genders as $g): ?>
-              <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
-                <?= $g["gender"] ?>
-              </option>
-            <?php endforeach ?>
-          </select>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="searchType" id="searchType2" value="author">
+          <label class="form-check-label" for="searchType2">創作者</label>
         </div>
       </div>
 
-      <div class="search flex-center gap-2">
-        <div class="col-auto flex-center">
-          <label class="form-label" for="price1">價格</label>
-        </div>
-        <div class="col-auto w200">
-          <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
-        </div>
-        <div class="col-auto"> ~ </div>
-        <div class="col-auto w200">
-          <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
-        </div>
-
-        <div class="col-auto d-flex">
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="searchType" id="searchType1" value="title" checked>
-            <label class="form-check-label" for="searchType1">專輯</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="searchType" id="searchType2" value="author">
-            <label class="form-check-label" for="searchType2">創作者</label>
-          </div>
-        </div>
-
-        <div class="col-auto">
-          <?php
-          $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
-          ?>
-          <div class="search-box d-flex">
-            <input name="search" type="text" class="form-control me-4"
-              placeholder="<?= htmlspecialchars($searchHolder) ?>">
-            <div class="btn btn-primary btn-search ps-5 wh50"><i class="fa fa-search"></i></div>
-            <!-- <i class="fas fa-search btn-search"></i> -->
-          </div>
+      <div class="col-auto">
+        <?php
+        $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
+        ?>
+        <div class="search-box d-flex">
+          <input name="search" type="text" class="form-control me-4"
+            placeholder="<?= htmlspecialchars($searchHolder) ?>">
+          <div class="btn btn-primary btn-search ps-5 wh50"><i class="fa fa-search"></i></div>
+          <!-- <i class="fas fa-search btn-search"></i> -->
         </div>
       </div>
     </div>
+    <!-- </div> -->
 
   </div>
 
@@ -495,30 +510,31 @@ $totalPage = ceil($totalCount / $perPage);
   const inputPrice2 = document.querySelector("input[name=price2]");
   const inputText = document.querySelector("input[name=search]")
 
-  const status = "<?= isset($_GET['status']) ? $_GET['status'] : '' ?>";
-  const price1 = "<?= isset($_GET['price1']) ? $_GET['price1'] : '' ?>";
-  const price2 = "<?= isset($_GET['price2']) ? $_GET['price2'] : '' ?>";
-  const genre = "<?= isset($_GET['genre']) ? $_GET['genre'] : '' ?>";
-  const gender = "<?= isset($_GET['gender']) ? $_GET['gender'] : '' ?>";
-  const author = "<?= isset($_GET['author']) ? $_GET['author'] : '' ?>";
-  const title = "<?= isset($_GET['title']) ? $_GET['title'] : '' ?>";
-  const author_id = "<?= isset($_GET['author_id']) ? $_GET['author_id'] : '' ?>";
-
   const sort_column = "<?= $sort_column ?>";
   const sort_order = "<?= $sort_order ?>";
   const nextSortOrder = (sort_order === "asc") ? "desc" : "asc";
 
   const sortBy = document.querySelectorAll(".sortBy")
 
-  const params = new URLSearchParams();
-  if (status && status !== "undefined") params.append("status", status);
-  if (genre && genre !== "undefined") params.append("genre", genre);
-  if (gender && gender !== "undefined") params.append("gender", gender);
-  if (price1 && price1 !== "undefined") params.append("price1", price1);
-  if (price2 && price2 !== "undefined") params.append("price2", price2);
-  if (author && author !== "undefined") params.append("author", author);
-  if (title && title !== "undefined") params.append("title", title);
-  if (author_id && author_id !== "undefined") params.append("author_id", author_id);
+  const params = new URLSearchParams(window.location.search); // ← 用現有網址初始化
+
+  const status = "<?= isset($_GET['status']) ? addslashes($_GET['status']) : '' ?>";
+  const price1 = "<?= isset($_GET['price1']) ? addslashes($_GET['price1']) : '' ?>";
+  const price2 = "<?= isset($_GET['price2']) ? addslashes($_GET['price2']) : '' ?>";
+  const genre = "<?= isset($_GET['genre']) ? addslashes($_GET['genre']) : '' ?>";
+  const gender = "<?= isset($_GET['gender']) ? addslashes($_GET['gender']) : '' ?>";
+  const author = "<?= isset($_GET['author']) ? addslashes($_GET['author']) : '' ?>";
+  const title = "<?= isset($_GET['title']) ? addslashes($_GET['title']) : '' ?>";
+  const author_id = "<?= isset($_GET['author_id']) ? addslashes($_GET['author_id']) : '' ?>";
+
+  if (status && status !== "undefined") params.set("status", status);
+  if (genre && genre !== "undefined") params.set("genre", genre);
+  if (gender && gender !== "undefined") params.set("gender", gender);
+  if (price1 && price1 !== "undefined") params.set("price1", price1);
+  if (price2 && price2 !== "undefined") params.set("price2", price2);
+  if (author && author !== "undefined") params.set("author", author);
+  if (title && title !== "undefined") params.set("title", title);
+  if (author_id && author_id !== "undefined") params.set("author_id", author_id);
 
 
   btnDel.forEach((btn) => {
@@ -571,6 +587,19 @@ $totalPage = ceil($totalCount / $perPage);
       } else if (queryType === "author") {
         params.push(`author=${encodeURIComponent(inputText.value.trim())}`);
       }
+    }
+
+    // 排序欄位與方向
+    if (sort_column) {
+      params.push(`sort_column=${encodeURIComponent(sort_column)}`);
+    }
+    if (sort_order) {
+      params.push(`sort_order=${encodeURIComponent(sort_order)}`);
+    }
+
+    // 排序欄位與方向
+    if (status) {
+      params.push(`status=${encodeURIComponent(status)}`);
     }
 
     // 組合 URL

@@ -1,7 +1,7 @@
 .title,
 .author {
     a {
-        color: #d1a65a;
+        color: #1a1a1a;
     }
 }
 .title {
@@ -13,6 +13,15 @@
 
 * {
     /* border: 2px solid red; */
+}
+
+.avatar-upload-container {
+    max-width: 700px;
+}
+
+#previewImage img {
+    width: auto;
+    max-height: 600px;
 }
 
 .flex-center {
@@ -32,6 +41,9 @@
 .w100 {
     width: 100px;
 }
-.w200 {
+.w150 {
     width: 150px;
+}
+.w200 {
+    width: 200px;
 }
