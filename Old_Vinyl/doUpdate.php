@@ -4,7 +4,7 @@ require_once "./connect.php";
 require_once "./Utilities.php";
 
 if(!isset($_POST["id"])){
-  alertGoTo("請從正常管道進入",);
+  alertGoTo("請從正常管道進入", "./index.php");
   exit;
 }
 
