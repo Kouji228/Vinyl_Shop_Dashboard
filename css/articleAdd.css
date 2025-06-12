@@ -1,3 +1,4 @@
+/* CKEditor 內容區塊 */
 .ck-editor__editable_inline {
   width: 100% !important;
   min-height: 400px !important;
@@ -5,6 +6,7 @@
   box-sizing: border-box;
   max-width: 100%;
 }
+/* 標籤選擇區塊 */
 .tag-checkbox {
   margin-right: 10px;
 }
@@ -28,6 +30,7 @@
   display: inline-block;
   margin-bottom: 0;
 }
+/* 封面圖片區塊 */
 .cover-image-container {
   display: flex;
   align-items: center;

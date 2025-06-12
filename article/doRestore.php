@@ -1,8 +1,8 @@
 <?php
-require_once "../components/connect.php";
+require_once "../article/connect.php";
 
 if(!isset($_GET["id"])){
-    echo "請勿直接從網址使用 restore.php";
+    echo "請勿直接從網址使用 doRestore.php";
     exit;
 }
 

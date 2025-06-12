@@ -1,0 +1,58 @@
+/* Table styles */
+.text-truncate {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table th {
+  vertical-align: middle;
+}
+
+.table-container {
+  margin-bottom: 1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+/* 清除篩選按鈕 */
+.accept-filters {
+  /* 繼承 clear-filters 大小設定 */
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  box-shadow: var(--shadow-light);
+  background-color: var(--warm-brass);
+  color: #fff;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* 清除篩選按鈕懸停效果 */
+.accept-filters:hover {
+  transform: translateY(-2px); /* 向上移動2像素 */
+  background-color: #b88a2b;
+  color: #fff;
+}
+
+.clear-filters {
+  text-decoration: none;
+}
+/* 清除篩選按鈕懸停效果 */
+.clear-filters:hover {
+  text-decoration: none;
+}

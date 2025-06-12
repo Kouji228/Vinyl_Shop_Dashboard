@@ -1,8 +1,8 @@
 <?php
 $servername = "localhost";
-$username = "admin";
-$password = "a12345";
-$dbname = "my_st";
+$username = "ant020336";
+$password = "ant360203";
+$dbname = "yi";
 $port = 3306;
 
 try{

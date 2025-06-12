@@ -1,5 +1,5 @@
 <?php
-require_once "../components/connect.php";
+require_once "../article/connect.php";
 require_once "../components/Utilities.php";
 
 $pageTitle = "文章管理";
@@ -18,6 +18,8 @@ $searchCategory = $_GET["categoryKeyword"] ?? "";
 $searchTag = $_GET["tagKeyword"] ?? "";
 $searchStatus = $_GET["statusKeyword"] ?? "";
 $searchDate = isset($_GET["searchDate"]) ? true : false;
+$sort_column = $_GET['sort_column'] ?? 'updated_at';
+$sort_order = $_GET['sort_order'] ?? 'desc';
 
 // 分頁邏輯
 $perPage = 10;
@@ -100,8 +102,13 @@ if (!empty($date1) || !empty($date2)) {
     }
 }
 
+
+
 // 組合 WHERE 子句
 $whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
+
+// 排序子句
+$orderClause = "ORDER BY a.{$sort_column} {$sort_order}";
 
 // 查詢文章列表
 $sql = "SELECT a.*, s.status, s.updated_at as status_updated_at,
@@ -115,7 +122,7 @@ $sql = "SELECT a.*, s.status, s.updated_at as status_updated_at,
         LEFT JOIN categories c ON ac.category_id = c.id
         $whereClause
         GROUP BY a.id, a.title, a.content, a.cover_image_url, a.created_at, a.updated_at, s.status, s.updated_at
-        ORDER BY a.created_at DESC
+        $orderClause
         LIMIT :limit OFFSET :offset";
 
 // 計算總筆數的查詢
@@ -165,6 +172,11 @@ try {
                 (已篩選)
             <?php endif; ?></span>
             <div class="d-flex gap-2">
+                <div class="batch-actions" style="display: none;">
+                    <button type="button" class="btn btn-danger" id="batchDeleteBtn">
+                        <i class="fas fa-trash-alt"></i> 批次刪除
+                    </button>
+                </div>
                 <a href="/article/trash.php" class="btn btn-secondary">回收站</a>
                 <a href="/article/form.php" class="btn btn-primary">新增文章</a>
             </div>
@@ -224,11 +236,26 @@ try {
                         <th style="width: 50px;">
                             <input type="checkbox" class="form-check-input" id="selectAll">
                         </th>
-                        <th>標題</th>
-                        <th>文章封面</th>
+                        <th style="width: 350px;">標題</th>
+                        <th style="width: 150px;">文章封面</th>
                         <th>分類</th>
                         <th>標籤</th>
-                        <th>更新時間</th>
+                        <th>更新時間
+                            <a href="?sort_column=updated_at&sort_order=<?= ($sort_column === 'updated_at' && $sort_order === 'asc') ? 'desc' : 'asc' ?>
+                                <?php if (!empty($searchTitle)) echo '&titleKeyword=' . urlencode($searchTitle); ?>
+                                <?php if (!empty($searchCategory)) echo '&categoryKeyword=' . urlencode($searchCategory); ?>
+                                <?php if (!empty($searchTag)) echo '&tagKeyword=' . urlencode($searchTag); ?>
+                                <?php if (!empty($searchStatus)) echo '&statusKeyword=' . urlencode($searchStatus); ?>
+                                <?php if (!empty($date1)) echo '&date1=' . urlencode($date1); ?>
+                                <?php if (!empty($date2)) echo '&date2=' . urlencode($date2); ?>
+                                " style="text-decoration:none; color:inherit;">
+                                <?php if ($sort_column === 'updated_at') : ?>
+                                    <i class="bi bi-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>-fill"></i>
+                                <?php else: ?>
+                                    <i class="bi bi-caret-down"></i>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <th>狀態</th>
                         <th style="width: 120px;">操作</th>
                     </tr>
@@ -239,8 +266,8 @@ try {
                         <td>
                             <input type="checkbox" class="form-check-input article-checkbox" value="<?=$article["id"]?>">
                         </td>
-                        <td><?=$article["title"]?></td>
-                        <td>
+                        <td style="width: 350px;"><?=$article["title"]?></td>
+                        <td style="width: 150px;">
                             <div class="image-container">
                                 <?php if (!empty($article["cover_image_url"])): ?>
                                     <img src="<?=$article["cover_image_url"]?>" alt="封面圖片" class="thumbnail">
@@ -299,7 +326,7 @@ try {
                                 <span class="status-badge status-draft">未設置</span>
                             <?php endif; ?>
                         </td>
-                        <td>
+                        <td width="120px">
                             <div class="action-buttons">
                                 <a href="/article/form.php?id=<?=$article["id"]?>" class="btn btn-sm btn-warning" title="修改"><i class="fas fa-edit"></i></a>
                                 <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="<?=$article["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
@@ -386,12 +413,41 @@ try {
         </div>
     </div>
 
+    <!-- 批次刪除確認對話框 -->
+    <div class="modal fade" id="batchDeleteModal" tabindex="-1" aria-labelledby="batchDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batchDeleteModalLabel">確認批次刪除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>確定要刪除所選的文章？</p>
+                    <p class="text-muted mb-0">此操作會將選中的文章移至回收站，您可以稍後在回收站中恢復或永久刪除。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmBatchDelete">確定刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 全選功能
         const selectAllCheckbox = document.getElementById('selectAll');
         const articleCheckboxes = document.querySelectorAll('.article-checkbox');
+        const batchActions = document.querySelector('.batch-actions');
+        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+        const batchDeleteModal = new bootstrap.Modal(document.getElementById('batchDeleteModal'));
+
+        // 更新批次操作按鈕的顯示狀態
+        function updateBatchActions() {
+            const checkedBoxes = document.querySelectorAll('.article-checkbox:checked');
+            batchActions.style.display = checkedBoxes.length > 0 ? 'block' : 'none';
+        }
 
         // 全選/取消全選
         selectAllCheckbox.addEventListener('change', (e) => {
@@ -399,14 +455,52 @@ try {
             articleCheckboxes.forEach(checkbox => {
                 checkbox.checked = isChecked;
             });
+            updateBatchActions();
         });
 
-        // 當所有文章都被選中時，自動勾選全選框
+        // 當個別 checkbox 改變時
         articleCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
                 const allChecked = Array.from(articleCheckboxes).every(cb => cb.checked);
                 selectAllCheckbox.checked = allChecked;
+                updateBatchActions();
             });
+        });
+
+        // 批次刪除按鈕點擊事件
+        batchDeleteBtn.addEventListener('click', () => {
+            const checkedBoxes = document.querySelectorAll('.article-checkbox:checked');
+            if (checkedBoxes.length > 0) {
+                batchDeleteModal.show();
+            }
+        });
+
+        // 確認批次刪除
+        document.getElementById('confirmBatchDelete').addEventListener('click', async () => {
+            const checkedBoxes = document.querySelectorAll('.article-checkbox:checked');
+            const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+            try {
+                const response = await fetch('doBatchDelete.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ids: ids })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    window.location.reload();
+                } else {
+                    alert(result.message || '操作失敗');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('發生錯誤，請稍後再試');
+            }
+
+            batchDeleteModal.hide();
         });
 
         // 刪除確認對話框
