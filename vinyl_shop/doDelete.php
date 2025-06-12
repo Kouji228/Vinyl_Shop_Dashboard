@@ -1,5 +1,5 @@
 <?php
-require_once "../article/connect.php";
+require_once "../vinyl_shop/connect.php";
 
 if(!isset($_GET["id"])){
   echo "請勿直接從網址使用 doDelete.php";
@@ -10,7 +10,7 @@ $id = $_GET['id'];
 
 try {
     // 執行軟刪除
-    $sql = "UPDATE articles SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP WHERE id = :id";
+    $sql = "UPDATE branch SET is_deleted = 1, deleted_at = CURRENT_TIMESTAMP WHERE id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $id]);
 

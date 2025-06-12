@@ -1,5 +1,5 @@
 <?php
-require_once "../article/connect.php";
+require_once "../vinyl_shop/connect.php";
 
 if(!isset($_GET["id"])){
     echo "請勿直接從網址使用 permanentDelete.php";
@@ -12,13 +12,11 @@ try {
     $pdo->beginTransaction();
 
     // 先刪除關聯資料
-    $pdo->prepare("DELETE FROM article_statuses WHERE article_id = ?")->execute([$id]);
-    $pdo->prepare("DELETE FROM article_tag WHERE article_id = ?")->execute([$id]);
-    $pdo->prepare("DELETE FROM article_category WHERE article_id = ?")->execute([$id]);
-    $pdo->prepare("DELETE FROM article_images WHERE article_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM branch_hashtag WHERE branch_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM branch_image WHERE branch_id = ?")->execute([$id]);
 
     // 最後刪除主表
-    $pdo->prepare("DELETE FROM articles WHERE id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM branch WHERE id = ?")->execute([$id]);
 
     $pdo->commit();
 

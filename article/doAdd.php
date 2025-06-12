@@ -1,5 +1,5 @@
 <?php
-include "../components/connect.php";
+include "../article/connect.php";
 include "../components/Utilities.php";
 
 $title = $_POST["title"];

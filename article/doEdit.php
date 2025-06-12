@@ -1,5 +1,5 @@
 <?php
-include "../components/connect.php";
+include "../article/connect.php";
 include "../components/Utilities.php";
 
 $id = $_POST["id"];

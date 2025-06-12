@@ -374,7 +374,7 @@ body {
   display: inline-flex;
   align-items: center;
   /* ↓↓↓ 新增這一行來確保內容水平置中 ↓↓↓ */
-  justify-content: center; 
+  justify-content: center;
   gap: 0.5rem;
   text-align: center;
   border: 2px solid transparent;
