@@ -1,7 +1,7 @@
 <?php
 // 軟刪除
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 
 if (!isset($_GET["id"])) {
     alertGoTo("請從正常管道進入", "./index.php");

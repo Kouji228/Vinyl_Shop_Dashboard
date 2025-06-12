@@ -1,7 +1,7 @@
 <?php
 
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 require_once "./couponMaps.php"; // 引入共用的 Map 陣列
 
 $pageTitle = "優惠卷管理";
@@ -24,6 +24,12 @@ $filters = [
     'date_end' => $_GET['date_end'] ?? ''
 ];
 
+// --- 排序參數處理 ---
+$valid_columns = ['id', 'start_at', 'end_at'];
+$sort_by = in_array($_GET['sort_by'] ?? '', $valid_columns) ? $_GET['sort_by'] : 'id';
+$sort_order = (isset($_GET['sort_order']) && strtolower($_GET['sort_order']) === 'desc') ? 'desc' : 'asc';
+$next_sort_order = ($sort_order === 'asc') ? 'desc' : 'asc';
+
 // --- 動態建立 SQL WHERE 條件 ---
 $whereConditions = ["coupons.`is_valid` = 1"]; // 基礎條件：只選取有效的優惠卷
 $bindings = []; // 用於 PDO prepare statement 的參數綁定
@@ -41,15 +47,12 @@ if (!empty($filters['search']) && in_array($filters['qType'], ['name', 'code']))
     $bindings[':search'] = "%" . $filters['search'] . "%";
 }
 
-// 日期區間篩選邏輯優化：尋找活動時間與所選區間有重疊的優惠卷
-// 這樣處理比原始的 if/elseif 更簡潔且邏輯相同
+// 日期區間篩選邏輯優化
 if (!empty($filters['date_start'])) {
-    // 條件：優惠卷的結束時間晚於篩選的開始日期 (或沒有結束時間，視為永久)
     $whereConditions[] = "(coupons.`end_at` >= :date_start OR coupons.`end_at` IS NULL)";
     $bindings[':date_start'] = $filters['date_start'] . " 00:00:00";
 }
 if (!empty($filters['date_end'])) {
-    // 條件：優惠卷的開始時間早於篩選的結束日期
     $whereConditions[] = "coupons.`start_at` <= :date_end";
     $bindings[':date_end'] = $filters['date_end'] . " 23:59:59";
 }
@@ -71,8 +74,8 @@ try {
             FROM `coupons`
             LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id
             $whereClause
-            ORDER BY coupons.id ASC
-            LIMIT $perPage OFFSET $pageStart"; //
+            ORDER BY coupons.{$sort_by} {$sort_order}
+            LIMIT $perPage OFFSET $pageStart";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($bindings);
@@ -102,7 +105,6 @@ $totalPage = ceil($totalCount / $perPage); //
         <div class="search-box">
             <input type="text" name="search" class="form-control" placeholder="關鍵字搜尋..."
                 value="<?= htmlspecialchars($filters['search']) ?>" id="searchText">
-            <i class="fas fa-search"></i>
         </div>
         <div class="filter-group">
             <select name="status_filter" id="statusFilterSelect" class="form-select">
@@ -131,15 +133,18 @@ $totalPage = ceil($totalCount / $perPage); //
         <table class="table table-bordered table-striped align-middle">
             <thead class="table-dark">
                 <tr>
-                    <th>編號</th>
+                    <th class="sortable-header <?php if ($sort_by === 'id')
+                        echo 'sort-' . $sort_order; ?>" data-sort="id">編號</th>
                     <th>優惠卷名稱</th>
                     <th>優惠碼</th>
                     <th>折扣值</th>
                     <th>狀態</th>
                     <th>總數</th>
                     <th>可用次數</th>
-                    <th>開始時間</th>
-                    <th>結束時間</th>
+                    <th class="sortable-header <?php if ($sort_by === 'start_at')
+                        echo 'sort-' . $sort_order; ?>" data-sort="start_at">開始時間</th>
+                    <th class="sortable-header <?php if ($sort_by === 'end_at')
+                        echo 'sort-' . $sort_order; ?>" data-sort="end_at">結束時間</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -210,8 +215,10 @@ $totalPage = ceil($totalCount / $perPage); //
 
     <?php if ($totalPage > 0): ?>
         <div class="pagination"> <?php if ($page > 1):
-            $prevLinkParams = array_filter($filters); // 清除空值
+            $prevLinkParams = array_filter($filters);
             $prevLinkParams['page'] = $page - 1;
+            $prevLinkParams['sort_by'] = $sort_by;
+            $prevLinkParams['sort_order'] = $sort_order;
             ?>
                 <a href="?<?= http_build_query($prevLinkParams) ?>" class="pagination-btn"><i
                         class="fas fa-chevron-left"></i></a>
@@ -222,6 +229,8 @@ $totalPage = ceil($totalCount / $perPage); //
             <?php for ($i = 1; $i <= $totalPage; $i++):
                 $pageLinkParams = array_filter($filters);
                 $pageLinkParams['page'] = $i;
+                $pageLinkParams['sort_by'] = $sort_by;
+                $pageLinkParams['sort_order'] = $sort_order;
                 ?>
                 <a href="?<?= http_build_query($pageLinkParams) ?>"
                     class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
@@ -230,6 +239,8 @@ $totalPage = ceil($totalCount / $perPage); //
             <?php if ($page < $totalPage):
                 $nextLinkParams = array_filter($filters);
                 $nextLinkParams['page'] = $page + 1;
+                $nextLinkParams['sort_by'] = $sort_by;
+                $nextLinkParams['sort_order'] = $sort_order;
                 ?>
                 <a href="?<?= http_build_query($nextLinkParams) ?>" class="pagination-btn"><i
                         class="fas fa-chevron-right"></i></a>
@@ -241,21 +252,21 @@ $totalPage = ceil($totalCount / $perPage); //
 </div>
 
 <script>
-    const btnDels = document.querySelectorAll(".btn-del"); //
+    const btnDels = document.querySelectorAll(".btn-del");
     btnDels.forEach((btn) => {
-        btn.addEventListener("click", doConfirm); //
+        btn.addEventListener("click", doConfirm);
     });
 
     function doConfirm(e) {
-        const btn = e.target.closest('.btn-del'); //
+        const btn = e.target.closest('.btn-del');
         if (btn && confirm("確定要刪除嗎?")) {
-            window.location.href = `./doDelete.php?id=${btn.dataset.id}`; //
+            window.location.href = `./doDelete.php?id=${btn.dataset.id}`;
         }
     }
 
     const btnCouponSearch = document.getElementById("btnCouponSearch");
     if (btnCouponSearch) {
-        btnCouponSearch.addEventListener("click", function () { //
+        btnCouponSearch.addEventListener("click", function () {
             let params = new URLSearchParams();
 
             const statusVal = document.getElementById("statusFilterSelect").value;
@@ -278,9 +289,30 @@ $totalPage = ceil($totalCount / $perPage); //
                 params.append('date_end', dateEndVal);
             }
 
-            window.location.href = 'index.php?' + params.toString(); //
+            window.location.href = 'index.php?' + params.toString();
         });
     }
+
+    // 排序功能
+    document.querySelectorAll('.sortable-header').forEach(header => {
+        header.addEventListener('click', function () {
+            const currentUrl = new URL(window.location.href);
+            const sortBy = this.dataset.sort;
+            const currentSortBy = currentUrl.searchParams.get('sort_by');
+            const currentSortOrder = currentUrl.searchParams.get('sort_order');
+
+            let newSortOrder = 'asc';
+            if (sortBy === currentSortBy && currentSortOrder === 'asc') {
+                newSortOrder = 'desc';
+            }
+
+            currentUrl.searchParams.set('sort_by', sortBy);
+            currentUrl.searchParams.set('sort_order', newSortOrder);
+
+            window.location.href = currentUrl.toString();
+        });
+    });
+
 </script>
 
 <?php
