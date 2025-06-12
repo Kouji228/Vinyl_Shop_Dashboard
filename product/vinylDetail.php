@@ -68,7 +68,7 @@ try {
                     <!-- <label for="memberAvatar" class="form-label"></label> -->
                     <div class="avatar-upload-container">
                         <?php if ($rowsImg): ?>
-                            <img class="img-fluid my-3" src="./img/<?= $rowsImg[0]["img_name"] ?>" alt="" srcset="">
+                            <img class="img-fluid my-3 rounded-3" src="./img/<?= $rowsImg[0]["img_name"] ?>" alt="" srcset="">
                         <?php endif; ?>
                     </div>
                 </div>

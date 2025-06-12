@@ -60,6 +60,10 @@ if ($author_id) {
 $titleSearch = $_GET["title"] ?? "";
 $authorSearch = $_GET["author"] ?? "";
 
+$company = $_GET["company"] ?? "";
+$format = $_GET["format"] ?? "";
+$stock = $_GET["stock"] ?? "";
+
 if ($titleSearch) {
   $conditions[] = "title LIKE :title";
   $values["title"] = "%$titleSearch%";
@@ -69,6 +73,18 @@ if ($authorSearch) {
   $values["author_name"] = "%$authorSearch%";
 }
 
+if ($company) {
+  $conditions[] = "company LIKE :company";
+  $values["company"] = "%$company%";
+}
+if ($format) {
+  $conditions[] = "format = :format";
+  $values["format"] = $format;
+}
+if ($stock !== "") {
+  $conditions[] = "stock > :stock";
+  $values["stock"] = (int) $stock;
+}
 
 $price1 = $_GET["price1"] ?? "";
 $price2 = $_GET["price2"] ?? "";
@@ -82,10 +98,21 @@ if ($price1 !== "" || $price2 !== "") {
   $values["endPrice"] = $endPrice;
 }
 
+$date1 = $_GET["date1"] ?? "";
+$date2 = $_GET["date2"] ?? "";
+
+if ($date1 !== "" || $date2 !== "") {
+  $startDate = $date1 !== "" ? $date1 : '0000-01-01';
+  $endDate = $date2 !== "" ? $date2 : '9999-12-31';
+
+  $conditions[] = "(release_date BETWEEN :startDate AND :endDate)";
+  $values["startDate"] = $startDate;
+  $values["endDate"] = $endDate;
+}
 
 $whereSQL = "WHERE " . implode(" AND ", $conditions);
 
-$perPage = 20;
+$perPage = $_GET["perPage"] ?? 20;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
 
@@ -120,6 +147,10 @@ try {
   $stmtAll = $pdo->prepare($sqlAll);
   $stmtAll->execute($values);
   $totalCount = $stmtAll->rowCount();
+
+  $stmtAuthor = $pdo->prepare($sqlAuthor);
+  $stmtAuthor->execute();
+  $rowsAuthor = $stmtAuthor->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
   echo "系統錯誤，請恰管理人員<br>";
   echo "錯誤: " . $e->getMessage();
@@ -154,9 +185,17 @@ $totalPage = ceil($totalCount / $perPage);
   <!--搜尋與分類 -->
   <div class="controls-section">
     <div class="w-100 d-flex">
-      <span class="">總共 <?= $totalCount ?> 筆資料, 每頁有 <?= $perPage ?> 筆資料</span>
-      <div class="ms-auto d-flex w100">
-        <select name="status" id="status" class="form-select">
+      <button type="button" class="btn btn-success me-1"><a class="text-decoration-none text-white"
+          href="./">清除篩選</a></button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">進階篩選</button>
+      <span class="fs-5 ms-3 flex-center">總共 <?= $totalCount ?> 個商品, 每頁有 <?= $perPage ?> 個商品</span>
+      <div class="ms-auto d-flex w200">
+        <select name="perpage" id="perpageNum" class="form-select w100 me-2">
+          <option value="20" <?= $perPage == 20 ? "selected" : "" ?>>20</option>
+          <option value="50" <?= $perPage == 50 ? "selected" : "" ?>>50</option>
+          <option value="100" <?= $perPage == 100 ? "selected" : "" ?>>100</option>
+        </select>
+        <select name="status" id="status" class="form-select w100 ms-auto">
           <?php foreach ($rowsStatus as $row): ?>
             <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
               <?= $row["status"] ?>
@@ -172,7 +211,7 @@ $totalPage = ceil($totalCount / $perPage);
       <label for="genre" class="form-label">風格</label>
 
       <div class="col-auto">
-        <select name="genre" id="genre" class="form-select w50">
+        <select name="genre" id="genre" class="form-select w25">
           <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
           <?php foreach ($rowsGenre as $row): ?>
             <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
@@ -186,7 +225,7 @@ $totalPage = ceil($totalCount / $perPage);
         <label for="gender" class="form-label">類別</label>
       </div>
       <div class="col-auto">
-        <select name="gender" id="gender" class="form-select">
+        <select name="gender" id="gender" class="form-select w25">
           <option value="/" <?= empty($gender) ? 'selected' : '' ?>>全部</option>
           <?php foreach ($genders as $g): ?>
             <option value="<?= $g["id"] ?>" <?= $gender == $g["id"] ? "selected" : "" ?>>
@@ -197,45 +236,37 @@ $totalPage = ceil($totalCount / $perPage);
       </div>
     </div>
 
-    <div class="price flex-center gap-2">
+    <div class="price flex-center gap-2 ms-auto">
       <div class="col-auto flex-center">
-        <label class="form-label" for="price1">價格</label>
+        <label class="form-label me-3" for="price1">價格</label>
       </div>
-      <div class="col-auto w180">
+      <div class="col-auto w150">
         <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
       </div>
       <div class="col-auto"> ~ </div>
-      <div class="col-auto w180">
+      <div class="col-auto w150">
         <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
       </div>
     </div>
 
-    <div class="search flex-center gap-2">
-
-      <div class="col-auto d-flex">
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="searchType" id="searchType1" value="title" checked>
-          <label class="form-check-label" for="searchType1">專輯</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="searchType" id="searchType2" value="author">
-          <label class="form-check-label" for="searchType2">創作者</label>
-        </div>
-      </div>
-
-      <div class="col-auto">
+    <div class="search flex-center gap-2 ms-auto">
+      <div class="input-group  flex-center">
         <?php
         $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
         ?>
-        <div class="search-box d-flex">
-          <input name="search" type="text" class="form-control me-4"
-            placeholder="<?= htmlspecialchars($searchHolder) ?>">
-          <div class="btn btn-primary btn-search ps-5 wh50"><i class="fa fa-search"></i></div>
-          <!-- <i class="fas fa-search btn-search"></i> -->
-        </div>
+        <label class="form-label me-3" for="searchType">搜尋</label>
+        <select class="rounded-start form-select w-10 flex-center" name="searchType" id="searchType">
+          <option value="title">專輯</option>
+          <option value="author">創作者</option>
+        </select>
+        <input name="search" type="text" class="form-control rounded-end"
+          placeholder="<?= htmlspecialchars($searchHolder) ?>" list="">
+
+        <!-- <i class="fas fa-search btn-search"></i> -->
       </div>
+      <div class="btn btn-primary btn-search ms-1 flex-center"><i class="fa fa-search"></i></div>
     </div>
-    <!-- </div> -->
+
 
   </div>
 
@@ -244,24 +275,24 @@ $totalPage = ceil($totalCount / $perPage);
     <table class="table table-bordered table-striped align-middle w-100 ">
       <thead class="table-dark">
         <tr>
-          <th class="id sortable sortBy" id="id">
+          <th class="id sortable sortBy cursor-pointer" id="id">
             編號
             <?php if ($sort_column === 'id'): ?>
               <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
             <?php endif; ?>
           </th>
           <th class="img">圖片</th>
-          <th class="title sortable sortBy" id="title">專輯
+          <th class="title sortable sortBy cursor-pointer" id="title">專輯
             <?php if ($sort_column === 'title'): ?>
               <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
             <?php endif; ?>
           </th>
-          <th class="author sortable sortBy" id="author">藝術家
+          <th class="author sortable sortBy cursor-pointer" id="author">藝術家
             <?php if ($sort_column === 'author'): ?>
               <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
             <?php endif; ?>
           </th>
-          <th class="price sortable sortBy" id="price">
+          <th class="price sortable sortBy cursor-pointer" id="price">
             價格
             <?php if ($sort_column === 'price'): ?>
               <i class="fa-solid fa-caret-<?= $sort_order === 'asc' ? 'up' : 'down'; ?>"></i>
@@ -326,7 +357,7 @@ $totalPage = ceil($totalCount / $perPage);
   <div class="w-100">
     <div class="pagination  d-flex justify-content-center">
       <?php
-      function makeLink($page, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order)
+      function makeLink($page, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage)
       {
         $params = ["page={$page}"];
         if ($genre > 0)
@@ -349,18 +380,30 @@ $totalPage = ceil($totalCount / $perPage);
           $params[] = "sort_by={$sort_column}";
         if ($sort_order)
           $params[] = "sort_order={$sort_order}";
+        if ($company)
+          $params[] = "company={$company}";
+        if ($stock)
+          $params[] = "stock={$stock}";
+        if ($format)
+          $params[] = "format={$format}";
+        if ($date1)
+          $params[] = "date1={$date1}";
+        if ($date2)
+          $params[] = "date2={$date2}";
+        if ($perPage)
+          $params[] = "perPage={$perPage}";
         return "./index.php?" . implode("&", $params);
       }
       ?>
 
       <?php if ($totalCount > 0): ?>
         <a class="pagination-btn"
-          href="<?= makeLink(1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
+          href="<?= makeLink(1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage) ?>">
           <i class="fa-solid fa-angles-left"></i>
         </a>
 
         <?php if ($page > 1): ?>
-          <a href="<?= makeLink($page - 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"
+          <a href="<?= makeLink($page - 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage) ?>"
             class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
         <?php endif; ?>
 
@@ -381,23 +424,147 @@ $totalPage = ceil($totalCount / $perPage);
           }
         }
         for ($i = $start; $i <= $end; $i++): ?>
-          <a class="pagination-btn <?= $page == $i ? "active" : "" ?>"
-            href="<?= makeLink($i, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"><?= $i ?></a>
+          <a class="pagination-btn text-decoration-none <?= $page == $i ? "active" : "" ?>"
+            href="<?= makeLink($i, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage) ?>"><?= $i ?></a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPage): ?>
-          <a href="<?= makeLink($page + 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>"
+          <a href="<?= makeLink($page + 1, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage) ?>"
             class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
         <?php endif; ?>
 
         <a class="pagination-btn"
-          href="<?= makeLink($totalPage, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order) ?>">
+          href="<?= makeLink($totalPage, $genre, $gender, $author_id, $status, $price1, $price2, $titleSearch, $authorSearch, $sort_column, $sort_order, $company, $stock, $format, $date1, $date2, $perPage) ?>">
           <i class="fa-solid fa-angles-right"></i>
         </a>
       <?php endif; ?>
 
     </div>
   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"">
+    <div class=" modal-content">
+    <div class="modal-header">
+      <h1 class="modal-title fs-5" id="exampleModalLabel">進階篩選</h1>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group info-group">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_status">狀態</label>
+            <select name="modal_status" id="modal_status" class="form-select">
+              <?php foreach ($rowsStatus as $row): ?>
+                <option value="<?= $row["id"] ?>" <?= ($status === null || $status === '') && $row["id"] == 1 ? 'selected' : ($status == $row["id"] ? 'selected' : '') ?>>
+                  <?= $row["status"] ?>
+                </option>
+              <?php endforeach ?>
+            </select>
+
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_title">唱片名稱</label>
+            <input name="modal_title" id="modal_title" type="text" class="form-control" <?= $titleSearch ? 'value="' . htmlspecialchars($titleSearch) . '"' : 'placeholder="唱片名稱"' ?>>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal_author" class="form-label">藝術家</label>
+            <input name="modal_author" id="modal_author" type="text" class="form-control" <?= $authorSearch ? 'value="' . htmlspecialchars($authorSearch) . '"' : 'placeholder="作家"' ?> list="authorList">
+            <datalist id="authorList">
+              <?php foreach ($rowsAuthor as $row): ?>
+                <option value="<?= $row["author"] ?>"></option>
+              <?php endforeach ?>
+            </datalist>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal_company" class="form-label">公司</label>
+            <input name="modal_company" id="modal_company" type="text" class="form-control" placeholder="公司名稱">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_genre">風格</label>
+            <select name="modal_genre" id="modal_genre" class="form-select">
+              <option value="" <?= empty($genre) ? 'selected' : '' ?>>全部</option>
+              <?php foreach ($rowsGenre as $row): ?>
+                <option value="<?= $row["id"] ?>" <?= $genre == $row["id"] ? "selected" : "" ?>>
+                  <?= $row["genre"] ?>
+                </option>
+              <?php endforeach ?>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modal_gender">類別</label>
+            <select name="modal_gender" id="modal_gender" class="form-select">
+              <option value selected disabled>請選擇</option>
+            </select>
+            <!-- <div class="error-message" id="levelError"></div> -->
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_price1">最小價格</label>
+            <input name="modal_price" id="modal_price1" type="number" class="form-control" placeholder="最小價格">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="modal_price2">最大價格</label>
+            <input name="modal_price" id="modal_price2" type="number" class="form-control" placeholder="最大價格">
+          </div>
+
+
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_stock">庫存</label>
+            <input name="modal_stock" id="modal_stock" type="number" class="form-control" placeholder="庫存數量">
+            <!-- <div class="error-message" id="levelError"></div> -->
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modal_format">規格</label>
+            <input name="modal_format" id="modal_format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
+            <!-- <div class="error-message" id="levelError"></div> -->
+          </div>
+
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="modal_date1">最小日期</label>
+            <input name="modal_date1" id="modal_date1" type="date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="modal_date1">最大日期</label>
+            <input name="modal_date2" id="modal_date2" type="date" class="form-control">
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-success me-1 btn-clear">清除篩選</button>
+      <button type="button" class="btn btn-primary filter-advance">篩選</button>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+    </div>
+  </div>
+</div>
 </div>
 
 
@@ -413,6 +580,7 @@ $totalPage = ceil($totalCount / $perPage);
   const inputPrice1 = document.querySelector("input[name=price1]");
   const inputPrice2 = document.querySelector("input[name=price2]");
   const inputText = document.querySelector("input[name=search]")
+  const queryType = document.querySelector('select[name=searchType]').value;
 
   const sort_column = "<?= $sort_column ?>";
   const sort_order = "<?= $sort_order ?>";
@@ -471,53 +639,50 @@ $totalPage = ceil($totalCount / $perPage);
     }
   }
 
-  btnSearch.addEventListener("click", () => {
-    const queryType = document.querySelector('input[name=searchType]:checked').value;
+  // !!　搜尋
+  searchType.addEventListener('change', function () {
+    if (this.value === 'author') {
+      inputText.setAttribute('list', 'authorList');
+    } else {
+      inputText.removeAttribute('list'); // 專輯不需要 datalist
+    }
+  });
 
-    let params = [];
+  btnSearch.addEventListener("click", () => {
+
+    // 先移除舊的 title / author 參數，避免殘留
+    params.delete("title");
+    params.delete("author");
 
     // 處理價格區間
     if (inputPrice1.value !== "") {
-      params.push(`price1=${encodeURIComponent(inputPrice1.value)}`);
+      params.set("price1", encodeURIComponent(inputPrice1.value));
     }
     if (inputPrice2.value !== "") {
-      params.push(`price2=${encodeURIComponent(inputPrice2.value)}`);
+      params.set("price2", encodeURIComponent(inputPrice2.value));
     }
 
+    console.log(queryType);
+
     // 處理搜尋字串
-    if (inputText.value.trim() !== "") {
-      if (queryType === "title") {
-        params.push(`title=${encodeURIComponent(inputText.value.trim())}`);
-      } else if (queryType === "author") {
-        params.push(`author=${encodeURIComponent(inputText.value.trim())}`);
+    const keyword = inputText.value.trim();
+    if (keyword !== "") {
+      if (searchType.value === "title") {
+        params.set("title", keyword);
+      } else if (searchType.value === "author") {
+        params.set("author", keyword);
       }
     }
 
-    // 排序欄位與方向
-    if (sort_column) {
-      params.push(`sort_column=${encodeURIComponent(sort_column)}`);
-    }
-    if (sort_order) {
-      params.push(`sort_order=${encodeURIComponent(sort_order)}`);
-    }
-
-    // 排序欄位與方向
-    if (status) {
-      params.push(`status=${encodeURIComponent(status)}`);
-    }
-
-    // 組合 URL
-    const queryString = params.join("&");
-    const url = `./index.php?${queryString}`;
-
-    // 導向新頁面
-    window.location.href = url;
+    // 其他篩選條件（status、price1…）如果之前已放進 params，會一併保留
+    window.location.href = `index.php?${params.toString()}`;
   });
 
   // 放你的 JS 代碼（包括 event listener）
   const genderSelect = document.getElementById("gender");
   const genreSelect = document.getElementById("genre");
   const statusSelect = document.getElementById("status")
+  const perPageSelect = document.getElementById("perpageNum")
 
   const genderOptionsRaw = <?= json_encode($rowsGender) ?>;
 
@@ -583,6 +748,16 @@ $totalPage = ceil($totalCount / $perPage);
     window.location.href = "index.php?" + params.toString();
   });
 
+  perPageSelect.addEventListener("change", function () {
+    if (this.value) {
+      params.set("perPage", this.value);
+    } else {
+      params.delete("status");
+    }
+
+    window.location.href = "index.php?" + params.toString();
+  });
+
   sortBy.forEach((btn) => {
     btn.addEventListener("click", function (e) {
       console.log(e);
@@ -598,6 +773,90 @@ $totalPage = ceil($totalCount / $perPage);
 
   })
 
+  // !! modal
+  const filter_advance = document.querySelector('.filter-advance');
+
+  const modal_genre = document.querySelector('#modal_genre');
+  const modal_gender = document.querySelector('#modal_gender');
+  const btnClear = document.querySelector(".btn-clear")
+
+  modal_genre.addEventListener("change", function () {
+    const genreId = this.value;
+    const genders = genderOptions[genreId] || [];
+
+    console.log(genreId);
+
+    // 清空原本選項
+    modal_gender.innerHTML = '<option value selected disabled>請選擇</option>';
+
+    // 加入新的選項
+    genders.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g.id;
+      opt.textContent = g.gender;
+      modal_gender.appendChild(opt);
+    });
+  });
+
+  filter_advance.addEventListener("click", () => {
+    const params = new URLSearchParams();
+
+    // 定義所有 input/select 欄位 ID（請確保這些 ID 與 HTML 對應）
+    const fields = [
+      "modal_status",
+      "modal_title",
+      "modal_author",
+      "modal_company",
+      "modal_genre",
+      "modal_gender",
+      "modal_price1",
+      "modal_price2",
+      "modal_stock",
+      "modal_format",
+      "modal_date1",
+      "modal_date2"
+    ];
+
+    // 逐一處理每個欄位
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value.trim() !== "") {
+        const key = id.replace(/^modal_/, ""); // 去掉 modal_
+        params.append(key, el.value.trim());
+      }
+    });
+
+    // 導向新網址，帶上參數（你可以改成你要的 php 檔案名稱）
+    window.location.href = `index.php?${params.toString()}`;
+  })
+
+  btnClear.addEventListener("click", () => {
+    const params = new URLSearchParams();
+
+    // 定義所有 input/select 欄位 ID（請確保這些 ID 與 HTML 對應）
+    const fields = [
+      "modal_status",
+      "modal_title",
+      "modal_author",
+      "modal_company",
+      "modal_genre",
+      "modal_gender",
+      "modal_price1",
+      "modal_price2",
+      "modal_stock",
+      "modal_format",
+      "modal_date1",
+      "modal_date2"
+    ];
+
+    // 逐一處理每個欄位
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value.trim() !== "") {
+        el.value = ""
+      }
+    });
+  })
 </script>
 
 <?php include "../template_btm.php"; ?>

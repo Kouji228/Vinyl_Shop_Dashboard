@@ -29,7 +29,12 @@
     justify-content: center;
     align-items: center;
 }
-
+.w-10 {
+    width: 10%;
+}
+.w25 {
+    width: 25px;
+}
 .wh50 {
     width: 50px;
     height: 50px;
@@ -49,4 +54,17 @@
 }
 .w200 {
     width: 200px;
+}
+.w300 {
+    width: 300px;
+}
+.wh600 {
+    width: 600px;
+    height: 600px;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+select {
+    cursor: pointer;
 }
