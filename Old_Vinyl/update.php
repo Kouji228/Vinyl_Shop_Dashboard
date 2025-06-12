@@ -79,132 +79,145 @@ foreach ($rowsCompany as $company) {
   <form action="./doUpdate.php" method="post" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?= $row["id"] ?>">
 
-    <div class="form-section">
-      <!-- 專產品圖片 -->
-      <div class="form-row">
-        <div class="form-group pd_img"><?php if (!empty($row["image_url"])): ?>
-            <?php if (filter_var($row["image_url"], FILTER_VALIDATE_URL)): ?>
-              <img src="<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
-            <?php else: ?>
-              <img src="./uploads/<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
-            <?php endif; ?>
-          <?php else: ?>
-            <img src="./uploads/no-image.png" alt="無圖片">
-          <?php endif; ?>
-          <input class="form-control pd_img" type="file" name="myFile" accept=".png,.jpg,.jpeg">
+    <div class="form-section ">
+      <div class="d-flex ovup">
+        <!-- 專產品圖片 -->
+        <div class="ovupimg">
+          <div class="form-row">
+            <div class="form-group pd_img">
+              <?php if (!empty($row["image_url"])): ?>
+                <?php if (filter_var($row["image_url"], FILTER_VALIDATE_URL)): ?>
+                  <img src="<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
+                <?php else: ?>
+                  <img src="./uploads/<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
+                <?php endif; ?>
+              <?php else: ?>
+                <img src="./uploads/no-image.png" alt="無圖片">
+              <?php endif; ?>
+              <input class="form-control pd_img" type="file" name="myFile" accept=".png,.jpg,.jpeg">
+            </div>
+          </div>
         </div>
-      </div>
-      <!-- 專輯名稱 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">專輯名稱</label>
-          <input required name="name" type="text" class="form-control" placeholder="專輯名稱" value="<?= $row["name"] ?>">
+        <div class="ovupword">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="couponName" class="form-label required">專輯名稱</label>
+              <input required name="name" type="text" class="form-control" placeholder="專輯名稱"
+                value="<?= $row["name"] ?>">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <!-- 狀態 -->
+            <div class="form-group">
+              <label for="couponName" class="form-label required">狀態</label>
+              <select name="status_id" class="form-select">
+                <option value selected disabled>請選擇</option>
+                <?php foreach ($rowsStatus as $rowStatus): ?>
+                  <option value="<?= $rowStatus["id"] ?>" <?= ($rowStatus["id"] == $row["status_id"]) ? "selected" : "" ?>>
+                    <?= $rowStatus["name"] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <!-- 狀況 -->
+            <div class="form-group">
+              <label for="couponName" class="form-label required">狀況</label>
+              <select name="condition_id" class="form-select">
+                <option value selected disabled>請選擇</option>
+                <?php foreach ($rowsCondition as $rowCondition): ?>
+                  <option value="<?= $rowCondition["id"] ?>" <?= ($rowCondition["id"] == $row["condition_id"]) ? "selected" : "" ?>>
+                    <?= $rowCondition["name"] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <!-- 庫存 -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="couponName" class="form-label required">庫存</label>
+              <input required name="stock" type="text" class="form-control" placeholder="庫存數量"
+                value="<?= $row["stock"] ?>">
+            </div>
+            <!-- 公司名稱 -->
+
+            <div class="form-group">
+              <label for="couponName" class="form-label required">公司名稱</label>
+              <input required name="company" type="text" class="form-control" placeholder="公司名稱"
+                value="<?= $companyName ?>">
+            </div>
+
+          </div>
+          <!-- 尺寸 -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="couponName" class="form-label required">尺寸</label>
+              <select name="lp_id" class="form-select">
+                <option value selected disabled>請選擇</option>
+                <?php foreach ($rowsLp as $rowLp): ?>
+                  <option value="<?= $rowLp["id"] ?>" <?= ($rowLp["id"] == $row["lp_id"]) ? "selected" : "" ?>>
+                    <?= $rowLp["size"] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <!-- 發行日 -->
+            <div class="form-group">
+              <label for="couponName" class="form-label required">發行日</label>
+              <input required name="release_date" type="date" class="form-control" value="<?= $row["release_date"] ?>">
+            </div>
+          </div>
+
+          <!-- 價格 -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="couponName" class="form-label required">價格</label>
+              <input required name="price" type="text" class="form-control" placeholder="價格"
+                value="<?= $row["price"] ?>">
+            </div>
+          </div>
+
+          <!-- 分類 -->
+          <div class="form-row">
+            <!-- 主分類 -->
+            <div class="form-group">
+              <label for="couponName" class="form-label required">主分類</label>
+              <select name="main_category_id" id="main_category_id" class="form-select">
+                <option value selected disabled>請選擇</option>
+                <?php foreach ($rowsMCate as $rowMCate): ?>
+                  <option value="<?= $rowMCate["id"] ?>" <?= ($rowMCate["id"] == $row["main_category_id"]) ? "selected" : "" ?>>
+                    <?= $rowMCate["title"] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <!-- 次分類 -->
+            <div class="form-group">
+              <label for="couponName" class="form-label required">次分類</label>
+              <select class="form-select" name="sub_category_id" id="sub_category_id">
+                <option value="" selected disabled>請選擇</option>
+                <?php foreach ($rowsSCate as $rowSCate): ?>
+                  <option value="<?= $rowSCate["id"] ?>" data-main="<?= $rowSCate["main_category_id"] ?>"
+                    <?= ($rowSCate["id"] == $row["sub_category_id"]) ? "selected" : "" ?>>
+                    <?= $rowSCate["title"] ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
         </div>
+        
       </div>
+
       <!-- 介紹 -->
-      <div class="form-row">
+      <div class="form-row desc">
         <div class="form-group">
           <label for="couponName" class="form-label required">介紹</label>
-          <input required name="desc" type="text" class="form-control" placeholder="介紹" value="<?= $row["desc"] ?>">
+   <textarea required name="desc" id="desc" class="form-control" placeholder="介紹"><?= $row["desc"] ?></textarea>
         </div>
       </div>
-      <div class="form-row">
-        <!-- 狀態 -->
-        <div class="form-group">
-          <label for="couponName" class="form-label required">狀態</label>
-          <select name="status_id" class="form-select">
-            <option value selected disabled>請選擇</option>
-            <?php foreach ($rowsStatus as $rowStatus): ?>
-              <option value="<?= $rowStatus["id"] ?>" <?= ($rowStatus["id"] == $row["status_id"]) ? "selected" : "" ?>>
-                <?= $rowStatus["name"] ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <!-- 狀況 -->
-        <div class="form-group">
-          <label for="couponName" class="form-label required">狀況</label>
-          <select name="condition_id" class="form-select">
-            <option value selected disabled>請選擇</option>
-            <?php foreach ($rowsCondition as $rowCondition): ?>
-              <option value="<?= $rowCondition["id"] ?>" <?= ($rowCondition["id"] == $row["condition_id"]) ? "selected" : "" ?>>
-                <?= $rowCondition["name"] ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      </div>
-      <!-- 庫存 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">庫存</label>
-          <input required name="stock" type="text" class="form-control" placeholder="庫存數量" value="<?= $row["stock"] ?>">
-        </div>
-      </div>
-      <!-- 尺寸 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">尺寸</label>
-          <select name="lp_id" class="form-select">
-            <option value selected disabled>請選擇</option>
-            <?php foreach ($rowsLp as $rowLp): ?>
-              <option value="<?= $rowLp["id"] ?>" <?= ($rowLp["id"] == $row["lp_id"]) ? "selected" : "" ?>>
-                <?= $rowLp["size"] ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      </div>
-      <!-- 公司名稱 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">公司名稱</label>
-          <input required name="company" type="text" class="form-control" placeholder="公司名稱"
-            value="<?= $companyName ?>">
-        </div>
-      </div>
-      <!-- 價格 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">價格</label>
-          <input required name="price" type="text" class="form-control" placeholder="價格" value="<?= $row["price"] ?>">
-        </div>
-      </div>
-      <!-- 發行日 -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="couponName" class="form-label required">發行日</label>
-          <input required name="release_date" type="date" class="form-control" value="<?= $row["release_date"] ?>">
-        </div>
-      </div>
-      <!-- 分類 -->
-      <div class="form-row">
-        <!-- 主分類 -->
-        <div class="form-group">
-          <label for="couponName" class="form-label required">主分類</label>
-          <select name="main_category_id" id="main_category_id" class="form-select">
-            <option value selected disabled>請選擇</option>
-            <?php foreach ($rowsMCate as $rowMCate): ?>
-              <option value="<?= $rowMCate["id"] ?>" <?= ($rowMCate["id"] == $row["main_category_id"]) ? "selected" : "" ?>>
-                <?= $rowMCate["title"] ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <!-- 次分類 -->
-        <div class="form-group">
-          <label for="couponName" class="form-label required">次分類</label>
-          <select class="form-select" name="sub_category_id" id="sub_category_id">
-            <option value="" selected disabled>請選擇</option>
-            <?php foreach ($rowsSCate as $rowSCate): ?>
-              <option value="<?= $rowSCate["id"] ?>" data-main="<?= $rowSCate["main_category_id"] ?>"
-                <?= ($rowSCate["id"] == $row["sub_category_id"]) ? "selected" : "" ?>>
-                <?= $rowSCate["title"] ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      </div>
+
       <div class="mt-1 text-end">
         <button type="submit" class="btn btn-info btn-send">送出</button>
         <a class="btn btn-primary" href="./index.php">取消</a>
