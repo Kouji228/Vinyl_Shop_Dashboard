@@ -240,14 +240,24 @@ try {
             <div class="form-row">
                 <div class="form-group">
                     <label for="memberPassword" class="form-label">密碼</label>
-                    <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
-                        placeholder="不修改請留空">
+                    <div class="password-field-container">
+                        <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
+                            placeholder="不修改請留空">
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="passwordError"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label">確認密碼</label>
-                    <input type="password" id="confirmPassword" name="confirm_password" class="form-control">
+                    <div class="password-field-container">
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control">
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="confirmPasswordError"></div>
                 </div>
             </div>
@@ -391,6 +401,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }
+    });
+
+    // Password toggle functionality
+    document.querySelectorAll('.password-toggle').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
     });
 });
 </script>

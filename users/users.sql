@@ -1314,3 +1314,22 @@ INSERT INTO user_addresses (user_id, city, district, address, is_default) VALUES
 
 SELECT * FROM `user_addresses`;
 
+CREATE TABLE `admins` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `account` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 插入預設管理者帳號 (密碼: admin123)
+INSERT INTO `admins` (`name`, `account`, `password`) VALUES
+('管理員', 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+
+-- 新增管理員頭像欄位
+ALTER TABLE `admins` ADD COLUMN `img` varchar(255) DEFAULT NULL COMMENT '管理員頭像路徑' AFTER `password`;
+
+DROP TABLE admins;
+SELECT * FROM `admins`;

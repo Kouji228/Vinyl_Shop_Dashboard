@@ -1,19 +1,36 @@
 <?php
-require_once "./connect.php";
-require_once "../components/Utilities.php";
-
-
 $pageTitle = "會員管理";
 $cssList = ["../css/index.css"];
 include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
 
+require_once "./connect.php";
+require_once "../components/Utilities.php";
+
+
+
+
 
 // 分頁邏輯
 $perPage = 25;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
+
+// 排序邏輯
+$sortColumn = $_GET["sort"] ?? "created_at";
+$sortOrder = $_GET["order"] ?? "DESC";
+
+// 允許排序的欄位
+$allowedSortColumns = ["name", "email", "phone", "level", "created_at", "is_valid"];
+
+// 驗證排序欄位
+if (!in_array($sortColumn, $allowedSortColumns)) {
+    $sortColumn = "created_at";
+}
+
+// 驗證排序方向
+$sortOrder = strtoupper($sortOrder) === "ASC" ? "ASC" : "DESC";
 
 //整理主sql
 $sql = "SELECT * FROM `users` WHERE 1=1 ";
@@ -48,6 +65,10 @@ if (!empty($search)) {
     $sql .= "AND (`name` LIKE ? OR `email` LIKE ? OR `phone` LIKE ?) ";
     $sqlAll .= "AND (`name` LIKE ? OR `email` LIKE ? OR `phone` LIKE ?) ";
 }
+
+// 添加排序
+$sql .= "ORDER BY `$sortColumn` $sortOrder ";
+$sqlAll .= "ORDER BY `$sortColumn` $sortOrder ";
 
 $sql .= "LIMIT $perPage OFFSET $pageStart";
 
@@ -84,12 +105,23 @@ $totalPage = ceil($totalCount / $perPage);
 <div class="content-section">
     <div class="section-header d-flex justify-content-between align-items-center">
         <h3 class="section-title">會員列表</h3>
-        <a href="./add.php" class="btn btn-primary">新增會員</a>
+        <div class="d-flex align-items-center gap-3">
+            <!-- 新增排序下拉選單 -->
+            <select id="sortFilter" onchange="handleSortChange(this)" class="form-select">
+                <option value="">排序方式</option>
+                <option value="created_at_desc" <?= $sortColumn === 'created_at' && $sortOrder === 'DESC' ? 'selected' : '' ?>>註冊時間 (新到舊)</option>
+                <option value="created_at_asc" <?= $sortColumn === 'created_at' && $sortOrder === 'ASC' ? 'selected' : '' ?>>註冊時間 (舊到新)</option>
+                <option value="is_valid_desc" <?= $sortColumn === 'is_valid' && $sortOrder === 'DESC' ? 'selected' : '' ?>>狀態 (啟用優先)</option>
+                <option value="is_valid_asc" <?= $sortColumn === 'is_valid' && $sortOrder === 'ASC' ? 'selected' : '' ?>>狀態 (停權優先)</option>
+            </select>
+            <a href="./add.php" class="btn btn-primary">新增會員</a>
+        </div>
     </div>
     <div class="controls-section">
         <div class="search-box">
             <form action="" method="GET" class="d-flex">
-                <input type="text" name="search" class="form-control" placeholder="搜尋會員姓名、Email或電話..." value="<?= htmlspecialchars($search ?? '') ?>">
+                <input type="text" name="search" class="form-control" placeholder="搜尋會員姓名、Email或電話..."
+                    value="<?= htmlspecialchars($search ?? '') ?>">
                 <i class="fas fa-search search-icon" onclick="submitSearch()"></i>
             </form>
         </div>
@@ -107,6 +139,9 @@ $totalPage = ceil($totalCount / $perPage);
                 <option value="active" <?= $status === 'active' ? 'selected' : '' ?>>啟用中會員</option>
                 <option value="suspended" <?= $status === 'suspended' ? 'selected' : '' ?>>查看停權會員</option>
             </select>
+
+
+
             <button class="clear-filters" onclick="clearFilters()">清除篩選</button>
         </div>
     </div>
@@ -122,9 +157,36 @@ $totalPage = ceil($totalCount / $perPage);
                     <th>姓名</th>
                     <th>Email</th>
                     <th>電話</th>
-                    <th>等級</th>
-                    <th>註冊時間</th>
-                    <th>帳號狀態</th>
+                    <th>
+                        <a href="?sort=level&order=<?= $sortColumn === 'level' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                            等級
+                            <?php if ($sortColumn === 'level'): ?>
+                                <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort"></i>
+                            <?php endif; ?>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=created_at&order=<?= $sortColumn === 'created_at' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                            註冊時間
+                            <?php if ($sortColumn === 'created_at'): ?>
+                                <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort"></i>
+                            <?php endif; ?>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=is_valid&order=<?= $sortColumn === 'is_valid' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                            帳號狀態
+                            <?php if ($sortColumn === 'is_valid'): ?>
+                                <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
+                            <?php else: ?>
+                                <i class="fas fa-sort"></i>
+                            <?php endif; ?>
+                        </a>
+                    </th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -173,15 +235,18 @@ $totalPage = ceil($totalCount / $perPage);
     <!-- 分頁 -->
     <div class="pagination">
         <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?>" class="pagination-btn"><i class="fas fa-chevron-left"></i></a>
+            <a href="?page=<?= $page - 1 ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>" class="pagination-btn"><i
+                    class="fas fa-chevron-left"></i></a>
         <?php endif; ?>
 
         <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-            <a href="?page=<?= $i ?>" class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
+            <a href="?page=<?= $i ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>"
+                class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
         <?php endfor; ?>
 
         <?php if ($page < $totalPage): ?>
-            <a href="?page=<?= $page + 1 ?>" class="pagination-btn"><i class="fas fa-chevron-right"></i></a>
+            <a href="?page=<?= $page + 1 ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>" class="pagination-btn"><i
+                    class="fas fa-chevron-right"></i></a>
         <?php endif; ?>
     </div>
 
@@ -210,16 +275,16 @@ $totalPage = ceil($totalCount / $perPage);
         function handleStatusChange(select) {
             const status = select.value;
             const currentUrl = new URL(window.location.href);
-            
+
             if (status) {
                 currentUrl.searchParams.set('status', status);
             } else {
                 currentUrl.searchParams.delete('status');
             }
-            
+
             // 重置分頁到第一頁
             currentUrl.searchParams.set('page', '1');
-            
+
             window.location.href = currentUrl.toString();
         }
 
@@ -227,16 +292,33 @@ $totalPage = ceil($totalCount / $perPage);
         function handleLevelChange(select) {
             const level = select.value;
             const currentUrl = new URL(window.location.href);
-            
+
             if (level) {
                 currentUrl.searchParams.set('level', level);
             } else {
                 currentUrl.searchParams.delete('level');
             }
-            
+
             // 重置分頁到第一頁
             currentUrl.searchParams.set('page', '1');
-            
+
+            window.location.href = currentUrl.toString();
+        }
+
+        // 處理排序變更
+        function handleSortChange(select) {
+            const value = select.value;
+            if (!value) return;
+
+            const [column, order] = value.split('_');
+            const currentUrl = new URL(window.location.href);
+
+            currentUrl.searchParams.set('sort', column);
+            currentUrl.searchParams.set('order', order);
+
+            // 重置分頁到第一頁
+            currentUrl.searchParams.set('page', '1');
+
             window.location.href = currentUrl.toString();
         }
 
@@ -247,6 +329,8 @@ $totalPage = ceil($totalCount / $perPage);
             currentUrl.searchParams.delete('level');
             currentUrl.searchParams.delete('status');
             currentUrl.searchParams.delete('page');
+            currentUrl.searchParams.delete('sort');
+            currentUrl.searchParams.delete('order');
             window.location.href = currentUrl.toString();
         }
 

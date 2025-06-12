@@ -1,0 +1,42 @@
+.address-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.address-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.address-input-group input[type="text"] {
+    flex: 1;
+}
+
+.address-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.form-check {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.form-check-input {
+    margin: 0;
+}
+
+.remove-address {
+    padding: 6px 12px;
+}
+
+#addAddress {
+    margin-top: 10px;
+}

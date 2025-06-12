@@ -95,14 +95,20 @@ if (!empty($password)) {
         $error_messages[] = "密碼長度至少需要6個字元";
     }
     if ($password !== $confirm_password) {
-        $error_messages[] = "兩次輸入的密碼不一致";
+        $error_messages[] = "兩次輸入的密碼不一致，請重新輸入";
     }
+} else if (!empty($confirm_password)) {
+    // 如果只填了確認密碼但沒填密碼
+    $error_messages[] = "請輸入密碼";
 }
 
-// 如果有錯誤訊息，導回編輯頁面
+// 如果有錯誤訊息，導回編輯頁面並顯示錯誤
 if (!empty($error_messages)) {
     $_SESSION['error'] = implode("<br>", $error_messages);
-    header("Location: update.php?id=" . $id);
+    echo "<script>
+        alert('" . implode("\\n", $error_messages) . "');
+        window.location.href = 'update.php?id=" . $id . "';
+    </script>";
     exit;
 }
 
@@ -243,7 +249,10 @@ try {
     
     // 設定成功訊息並停留在編輯頁面
     $_SESSION['success'] = "會員資料更新成功";
-    header("Location: update.php?id=" . $id);
+    echo "<script>
+        alert('會員資料更新成功！');
+        window.location.href = 'update.php?id=" . $id . "';
+    </script>";
     exit;
 
 } catch (Exception $e) {

@@ -4,7 +4,7 @@ require_once "../components/Utilities.php";
 
 
 $pageTitle = "會員管理";
-$cssList = ["../css/index.css", "../css/add.css"];
+$cssList = ["../css/index.css", "../css/add.css", "./users.css"];
 include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
@@ -30,51 +30,6 @@ try {
 
 
 ?>
-
-<style>
-.address-item {
-    background-color: #f8f9fa;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    border: 1px solid #dee2e6;
-}
-
-.address-input-group {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.address-input-group input[type="text"] {
-    flex: 1;
-}
-
-.address-actions {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.form-check {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.form-check-input {
-    margin: 0;
-}
-
-.remove-address {
-    padding: 6px 12px;
-}
-
-#addAddress {
-    margin-top: 10px;
-}
-</style>
 
 <div class="content-section">
     <div class="section-header">
@@ -179,13 +134,16 @@ try {
                                 <div class="form-group full-width">
                                     <label for="memberAddress" class="form-label">詳細地址</label>
                                     <div class="address-input-group">
-                                        <input type="text" name="address[]" class="form-control" placeholder="例：中山南路21號">
+                                        <input type="text" name="address[]" class="form-control"
+                                            placeholder="例：中山南路21號">
                                         <div class="address-actions">
                                             <div class="form-check">
-                                                <input type="radio" name="default_address" value="0" class="form-check-input" checked>
+                                                <input type="radio" name="default_address" value="0"
+                                                    class="form-check-input" checked>
                                                 <label class="form-check-label">預設地址</label>
                                             </div>
-                                            <button type="button" class="btn btn-danger remove-address" style="display: none;">
+                                            <button type="button" class="btn btn-danger remove-address"
+                                                style="display: none;">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
@@ -207,8 +165,8 @@ try {
             <div class="form-row">
                 <div class="form-group full-width">
                     <label for="memberAccount" class="form-label required">帳號</label>
-                    <input type="email" id="memberAccount" name="account" class="form-control" required 
-                           placeholder="將自動帶入Email，可修改">
+                    <input type="email" id="memberAccount" name="account" class="form-control" required
+                        placeholder="將自動帶入Email，可修改">
                     <div class="error-message" id="accountError"></div>
                 </div>
             </div>
@@ -216,14 +174,24 @@ try {
             <div class="form-row">
                 <div class="form-group">
                     <label for="memberPassword" class="form-label required">密碼</label>
-                    <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
-                        required placeholder="至少6個字元">
+                    <div class="password-field-container">
+                        <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
+                            required placeholder="至少6個字元">
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="passwordError"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label required">確認密碼</label>
-                    <input type="password" id="confirmPassword" name="confirm_password" class="form-control" required>
+                    <div class="password-field-container">
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control" required>
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="confirmPasswordError"></div>
                 </div>
             </div>
@@ -241,123 +209,143 @@ try {
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> 儲存會員
             </button>
+        </div>
     </form>
 </div>
 
-<script>
-      let subs = [];
-      subs = <?php echo json_encode($rows2); ?>;
 
-      // 更新區域選單函數
-      function setSubMenu(cityId, districtSelect) {
-          const ary = subs.filter(sub => sub.city_id == cityId);
-          districtSelect.innerHTML = "<option value='' selected disabled>請選擇區域</option>";
-          
-          // 使用 Set 來追蹤已經添加的區域名稱
-          const addedDistricts = new Set();
-          
-          ary.forEach(sub => {
-              // 只有當區域名稱還沒有被添加過時才添加
-              if (!addedDistricts.has(sub.name)) {
-                  const option = document.createElement("option");
-                  option.value = sub.id;
-                  option.innerHTML = sub.name;
-                  districtSelect.append(option);
-                  addedDistricts.add(sub.name);
-              }
-          });
-      }
+<script>
+    let subs = [];
+    subs = <?php echo json_encode($rows2); ?>;
+
+    // 更新區域選單函數
+    function setSubMenu(cityId, districtSelect) {
+        const ary = subs.filter(sub => sub.city_id == cityId);
+        districtSelect.innerHTML = "<option value='' selected disabled>請選擇區域</option>";
+
+        // 使用 Set 來追蹤已經添加的區域名稱
+        const addedDistricts = new Set();
+
+        ary.forEach(sub => {
+            // 只有當區域名稱還沒有被添加過時才添加
+            if (!addedDistricts.has(sub.name)) {
+                const option = document.createElement("option");
+                option.value = sub.id;
+                option.innerHTML = sub.name;
+                districtSelect.append(option);
+                addedDistricts.add(sub.name);
+            }
+        });
+    }
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 圖片預覽功能
-    function previewImage(input) {
-        const preview = document.getElementById('avatarPreview');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-    document.getElementById('memberAvatar').addEventListener('change', function() {
-        previewImage(this);
-    });
-
-    // Email 同步到帳號
-    const emailInput = document.getElementById('memberEmail');
-    const accountInput = document.getElementById('memberAccount');
-    
-    emailInput.addEventListener('input', function() {
-        accountInput.value = this.value;
-    });
-
-    accountInput.addEventListener('input', function() {
-        // 如果帳號被清空，則同步回 email 的值
-        if (this.value === '') {
-            this.value = emailInput.value;
-        }
-    });
-
-    // 地址相關功能
-    const addressList = document.getElementById('addressList');
-    const addAddressBtn = document.getElementById('addAddress');
-
-    // 新增地址
-    addAddressBtn.addEventListener('click', function() {
-        const addressItem = document.querySelector('.address-item').cloneNode(true);
-        
-        // 重置選擇和輸入值
-        addressItem.querySelectorAll('select').forEach(select => {
-            select.value = '';
-        });
-        addressItem.querySelector('input[type="text"]').value = '';
-        
-        // 更新預設地址radio的value
-        const defaultAddressRadio = addressItem.querySelector('input[type="radio"]');
-        defaultAddressRadio.value = addressList.children.length;
-        defaultAddressRadio.checked = false;
-        
-        // 顯示刪除按鈕
-        addressItem.querySelector('.remove-address').style.display = 'inline-block';
-        
-        // 重新綁定縣市選擇事件
-        const citySelect = addressItem.querySelector('.city-select');
-        citySelect.addEventListener('change', function() {
-            setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
-        });
-        
-        addressList.appendChild(addressItem);
-    });
-
-    // 刪除地址
-    addressList.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-address')) {
-            const addressItem = e.target.closest('.address-item');
-            if (addressList.children.length > 1) {
-                // 如果刪除的是預設地址，則將第一個地址設為預設
-                if (addressItem.querySelector('input[type="radio"]').checked) {
-                    addressList.querySelector('.address-item:first-child input[type="radio"]').checked = true;
+    document.addEventListener('DOMContentLoaded', function () {
+        // 圖片預覽功能
+        function previewImage(input) {
+            const preview = document.getElementById('avatarPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
                 }
-                addressItem.remove();
-                
-                // 重新設置所有radio的value
-                document.querySelectorAll('.address-item').forEach((item, index) => {
-                    item.querySelector('input[type="radio"]').value = index;
-                });
+                reader.readAsDataURL(input.files[0]);
             }
         }
-    });
+        document.getElementById('memberAvatar').addEventListener('change', function () {
+            previewImage(this);
+        });
 
-    // 縣市選擇事件
-    document.querySelectorAll('.city-select').forEach(select => {
-        select.addEventListener('change', function() {
-            setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
+        // 密碼顯示切換功能
+        document.querySelectorAll('.password-toggle').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        });
+
+        // Email 同步到帳號
+        const emailInput = document.getElementById('memberEmail');
+        const accountInput = document.getElementById('memberAccount');
+
+        emailInput.addEventListener('input', function () {
+            accountInput.value = this.value;
+        });
+
+        accountInput.addEventListener('input', function () {
+            // 如果帳號被清空，則同步回 email 的值
+            if (this.value === '') {
+                this.value = emailInput.value;
+            }
+        });
+
+        // 地址相關功能
+        const addressList = document.getElementById('addressList');
+        const addAddressBtn = document.getElementById('addAddress');
+
+        // 新增地址
+        addAddressBtn.addEventListener('click', function () {
+            const addressItem = document.querySelector('.address-item').cloneNode(true);
+
+            // 重置選擇和輸入值
+            addressItem.querySelectorAll('select').forEach(select => {
+                select.value = '';
+            });
+            addressItem.querySelector('input[type="text"]').value = '';
+
+            // 更新預設地址radio的value
+            const defaultAddressRadio = addressItem.querySelector('input[type="radio"]');
+            defaultAddressRadio.value = addressList.children.length;
+            defaultAddressRadio.checked = false;
+
+            // 顯示刪除按鈕
+            addressItem.querySelector('.remove-address').style.display = 'inline-block';
+
+            // 重新綁定縣市選擇事件
+            const citySelect = addressItem.querySelector('.city-select');
+            citySelect.addEventListener('change', function () {
+                setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
+            });
+
+            addressList.appendChild(addressItem);
+        });
+
+        // 刪除地址
+        addressList.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-address')) {
+                const addressItem = e.target.closest('.address-item');
+                if (addressList.children.length > 1) {
+                    // 如果刪除的是預設地址，則將第一個地址設為預設
+                    if (addressItem.querySelector('input[type="radio"]').checked) {
+                        addressList.querySelector('.address-item:first-child input[type="radio"]').checked = true;
+                    }
+                    addressItem.remove();
+
+                    // 重新設置所有radio的value
+                    document.querySelectorAll('.address-item').forEach((item, index) => {
+                        item.querySelector('input[type="radio"]').value = index;
+                    });
+                }
+            }
+        });
+
+        // 縣市選擇事件
+        document.querySelectorAll('.city-select').forEach(select => {
+            select.addEventListener('change', function () {
+                setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
+            });
         });
     });
-});
 </script>
 
 
