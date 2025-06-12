@@ -74,7 +74,6 @@ try {
                 </div>
 
                 <div class="form-group info-group">
-
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label ">唱片名稱</label>

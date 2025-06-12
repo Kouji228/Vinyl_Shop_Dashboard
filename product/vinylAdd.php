@@ -49,19 +49,7 @@ try {
   <form action="./doAddVinyl.php" method="post" enctype="multipart/form-data">
     <!-- 唱片 -->
     <div class="form-section">
-      <h4 class="form-section-title">唱片資訊</h4>
       <div class="form-row avatar-row">
-        <div class="form-group avatar-group">
-          <label for="memberAvatar" class="form-label"></label>
-          <div class="avatar-upload-container">
-            <div class="avatar-preview" id="previewImage">
-              <img id="avatarPreview" src="./img/59C26E03_1749437439.jpg" alt="預覽圖片">
-            </div>
-            <input type="file" id="imageInput" name="myFile" class="form-control mt-4" accept="image/*">
-            <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
-          </div>
-        </div>
-
         <div class="form-group info-group">
           <div class="form-row">
             <div class="form-group">
@@ -149,6 +137,17 @@ try {
               <input required name="format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
               <!-- <div class="error-message" id="levelError"></div> -->
             </div>
+          </div>
+        </div>
+
+        <div class="form-group avatar-group">
+          <label for="memberAvatar" class="form-label"></label>
+          <div class="avatar-upload-container">
+            <div class="avatar-preview ms-auto" id="previewImage">
+              <img id="avatarPreview" src="./img/59C26E03_1749437439.jpg" alt="預覽圖片">
+            </div>
+            <input type="file" id="imageInput" name="myFile" class="form-control mt-4" accept="image/*">
+            <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
           </div>
         </div>
       </div>
