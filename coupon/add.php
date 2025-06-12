@@ -1,7 +1,7 @@
 <?php
 
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 require_once "./couponMaps.php"; // 引入共用的 Map 陣列
 
 $pageTitle = "新增優惠卷";
