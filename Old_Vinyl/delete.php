@@ -16,32 +16,10 @@ if ($search != "") {
   $searchSQL = "(v.name LIKE :search OR v.desc LIKE :search OR cp.name LIKE :search ) AND ";
   $values["search"] = "%$search%";
 }
-// 分頁
-$perPage = 10; // 每頁顯示的資料筆數
+
+$perPage = 10;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
-// 篩選主類別
-$cid = intval($_GET["cid"] ?? 0);
-
-// 如果有分類ID，則加入 WHERE 條件
-if ($cid == 0) {
-  $cateSQL = "";
-  $sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` v 
-             LEFT JOIN `main_category` mc ON v.main_category_id = mc.id
-             LEFT JOIN `company` cp ON v.company_id = cp.id
-             LEFT JOIN `sub_category` sc ON v.sub_category_id = sc.id
-             WHERE $searchSQL v.`is_valid` = 1";
-  $valuesAll = $values;
-} else {
-  $cateSQL = "mc.id= :cid and";
-  $values["cid"] = $cid;
-  $sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` v 
-             LEFT JOIN `main_category` mc ON v.main_category_id = mc.id
-             LEFT JOIN `company` cp ON v.company_id = cp.id
-             LEFT JOIN `sub_category` sc ON v.sub_category_id = sc.id
-             WHERE $cateSQL $searchSQL v.`is_valid` = 1";
-  $valuesAll = $values;
-}
 
 // 取得黑膠資料，使用 JOIN 來取得分類名稱
 $sql = "SELECT v.*, 
@@ -60,25 +38,32 @@ $sql = "SELECT v.*,
         LEFT JOIN `lp` ON v.lp_id = lp.id
         LEFT JOIN `condition` cd ON v.condition_id = cd.id
         LEFT JOIN `status` st ON v.status_id = st.id
-        WHERE $cateSQL $searchSQL v.`is_valid` = 1 
+        WHERE $searchSQL v.`is_valid` = 0 
         ORDER BY v.id 
         LIMIT $perPage OFFSET $pageStart";
 
-;
+
+$sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` WHERE $searchSQL `is_valid` =0 ";
 $sqlCate = "SELECT * FROM `main_category`";
 
 try {
   $stmt = $pdo->prepare($sql);
-  $stmt->execute($values);
+  $stmtAll = $pdo->prepare($sqlAll);
+
+  if ($search != "") {
+    $stmt->execute($values);
+    $stmtAll->execute($values);
+  } else {
+    $stmt->execute();
+    $stmtAll->execute();
+  }
+
   $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $totalCount = $stmtAll->fetchColumn();
 
   $stmtCate = $pdo->prepare($sqlCate);
   $stmtCate->execute();
   $rowsCate = $stmtCate->fetchAll(PDO::FETCH_ASSOC);
-
-  $stmtAll = $pdo->prepare($sqlAll);
-  $stmtAll->execute($valuesAll);
-  $totalCount = $stmtAll->fetchColumn();
 } catch (PDOException $e) {
   echo "錯誤: {$e->getMessage()}";
   exit;
@@ -86,11 +71,11 @@ try {
 $totalPage = ceil($totalCount / $perPage);
 ?>
 
+
 <div class="content-section">
   <div class="section-header d-flex justify-content-between align-items-center">
-    <h3 class="section-title">二手商品列表</h3>
+    <h3 class="section-title">已刪除二手商品</h3>
     <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料</span>
-    <a href="./add.php" class="btn btn-primary">增加資料</a>
   </div>
   <!-- 搜尋篩選 -->
   <div class="controls-section">
@@ -101,14 +86,7 @@ $totalPage = ceil($totalCount / $perPage);
     </div>
     <!-- 篩選bar -->
     <!-- 分類 -->
-    <div class="nav nav-tabs">
-      <a class="nav-link <?= $cid == 0 ? "active" : "" ?>" href="./index.php">全部</a>
-      <?php foreach ($rowsCate as $rowCate): ?>
-        <a class="nav-link <?= $cid == $rowCate["id"] ? "active" : "" ?>" href="./index.php?cid=<?= $rowCate["id"] ?>">
-          <?= htmlspecialchars($rowCate["title"]) ?>
-        </a>
-      <?php endforeach; ?>
-    </div>
+
 
   </div>
 
@@ -183,14 +161,12 @@ $totalPage = ceil($totalCount / $perPage);
             <!-- 操錯 -->
             <td class="text-center">
               <div class="action-buttons">
-                <a class="btn btn-sm btn-info btn-icon-absolute" href="./view.php?id=<?= $row["id"] ?>" title="詳細">
-                  <i class="fas fa-fw fa-eye"></i>
+                <button class="btn btn-danger btn-sm btn-del me-1" data-id="<?= $row["id"] ?>">
+                  <i class="fas fa-trash"></i> 刪除
+                </button>
+                <a class="btn btn-warning btn-sm me-1" href="./doReturn.php?id=<?= $row["id"] ?>">
+                  <i class="fa-solid fa-rotate-right"></i>復原
                 </a>
-                <a class="btn btn-sm btn-warning btn-icon-absolute" href="./update.php?id=<?= $row["id"] ?>" title="修改">
-                  <i class="fas fa-fw fa-edit"></i>
-                </a>
-                <button class="btn btn-sm btn-danger btn-del btn-icon-absolute" data-id="<?= $row["id"] ?>">
-                  <i class="fa-solid fa-trash fa-fw " title="刪除"></i>
                 </button>
               </div>
             </td>
@@ -208,51 +184,33 @@ $totalPage = ceil($totalCount / $perPage);
   <div class="pagination">
     <?php for ($i = 1; $i <= $totalPage; $i++): ?>
       <a class="pagination-btn <?= $page == $i ? "active" : "" ?>"
-        href="./index.php?page=<?= $i ?>&cid=<?= $cid > 0 ? $cid : 0 ?>&search=<?= $search !== "" ? $search : "" ?>"><?= $i ?></a>
+        href="./delete.php?page=<?= $i ?>&search=<?= urlencode($search) ?>"><?= $i ?></a>
     <?php endfor; ?>
   </div>
-  <div class="delcon"><a class="btn btn-warning btn-sm justify-content-start" href="./delete.php">
-    <i class="fas fa-trash"></i> 回收桶
-  </a></div>
+
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <script>
-  const btnDels = document.querySelectorAll(".btn-del");
   const btnSearch = document.querySelector(".fa-search");
 
   //搜尋
   btnSearch.addEventListener("click", function () {
     const query = document.querySelector("input[name=search]").value;
-    window.location.href = `./index.php?search=${query}`;
+    window.location.href = `./delete.php?search=${query}`;
   })
-
-  //刪除
+  const btnDels = document.querySelectorAll(".btn-del");
   btnDels.forEach((btn) => {
     btn.addEventListener("click", doConfirm);
   });
 
   function doConfirm(e) {
     const btn = e.target.closest('.btn-del');
-    if (confirm("確定要刪除嗎?")) {
-      window.location.href = `./doSoftDelete.php?id=${btn.dataset.id}`;
+    if (confirm("確定要永久刪除?")) {
+      window.location.href = `./doRelyDelete.php?id=${btn.dataset.id}`;
     }
   }
-
 </script>
+
 <?php
 include "../template_btm.php";
 ?>
