@@ -54,10 +54,6 @@ try {
     $errorMsg = $e->getMessage();
 }
 
-// echo $rowsAuthor["author"];
-// echo "<pre>";
-// print_r($rowsImg);
-// echo "</pre>";
 ?>
 
 <div class="content-section">
@@ -74,13 +70,13 @@ try {
         <div class="form-section">
             <div class="form-row avatar-row">
                 <div class="form-group avatar-group">
-                    <label for="memberAvatar" class="form-label"></label>
+                    <!-- <label for="memberAvatar" class="form-label"></label> -->
                     <div class="avatar-upload-container">
                         <div class="avatar-preview" id="previewImage">
-                            <img id="previewImage" class="img-fluid my-3" src="./img/<?= $rowsImg[0]["img_name"] ?>"
+                            <img id="previewImage" class="img-fluid mb-4 rounded-3" src="./img/<?= $rowsImg[0]["img_name"] ?>"
                                 alt="" srcset="">
-                        </div><input name="myFile" id="imageInput" type="file" class="form-control"
-                            accept=".png,.jpg,.jpeg">
+                        </div>
+                        <input name="myFile" id="imageInput" type="file" class="form-control" accept=".png,.jpg,.jpeg">
                         <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
                     </div>
                 </div>
@@ -258,7 +254,7 @@ try {
                 // 建立新圖片
                 const img = document.createElement('img');
                 img.src = e.target.result;
-                img.className = 'img-fluid my-3';
+                img.className = 'img-fluid my-3 rounded-3   ';
                 preview.appendChild(img);
             };
             reader.readAsDataURL(file);

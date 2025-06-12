@@ -66,8 +66,8 @@ try {
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">唱片名稱</label>
-              <input required name="title" type="text" class="form-control" placeholder="唱片名稱">
+              <label class="form-label required" for="title">唱片名稱</label>
+              <input required name="title" id="title" type="text" class="form-control" placeholder="唱片名稱">
               <!-- <div class="error-message" id="phoneError"></div> -->
             </div>
           </div>
@@ -95,7 +95,7 @@ try {
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">風格</label>
+              <label class="form-label required" for="genre">風格</label>
               <select name="genre" id="genre" class="form-select" required>
                 <option value selected disabled>請選擇</option>
                 <?php foreach ($rows as $row): ?>
@@ -105,7 +105,7 @@ try {
             </div>
 
             <div class="form-group">
-              <label class="form-label required">類別</label>
+              <label class="form-label required" for="gender">類別</label>
               <select name="gender" id="gender" class="form-select" required>
                 <option value selected disabled>請選擇</option>
               </select>
@@ -115,64 +115,65 @@ try {
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label required">價格</label>
-              <input required name="price" type="number" class="form-control" placeholder="價格">
+              <label class="form-label required" for="price">價格</label>
+              <input required name="price" id="price" type="number" class="form-control" placeholder="價格">
             </div>
 
             <div class="form-group">
-              <label class="form-label required">庫存</label>
-              <input required name="stock" type="number" class="form-control" placeholder="庫存數量">
+              <label class="form-label required" for="stock">庫存</label>
+              <input required name="stock" id="stock" type="number" class="form-control" placeholder="庫存數量">
               <!-- <div class="error-message" id="levelError"></div> -->
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">發行日期</label>
-              <input name="release_date" type="date" class="form-control">
+              <label class="form-label" for="release_date">發行日期</label>
+              <input name="release_date" id="release_date" type="date" class="form-control">
             </div>
 
             <div class="form-group">
-              <label class="form-label required">規格</label>
-              <input required name="format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
+              <label class="form-label required" for="format">規格</label>
+              <input required name="format" id="format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
               <!-- <div class="error-message" id="levelError"></div> -->
             </div>
           </div>
         </div>
 
         <div class="form-group avatar-group">
-          <label for="memberAvatar" class="form-label"></label>
+          <label for="imageInput" class="form-label"></label>
           <div class="avatar-upload-container">
-            <div class="avatar-preview ms-auto" id="previewImage">
-              <img id="avatarPreview" src="./img/59C26E03_1749437439.jpg" alt="預覽圖片">
+            <div class="avatar-preview flex-center rounded-5" id="previewImage">
+              <div class="wh600 flex-center bg-secondary text-white fs-2 rounded-3">
+                圖片預覽位置
+              </div>
             </div>
-            <input type="file" id="imageInput" name="myFile" class="form-control mt-4" accept="image/*">
+            <input type="file" id="imageInput" name="myFile" class="form-control mt-4 required" accept="image/*" required>
             <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
           </div>
         </div>
       </div>
-    </div>
 
 
-    <div class="form-section">
-      <div class="form-group mb-3">
-        <label class="form-label">介紹</label>
-        <textarea name="desc_text" class="form-control" rows="4" placeholder="專輯介紹"></textarea>
+      <div class="form-section">
+        <div class="form-group mb-3">
+          <label class="form-label" for="desc_text">介紹</label>
+          <textarea name="desc_text" id="desc_text" class="form-control" rows="4" placeholder="專輯介紹"></textarea>
+        </div>
       </div>
-    </div>
 
-    <div class="form-section">
-      <div class="form-group mb-3">
-        <label class="form-label">歌曲清單</label>
-        <textarea name="playlist" class="form-control" rows="6" placeholder="每首歌換行輸入"></textarea>
+      <div class="form-section">
+        <div class="form-group mb-3">
+          <label class="form-label" for="playlist">歌曲清單</label>
+          <textarea name="playlist" id="playlist" class="form-control" rows="6" placeholder="每首歌換行輸入"></textarea>
+        </div>
       </div>
-    </div>
 
-    <!-- 按鈕 -->
-    <div class="text-end">
-      <button type="submit" class="btn btn-info">送出</button>
-      <a class="btn btn-secondary" href="./index.php">取消</a>
-    </div>
+      <!-- 按鈕 -->
+      <div class="text-end">
+        <button type="submit" class="btn btn-info">送出</button>
+        <a class="btn btn-secondary" href="./index.php">取消</a>
+      </div>
   </form>
 
 
@@ -248,7 +249,7 @@ try {
         const img = document.createElement('img');
         img.src = e.target.result;
         img.alt = '預覽圖片';
-        img.className = 'img-fluid rounded'; // Bootstrap 樣式
+        img.className = 'img-fluid rounded-3'; // Bootstrap 樣式
         preview.appendChild(img);
       }
       reader.readAsDataURL(file);
