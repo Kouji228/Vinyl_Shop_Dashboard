@@ -128,3 +128,9 @@
   overflow-wrap: break-word;
 
  }
+textarea {
+  resize: none; /* 禁止用戶手動調整大小 */
+  overflow: hidden; /* 隱藏滾動條 */
+  width: 100%; /* 確保寬度填滿父容器 */
+  box-sizing: border-box; /* 包括內邊距和邊框在寬度內 */
+}

@@ -79,8 +79,8 @@ foreach ($rowsCompany as $company) {
   <form action="./doUpdate.php" method="post" enctype="multipart/form-data">
     <input type="hidden" name="id" value="<?= $row["id"] ?>">
 
-    <div class="form-section ">
-      <div class="d-flex ovup">
+    <div class="form-section">
+       <div class="d-flex ovup">
         <!-- 專產品圖片 -->
         <div class="ovupimg">
           <div class="form-row">
@@ -94,15 +94,15 @@ foreach ($rowsCompany as $company) {
               <?php else: ?>
                 <img src="./uploads/no-image.png" alt="無圖片">
               <?php endif; ?>
-              <input class="form-control pd_img" type="file" name="myFile" accept=".png,.jpg,.jpeg">
+              <input class="form-control pd_img" type="file" name="myFile" id="myFile" accept=".png,.jpg,.jpeg">
             </div>
           </div>
         </div>
         <div class="ovupword">
           <div class="form-row">
             <div class="form-group">
-              <label for="couponName" class="form-label required">專輯名稱</label>
-              <input required name="name" type="text" class="form-control" placeholder="專輯名稱"
+              <label for="name" class="form-label required">專輯名稱</label>
+              <input required name="name" type="text" class="form-control" id="name" placeholder="專輯名稱"
                 value="<?= $row["name"] ?>">
             </div>
           </div>
@@ -110,8 +110,8 @@ foreach ($rowsCompany as $company) {
           <div class="form-row">
             <!-- 狀態 -->
             <div class="form-group">
-              <label for="couponName" class="form-label required">狀態</label>
-              <select name="status_id" class="form-select">
+              <label for="status_id" class="form-label required">狀態</label>
+              <select name="status_id" id="status_id" class="form-select">
                 <option value selected disabled>請選擇</option>
                 <?php foreach ($rowsStatus as $rowStatus): ?>
                   <option value="<?= $rowStatus["id"] ?>" <?= ($rowStatus["id"] == $row["status_id"]) ? "selected" : "" ?>>
@@ -122,8 +122,8 @@ foreach ($rowsCompany as $company) {
             </div>
             <!-- 狀況 -->
             <div class="form-group">
-              <label for="couponName" class="form-label required">狀況</label>
-              <select name="condition_id" class="form-select">
+              <label for="condition_id" class="form-label required">狀況</label>
+              <select name="condition_id" id="condition_id" class="form-select">
                 <option value selected disabled>請選擇</option>
                 <?php foreach ($rowsCondition as $rowCondition): ?>
                   <option value="<?= $rowCondition["id"] ?>" <?= ($rowCondition["id"] == $row["condition_id"]) ? "selected" : "" ?>>
@@ -136,15 +136,15 @@ foreach ($rowsCompany as $company) {
           <!-- 庫存 -->
           <div class="form-row">
             <div class="form-group">
-              <label for="couponName" class="form-label required">庫存</label>
-              <input required name="stock" type="text" class="form-control" placeholder="庫存數量"
+              <label for="stock" class="form-label required">庫存</label>
+              <input required name="stock" type="text" class="form-control" id="stock" placeholder="庫存數量"
                 value="<?= $row["stock"] ?>">
             </div>
             <!-- 公司名稱 -->
 
             <div class="form-group">
-              <label for="couponName" class="form-label required">公司名稱</label>
-              <input required name="company" type="text" class="form-control" placeholder="公司名稱"
+              <label for="company" class="form-label ">公司名稱</label>
+              <input required name="company" type="text" class="form-control" id="company" placeholder="公司名稱"
                 value="<?= $companyName ?>">
             </div>
 
@@ -152,8 +152,8 @@ foreach ($rowsCompany as $company) {
           <!-- 尺寸 -->
           <div class="form-row">
             <div class="form-group">
-              <label for="couponName" class="form-label required">尺寸</label>
-              <select name="lp_id" class="form-select">
+              <label for="lp_id" class="form-label required">尺寸</label>
+              <select name="lp_id" id="lp_id" class="form-select">
                 <option value selected disabled>請選擇</option>
                 <?php foreach ($rowsLp as $rowLp): ?>
                   <option value="<?= $rowLp["id"] ?>" <?= ($rowLp["id"] == $row["lp_id"]) ? "selected" : "" ?>>
@@ -164,16 +164,16 @@ foreach ($rowsCompany as $company) {
             </div>
             <!-- 發行日 -->
             <div class="form-group">
-              <label for="couponName" class="form-label required">發行日</label>
-              <input required name="release_date" type="date" class="form-control" value="<?= $row["release_date"] ?>">
+              <label for="release_date" class="form-label ">發行日</label>
+              <input required name="release_date" type="date" class="form-control" id="release_date" value="<?= $row["release_date"] ?>">
             </div>
           </div>
 
           <!-- 價格 -->
           <div class="form-row">
             <div class="form-group">
-              <label for="couponName" class="form-label required">價格</label>
-              <input required name="price" type="text" class="form-control" placeholder="價格"
+              <label for="price" class="form-label required">價格</label>
+              <input required name="price" type="text" class="form-control" id="price" placeholder="價格"
                 value="<?= $row["price"] ?>">
             </div>
           </div>
@@ -182,7 +182,7 @@ foreach ($rowsCompany as $company) {
           <div class="form-row">
             <!-- 主分類 -->
             <div class="form-group">
-              <label for="couponName" class="form-label required">主分類</label>
+              <label for="main_category_id" class="form-label required">主分類</label>
               <select name="main_category_id" id="main_category_id" class="form-select">
                 <option value selected disabled>請選擇</option>
                 <?php foreach ($rowsMCate as $rowMCate): ?>
@@ -194,7 +194,7 @@ foreach ($rowsCompany as $company) {
             </div>
             <!-- 次分類 -->
             <div class="form-group">
-              <label for="couponName" class="form-label required">次分類</label>
+              <label for="sub_category_id" class="form-label required">次分類</label>
               <select class="form-select" name="sub_category_id" id="sub_category_id">
                 <option value="" selected disabled>請選擇</option>
                 <?php foreach ($rowsSCate as $rowSCate): ?>
@@ -206,6 +206,7 @@ foreach ($rowsCompany as $company) {
               </select>
             </div>
           </div>
+          
         </div>
         
       </div>
@@ -213,15 +214,20 @@ foreach ($rowsCompany as $company) {
       <!-- 介紹 -->
       <div class="form-row desc">
         <div class="form-group">
-          <label for="couponName" class="form-label required">介紹</label>
-   <textarea required name="desc" id="desc" class="form-control" placeholder="介紹"><?= $row["desc"] ?></textarea>
+          <label for="desc" class="form-label ">介紹</label>
+          <textarea required name="desc" id="desc" class="form-control" placeholder="介紹"><?= $row["desc"] ?></textarea>
         </div>
       </div>
-
-      <div class="mt-1 text-end">
-        <button type="submit" class="btn btn-info btn-send">送出</button>
-        <a class="btn btn-primary" href="./index.php">取消</a>
-      </div>
+    </div>
+     
+ <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> 更新資料
+            </button>
+            <a class="btn btn-secondary" href="./index.php">
+                <i class="fas fa-times"></i> 取消
+            </a>
+        </div>
   </form>
 </div>
 
@@ -256,7 +262,24 @@ foreach ($rowsCompany as $company) {
       mainSelect.dispatchEvent(new Event('change'));
     }
   });
+
+  //調整介紹欄位高度
+  document.addEventListener("input",function (e) {
+  if(e.target.tagName==="textarea"){
+    event.target.style.height = 'auto'; // 重置高度
+  }
+  })
+  // 頁面載入時自動調整高度
+window.addEventListener('load', function () {
+  var textareas = document.querySelectorAll('textarea');
+  textareas.forEach(function (textarea) {
+    textarea.style.height = 'auto'; // 重置高度
+    textarea.style.height = textarea.scrollHeight + 'px'; // 根據內容調整高度
+  });
+});
+
 </script>
+
 <?php
 include "../template_btm.php";
 ?>
