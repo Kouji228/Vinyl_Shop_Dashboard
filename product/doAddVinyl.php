@@ -21,8 +21,8 @@ $stock = htmlspecialchars($_POST["stock"]);
 $desc_text = htmlspecialchars($_POST["desc_text"]);
 $playlist = htmlspecialchars($_POST["playlist"]);
 
-if ($title == "" || $author == "") {
-  alertGoBack("請輸入資訊");
+if ($title == "" || $author == "" || $shs_id == "" || $_FILES["myFile"] == "") {
+  alertAndBack("請輸入資訊");
   exit;
 }
 
@@ -31,7 +31,7 @@ $stmtShs_id = $pdo->prepare($sqlShs_id);
 $stmtShs_id->execute([$shs_id]);
 $shs_idResult = $stmtShs_id->fetch(PDO::FETCH_ASSOC);
 if ($shs_idResult) {
-  alertGoBack("代碼重複");
+  alertAndBack("代碼重複");
   exit;
 }
 
