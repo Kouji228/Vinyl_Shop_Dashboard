@@ -2,7 +2,7 @@
 require_once "./connect.php";
 require_once "./utilities.php";
 
-$pageTitle = "新增二手商品";
+$pageTitle = "二手商品管理";
 $cssList = ["../css/index.css", "../coupon/coupon.css", "./Old_Vinyl.css"]; //
 include "../vars.php";
 include "../template_top.php";
@@ -174,7 +174,7 @@ try {
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-success ">
+      <button type="submit" class="btn btn-primary ">
         <i class="fa-solid fa-square-plus"></i>增加商品
       </button>
       <a class="btn btn-danger" href="./index.php">

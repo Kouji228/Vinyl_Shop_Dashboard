@@ -134,3 +134,6 @@ textarea {
   width: 100%; /* 確保寬度填滿父容器 */
   box-sizing: border-box; /* 包括內邊距和邊框在寬度內 */
 }
+.table {
+  margin-bottom: 0;
+}
