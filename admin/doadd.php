@@ -1,5 +1,5 @@
 <?php
-require_once "../users/connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

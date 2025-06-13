@@ -1,5 +1,5 @@
 <?php
-require_once "../users/connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 $pageTitle = "管理員帳號設定";

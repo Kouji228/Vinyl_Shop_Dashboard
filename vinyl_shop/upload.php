@@ -1,5 +1,5 @@
 <?php
-require_once "../vinyl_shop/connect.php";
+require_once "../components/connect.php";
 
 // 設置允許的文件類型
 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];

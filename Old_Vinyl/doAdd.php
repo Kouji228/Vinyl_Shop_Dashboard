@@ -1,7 +1,7 @@
 <?php
 // 新增主要程式
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 if(!isset($_POST["name"])){
   alertGoTo("請從正常管道進入");

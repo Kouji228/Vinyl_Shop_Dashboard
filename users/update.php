@@ -1,5 +1,5 @@
 <?php
-require_once "./connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 $pageTitle = "編輯會員";
