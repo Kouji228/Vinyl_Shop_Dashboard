@@ -295,18 +295,23 @@ $totalPage = ceil($totalCount / $perPage); //
 
     // 排序功能
     document.querySelectorAll('.sortable-header').forEach(header => {
+        // 從 PHP 獲取初始的排序狀態
+        const initialSortBy = "<?= $sort_by ?>";
+        const initialSortOrder = "<?= $sort_order ?>";
+
         header.addEventListener('click', function () {
             const currentUrl = new URL(window.location.href);
-            const sortBy = this.dataset.sort;
-            const currentSortBy = currentUrl.searchParams.get('sort_by');
-            const currentSortOrder = currentUrl.searchParams.get('sort_order');
+            const clickedColumn = this.dataset.sort;
 
-            let newSortOrder = 'asc';
-            if (sortBy === currentSortBy && currentSortOrder === 'asc') {
-                newSortOrder = 'desc';
+            let newSortOrder;
+            if (clickedColumn === initialSortBy) {
+                // 如果點擊的是當前排序的欄位，則切換排序順序
+                newSortOrder = (initialSortOrder === 'asc') ? 'desc' : 'asc';
+            } else {
+                // 如果點擊的是新的欄位，則預設為升冪排序
+                newSortOrder = 'asc';
             }
-
-            currentUrl.searchParams.set('sort_by', sortBy);
+            currentUrl.searchParams.set('sort_by', clickedColumn);
             currentUrl.searchParams.set('sort_order', newSortOrder);
 
             window.location.href = currentUrl.toString();

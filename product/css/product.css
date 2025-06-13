@@ -68,3 +68,6 @@
 select {
     cursor: pointer;
 }
+.searchInput {
+    flex-grow: 6 !important;
+}
