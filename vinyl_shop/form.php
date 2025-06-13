@@ -1,5 +1,5 @@
 <?php
-include "../vinyl_shop/connect.php";
+require_once "../components/connect.php";
 include "../components/Utilities.php";
 
 $pageTitle = "店面管理";

@@ -1,12 +1,13 @@
 <?php
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
+
 $pageTitle = "會員管理";
 $cssList = ["../css/index.css"];
 include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
 
-require_once "./connect.php";
-require_once "../components/Utilities.php";
 
 
 

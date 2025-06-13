@@ -1,5 +1,5 @@
 <?php
-require_once "../article/connect.php";
+require_once "../components/connect.php";
 
 if(!isset($_GET["id"])){
     echo "請勿直接從網址使用 permanentDelete.php";

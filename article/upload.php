@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include "../article/connect.php"; // 新增資料庫連線
+require_once "../components/connect.php"; // 新增資料庫連線
 // 設置允許的文件類型
 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
 // 設置最大文件大小（5MB）

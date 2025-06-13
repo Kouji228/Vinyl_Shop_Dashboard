@@ -1,6 +1,6 @@
 <?php
 // 引入必要的檔案
-require_once "./connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 // 驗證請求方法是否為 POST

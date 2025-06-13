@@ -1,6 +1,6 @@
 <?php
 // 恢復被停權的會員
-require_once "connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;

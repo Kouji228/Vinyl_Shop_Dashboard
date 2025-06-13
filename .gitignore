@@ -14,4 +14,3 @@ img/content/*
 vendor/
 node_modules/
 
-components/connect.php

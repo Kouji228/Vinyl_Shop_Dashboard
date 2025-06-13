@@ -1,6 +1,7 @@
 <?php
-require_once "../users/connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
+
 if (!isset($_GET['id'])) {
     alertGoTo("缺少ID", "index.php");
     exit;

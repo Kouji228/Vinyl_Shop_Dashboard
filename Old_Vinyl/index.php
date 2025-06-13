@@ -1,6 +1,6 @@
 <?php
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 
 $pageTitle = "二手商品管理";
 $cssList = ["../css/index.css", "../coupon/coupon.css", "./Old_Vinyl.css"]; //

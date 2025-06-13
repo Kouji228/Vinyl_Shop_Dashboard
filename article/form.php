@@ -1,5 +1,5 @@
 <?php
-include "../article/connect.php";
+require_once "../components/connect.php";
 include "../components/Utilities.php";
 
 $pageTitle = "文章管理";

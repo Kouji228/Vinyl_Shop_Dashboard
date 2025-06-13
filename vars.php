@@ -6,8 +6,8 @@ $menu_items = [
   ["id" => "coupons", "icon" => "fas fa-ticket", "label" => "優惠券管理", "link" => "../coupon/index.php"],
   ["id" => "articles", "icon" => "fas fa-file-pen", "label" => "文章管理", "link" => "../article/index.php"],
   ["id" => "stores", "icon" => "fas fa-store-alt", "label" => "店面管理", "link" => "../vinyl_shop/index.php"],
-  ["id" => "settings", "icon" => "fas fa-cog", "label" => "系統設定"],
-  ["id" => "logout", "icon" => "fas fa-sign-out-alt", "label" => "登出", "link" => "#logout"]
+  ["id" => "settings", "icon" => "fas fa-cog", "label" => "管理者帳號設定", "link" => "../admin/index.php"],
+  ["id" => "logout", "icon" => "fas fa-sign-out-alt", "label" => "登出", "link" => "../admin_logout.php"]
 ];
 
 
