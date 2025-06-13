@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once "../components/connect.php";
-require_once "../components/Utilities.php";
+require_once "./components/connect.php";
+require_once "./components/Utilities.php";
 
 if (!isset($_POST["account"])) {
     alertGoTo("請從正常管道進入", "./admin_login.php"); 

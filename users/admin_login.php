@@ -10,6 +10,8 @@ if (isset($_SESSION['admin_id'])) {
 }
 ?>
 
+<!-- 密碼admin123 -->
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 
