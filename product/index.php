@@ -126,6 +126,7 @@ $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
 $sqlStatus = "SELECT * FROM vinyl_status";
 
+$sqlVinyl="SELECT * FROM vinyl where status_id = 1";
 
 try {
   $stmt = $pdo->prepare($sql);
@@ -151,6 +152,10 @@ try {
   $stmtAuthor = $pdo->prepare($sqlAuthor);
   $stmtAuthor->execute();
   $rowsAuthor = $stmtAuthor->fetchAll(PDO::FETCH_ASSOC);
+
+  $stmtVinyl = $pdo->prepare($sqlVinyl);
+  $stmtVinyl->execute();
+  $rowsVinyl= $stmtVinyl->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
   echo "系統錯誤，請恰管理人員<br>";
   echo "錯誤: " . $e->getMessage();
@@ -186,8 +191,8 @@ $totalPage = ceil($totalCount / $perPage);
   <div class="controls-section">
     <div class="w-100 d-flex">
       <button type="button" class="btn btn-success me-1"><a class="text-decoration-none text-white"
-          href="./">清除篩選</a></button>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">進階篩選</button>
+          href="./">清除搜尋</a></button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">進階搜尋</button>
       <span class="fs-5 ms-3 flex-center">總共 <?= $totalCount ?> 個商品, 每頁有 <?= $perPage ?> 個商品</span>
       <div class="ms-auto d-flex w200">
         <select name="perpage" id="perpageNum" class="form-select w100 me-2">
@@ -206,7 +211,6 @@ $totalPage = ceil($totalCount / $perPage);
     </div>
 
     <!-- 篩選與搜尋 -->
-    <!-- <div class="w-100 flex-center gap-3"> -->
     <div class="filter-group gap-3">
       <label for="genre" class="form-label">風格</label>
 
@@ -236,37 +240,41 @@ $totalPage = ceil($totalCount / $perPage);
       </div>
     </div>
 
-    <div class="price flex-center gap-2 ms-auto">
+    <div class="price flex-center">
       <div class="col-auto flex-center">
         <label class="form-label me-3" for="price1">價格</label>
       </div>
       <div class="col-auto w150">
         <input name="price1" id="price1" type="number" class="form-control " placeholder="<?= $price1 ?>">
       </div>
-      <div class="col-auto"> ~ </div>
+      <div class="col-auto mx-2"> ~ </div>
       <div class="col-auto w150">
         <input name="price2" type="number" class="form-control" placeholder="<?= $price2 ?>">
       </div>
     </div>
 
-    <div class="search flex-center gap-2 ms-auto">
+    <div class="search flex-center flex-grow-1">
       <div class="input-group  flex-center">
         <?php
         $searchHolder = !empty($titleSearch) ? $titleSearch : (!empty($authorSearch) ? $authorSearch : "專輯或創作者");
         ?>
-        <label class="form-label me-3" for="searchType">搜尋</label>
-        <select class="rounded-start form-select w-10 flex-center" name="searchType" id="searchType">
+        <label class="form-label me-3 w-auto" for="searchType">搜尋</label>
+        <select class="rounded-start form-select flex-center" name="searchType" id="searchType">
           <option value="title">專輯</option>
           <option value="author">創作者</option>
         </select>
-        <input name="search" type="text" class="form-control rounded-end"
-          placeholder="<?= htmlspecialchars($searchHolder) ?>" list="">
+        <input name="search" type="text" class="form-control rounded-end searchInput"
+          placeholder="<?= htmlspecialchars($searchHolder) ?>" list="titleList">
+        <datalist id="titleList">
+          <?php foreach ($rowsVinyl as $row): ?>
+            <option value="<?= $row["title"] ?>"></option>
+          <?php endforeach ?>
+        </datalist>
 
         <!-- <i class="fas fa-search btn-search"></i> -->
       </div>
-      <div class="btn btn-primary btn-search ms-1 flex-center"><i class="fa fa-search"></i></div>
+      <div class="btn btn-primary btn-search ms-2 flex-center wh50"><i class="fa fa-search"></i></div>
     </div>
-
 
   </div>
 
@@ -321,7 +329,9 @@ $totalPage = ceil($totalCount / $perPage);
                 </a>
               </td>
               <td><?= htmlspecialchars($row["price"]) ?></td>
-              <td><?= htmlspecialchars($row["stock"]) ?></td>
+              <td>
+                <?= htmlspecialchars($row["stock"]) ?>
+              </td>
               <td><?= htmlspecialchars($row["genre"]) ?></td>
               <td><?= htmlspecialchars($row["gender"]) ?></td>
 
@@ -447,8 +457,8 @@ $totalPage = ceil($totalCount / $perPage);
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered"">
     <div class=" modal-content">
-    <div class="modal-header">
-      <h1 class="modal-title fs-5" id="exampleModalLabel">進階篩選</h1>
+    <div class="modal-header bg-dark text-white">
+      <h1 class="modal-title fs-5" id="exampleModalLabel">進階搜尋</h1>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
 
@@ -471,7 +481,7 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="modal_title">唱片名稱</label>
-            <input name="modal_title" id="modal_title" type="text" class="form-control" <?= $titleSearch ? 'value="' . htmlspecialchars($titleSearch) . '"' : 'placeholder="唱片名稱"' ?>>
+            <input name="modal_title" id="modal_title" type="text" class="form-control" <?= $titleSearch ? 'value="' . htmlspecialchars($titleSearch) . '"' : 'placeholder="唱片名稱"' ?> list="titleList">
           </div>
         </div>
 
@@ -558,9 +568,9 @@ $totalPage = ceil($totalCount / $perPage);
       </div>
     </div>
 
-    <div class="modal-footer">
+    <div class="modal-footer bg-dark">
       <button type="button" class="btn btn-success me-1 btn-clear">清除篩選</button>
-      <button type="button" class="btn btn-primary filter-advance">篩選</button>
+      <button type="button" class="btn btn-primary ms-auto filter-advance">搜尋</button>
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
     </div>
   </div>
@@ -644,7 +654,7 @@ $totalPage = ceil($totalCount / $perPage);
     if (this.value === 'author') {
       inputText.setAttribute('list', 'authorList');
     } else {
-      inputText.removeAttribute('list'); // 專輯不需要 datalist
+      inputText.setAttribute('list', 'titleList');
     }
   });
 
