@@ -107,15 +107,7 @@ $totalPage = ceil($totalCount / $perPage);
     <div class="section-header d-flex justify-content-between align-items-center">
         <h3 class="section-title">會員列表</h3>
         <div class="d-flex align-items-center gap-3">
-            <!-- 新增排序下拉選單 -->
-            <select id="sortFilter" onchange="handleSortChange(this)" class="form-select">
-                <option value="">排序方式</option>
-                <option value="created_at_desc" <?= $sortColumn === 'created_at' && $sortOrder === 'DESC' ? 'selected' : '' ?>>註冊時間 (新到舊)</option>
-                <option value="created_at_asc" <?= $sortColumn === 'created_at' && $sortOrder === 'ASC' ? 'selected' : '' ?>>註冊時間 (舊到新)</option>
-                <option value="is_valid_desc" <?= $sortColumn === 'is_valid' && $sortOrder === 'DESC' ? 'selected' : '' ?>>狀態 (啟用優先)</option>
-                <option value="is_valid_asc" <?= $sortColumn === 'is_valid' && $sortOrder === 'ASC' ? 'selected' : '' ?>>狀態 (停權優先)</option>
-            </select>
-            <a href="./add.php" class="btn btn-primary">新增會員</a>
+            <!-- <a href="./add.php" class="btn btn-primary">新增會員</a> -->
         </div>
     </div>
     <div class="controls-section">
