@@ -326,10 +326,10 @@ try {
                                 <span class="status-badge status-draft">未設置</span>
                             <?php endif; ?>
                         </td>
-                        <td width="120px">
+                        <td class="text-center" width="120px">
                             <div class="action-buttons">
-                                <a href="/article/form.php?id=<?=$article["id"]?>" class="btn btn-sm btn-warning" title="修改"><i class="fas fa-edit"></i></a>
-                                <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="<?=$article["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
+                                <a href="/article/form.php?id=<?=$article["id"]?>" class="btn btn-sm btn-warning btn-icon-absolute" title="修改"><i class="fas fa-edit"></i></a>
+                                <a href="#" class="btn btn-sm btn-danger btn-icon-absolute delete-btn" data-id="<?=$article["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
                             </div>
                         </td>
                     </tr>

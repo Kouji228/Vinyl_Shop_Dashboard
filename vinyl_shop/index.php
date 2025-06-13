@@ -147,10 +147,10 @@ try {
                         ?>
                     </td>
                     <td style="width: 150px;"><?=$branch["business_hours"]?></td>
-                        <td style="width: 120px;">
+                        <td class="text-center" style="width: 120px;">
                         <div class="action-buttons">
-                                <a href="/vinyl_shop/form.php?id=<?=$branch["id"]?>" class="btn btn-sm btn-warning" title="修改"><i class="fas fa-edit"></i></a>
-                                <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="<?=$branch["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
+                                <a href="/vinyl_shop/form.php?id=<?=$branch["id"]?>" class="btn btn-sm btn-warning btn-icon-absolute" title="修改"><i class="fas fa-edit"></i></a>
+                                <a href="#" class="btn btn-sm btn-danger btn-icon-absolute delete-btn" data-id="<?=$branch["id"]?>" title="刪除"><i class="fas fa-trash-alt"></i></a>
                             </div>
                         </td>
                     </tr>

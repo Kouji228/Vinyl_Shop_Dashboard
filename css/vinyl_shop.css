@@ -56,3 +56,44 @@
 .clear-filters:hover {
   text-decoration: none;
 }
+
+.action-buttons .btn.btn-icon-absolute {
+  /* 1. 讓自己成為子層圖示的「定位基準」 */
+  position: relative;
+
+  /* 2. 再次確保按鈕尺寸，使其不受其他樣式影響 */
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  /* 必須移除內邊距 */
+  box-sizing: border-box;
+}
+
+.action-buttons .btn.btn-icon-absolute i {
+  /* 3. 設定為「絕對定位」脫離正常排版 */
+  position: absolute;
+
+  /* 4. 將圖示的左上角移動到父層按鈕的中心點 */
+  top: 50%;
+  left: 50%;
+
+  /* 5. 使用 transform 將圖示往左、往上拉回自身宽高的一半，達成完美置中 */
+  transform: translate(-50%, -50%);
+
+  /* 6. 確保圖示本身不會有奇怪的 margin 或大小問題 */
+  margin: 0;
+  line-height: 1;
+  /* 重設行高 */
+  font-size: 14px;
+  /* 可在此微調圖示大小 */
+}
+
+.btn-secondary {
+  background: linear-gradient(45deg, #808080, #a9a9a9);
+  color: var(--white);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(128, 128, 128, 0.4);
+}
