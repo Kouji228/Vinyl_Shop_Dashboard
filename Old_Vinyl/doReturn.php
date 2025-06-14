@@ -21,4 +21,4 @@ try {
   exit;
 }
 
-alertGoTo("取消刪除成功", "./");
+alertGoTo("復原成功", "./");

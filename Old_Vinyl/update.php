@@ -87,12 +87,12 @@ foreach ($rowsCompany as $company) {
             <div class="form-group pd_img">
               <?php if (!empty($row["image_url"])): ?>
                 <?php if (filter_var($row["image_url"], FILTER_VALIDATE_URL)): ?>
-                  <img src="<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
+                  <img class="preview" src="<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
                 <?php else: ?>
-                  <img src="./uploads/<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
+                  <img class="preview" src="./uploads/<?= htmlspecialchars($row["image_url"]) ?>" alt="專輯圖片">
                 <?php endif; ?>
               <?php else: ?>
-                <img src="./uploads/no-image.png" alt="無圖片">
+                <img class="preview" src="./uploads/no-image.png" alt="無圖片">
               <?php endif; ?>
               <input class="form-control pd_img" type="file" name="myFile" id="myFile" accept=".png,.jpg,.jpeg">
             </div>
@@ -165,7 +165,7 @@ foreach ($rowsCompany as $company) {
             <!-- 發行日 -->
             <div class="form-group">
               <label for="release_date" class="form-label ">發行日</label>
-              <input required name="release_date" type="date" class="form-control" id="release_date" value="<?= $row["release_date"] ?>">
+              <input  name="release_date" type="date" class="form-control" id="release_date" value="<?= $row["release_date"] ?>">
             </div>
           </div>
 
@@ -215,7 +215,7 @@ foreach ($rowsCompany as $company) {
       <div class="form-row desc">
         <div class="form-group">
           <label for="desc" class="form-label ">介紹</label>
-          <textarea required name="desc" id="desc" class="form-control" placeholder="介紹"><?= $row["desc"] ?></textarea>
+          <textarea  name="desc" id="desc" class="form-control" placeholder="介紹"><?= $row["desc"] ?></textarea>
         </div>
       </div>
     </div>
@@ -276,6 +276,16 @@ window.addEventListener('load', function () {
     textarea.style.height = 'auto'; // 重置高度
     textarea.style.height = textarea.scrollHeight + 'px'; // 根據內容調整高度
   });
+});
+document.getElementById('myFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 });
 
 </script>

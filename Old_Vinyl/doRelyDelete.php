@@ -20,4 +20,4 @@ try {
   exit;
 }
 
-alertGoTo("刪除資料成功", "./");
+alertGoTo("刪除資料成功", "./delete.php");
