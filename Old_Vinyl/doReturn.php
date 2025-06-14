@@ -1,7 +1,7 @@
 <?php
 //取消軟刪除
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 if(!isset($_GET["id"])){
   alertGoTo("請從正常管道進入", "./index.php");
@@ -21,4 +21,4 @@ try {
   exit;
 }
 
-alertGoTo("取消刪除成功", "./");
+alertGoTo("復原成功", "./");

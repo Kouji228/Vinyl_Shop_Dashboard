@@ -1,6 +1,6 @@
 <?php
-require_once "./connect.php";
-require_once "./utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 $pageTitle = "二手商品管理";
 $cssList = ["../css/index.css", "../coupon/coupon.css", "./Old_Vinyl.css"]; //
@@ -47,7 +47,7 @@ try {
 <div class="content-section">
   <!-- 標題 -->
   <div class="section-header">
-    <h3 class="section-title">新增商品</h3>
+    <h3 class="section-title">新增二手商品</h3>
     <a href="./index.php" class="btn btn-secondary">返回列表</a>
   </div>
   <form action="./doAdd.php" method="post" enctype="multipart/form-data">

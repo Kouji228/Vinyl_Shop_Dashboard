@@ -124,16 +124,132 @@
    width: calc(95% + 40px);
    height: auto;
    word-wrap: break-word;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+   word-wrap: break-word;
+   overflow-wrap: break-word;
 
  }
-textarea {
-  resize: none; /* 禁止用戶手動調整大小 */
-  overflow: hidden; /* 隱藏滾動條 */
-  width: 100%; /* 確保寬度填滿父容器 */
-  box-sizing: border-box; /* 包括內邊距和邊框在寬度內 */
-}
-.table {
-  margin-bottom: 0;
-}
+
+ textarea {
+   resize: none;
+   /* 禁止用戶手動調整大小 */
+   overflow: hidden;
+   /* 隱藏滾動條 */
+   width: 100%;
+   /* 確保寬度填滿父容器 */
+   box-sizing: border-box;
+   /* 包括內邊距和邊框在寬度內 */
+ }
+
+ .table {
+   margin-bottom: 0;
+ }
+
+ .index_tr th {
+   text-align: center;
+   height: 50px;
+   vertical-align: middle;
+   width: 105px;
+
+ }
+
+ .index_tr td {
+   text-align: center;
+   height: 100px;
+   vertical-align: middle;
+   width: 105px;
+
+ }
+
+ .index_tr .index_sm {
+   width: 50px;
+ }
+
+ .index_img img {
+   width: 100px;
+   object-fit: cover;
+   border-radius: 4px;
+ }
+
+ .index_img {
+   width: 100px;
+ }
+
+ .index_id {
+   width: 50px;
+ }
+
+ .search-box {
+   flex-grow: 9;
+   /* 讓搜尋框佔更多空間 */
+ }
+
+ .filter-group {
+   flex-grow: 1;
+   /* 讓篩選元素佔較小空間 */
+ }
+
+ .form-control-lg {
+   font-size: 1.25rem;
+   /* 調整搜尋框文字大小 */
+ }
+
+ .form-select-sm {
+   font-size: 0.875rem;
+   /* 調整篩選元素文字大小 */
+ }
+
+ .ml15px {
+   margin-left: 15px;
+ }
+
+ .controls-section {
+   justify-content: space-between;
+ }
+
+
+ .status-sold-out {
+   background-color: #d32f2f !important;
+   color: #fff !important;
+   border-radius: 4px;
+   /* 保持圓角效果 */
+   font-weight: bold;
+   height: 20px;
+   /* 增加高度以容納文字 */
+   width: 60px;
+   /* 增加寬度形成橢圓 */
+   align-items: center;
+   /* 垂直居中 */
+   justify-content: center;
+   /* 水平居中 */
+   text-align: center;
+   padding: 4px;
+ }
+
+ .status-sold {
+   background-color: #45a049 !important;
+   color: #fff !important;
+   border-radius: 4px;
+   /* 保持圓角效果 */
+   font-weight: bold;
+   height: 20px;
+   /* 增加高度以容納文字 */
+   width: 60px;
+   /* 增加寬度形成橢圓 */
+   align-items: center;
+   /* 垂直居中 */
+   justify-content: center;
+   /* 水平居中 */
+   text-align: center;
+   padding: 4px;
+ }
+
+ .sortable {
+   cursor: pointer;
+
+   a {
+     text-decoration: none;
+     /* 移除底線 */
+     color: inherit;
+   }
+
+ }

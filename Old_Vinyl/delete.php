@@ -1,6 +1,6 @@
 <?php
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/utilities.php";
 
 $pageTitle = "二手商品管理";
 $cssList = ["../css/index.css", "../coupon/coupon.css", "./Old_Vinyl.css"]; //
@@ -17,9 +17,12 @@ if ($search != "") {
   $values["search"] = "%$search%";
 }
 
+
 $perPage = 10;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
+
+
 
 // 取得黑膠資料，使用 JOIN 來取得分類名稱
 $sql = "SELECT v.*, 
@@ -43,8 +46,14 @@ $sql = "SELECT v.*,
         LIMIT $perPage OFFSET $pageStart";
 
 
-$sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` WHERE $searchSQL `is_valid` =0 ";
+$sqlAll = "SELECT COUNT(*) as total FROM `o_vinyl` v 
+             LEFT JOIN `main_category` mc ON v.main_category_id = mc.id
+             LEFT JOIN `company` cp ON v.company_id = cp.id
+             LEFT JOIN `sub_category` sc ON v.sub_category_id = sc.id
+             WHERE $searchSQL v.`is_valid` = 0";
 $sqlCate = "SELECT * FROM `main_category`";
+
+
 
 try {
   $stmt = $pdo->prepare($sql);
@@ -74,18 +83,17 @@ $totalPage = ceil($totalCount / $perPage);
 
 <div class="content-section">
   <div class="section-header d-flex justify-content-between align-items-center">
-    <h3 class="section-title">已刪除二手商品</h3>
+    <h3 class="section-title">二手商品回收桶</h3>
     <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料</span>
+    <a href="./index.php" class="btn btn-secondary">返回列表</a>
   </div>
   <!-- 搜尋篩選 -->
   <div class="controls-section">
     <!-- 搜尋 -->
     <div class="search-box">
-      <input name="search" type="text" class="form-control form-control-sm" placeholder="搜尋">
+      <input name="search" type="text" class="form-control form-control-sm" placeholder="搜尋(專輯名稱、內文、公司名稱)">
       <i class="fas fa-search"></i>
     </div>
-    <!-- 篩選bar -->
-    <!-- 分類 -->
 
 
   </div>
@@ -93,30 +101,29 @@ $totalPage = ceil($totalCount / $perPage);
   <div class="table-container table-responsive">
     <table class="table table-bordered table-striped align-middle">
       <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>照片</th>
+        <tr class="index_tr">
+          <th class="index_sm">編號</th>
+          <th class="index_img">照片</th>
           <th>專輯名稱</th>
-          <th>狀態</th>
-          <th>狀況</th>
-          <th>庫存</th>
-          <th>尺寸</th>
-          <th>公司</th>
-          <th>價格</th>
-          <th>發行日</th>
-          <th>主分類</th>
+          <th class="index_sm">主分類</th>
           <th>次分類</th>
+          <th class="index_sm">狀態</th>
+          <th class="index_sm">狀況</th>
+          <th class="index_sm">庫存</th>
+          <th class="index_sm">尺寸</th>
+          <th class="index_sm">價格</th>
+
           <th>建立時間</th>
-          <th>操作</th>
+          <th class="index_sm">操作</th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($rows as $index => $row): ?>
-          <tr>
+          <tr class="index_tr">
             <!-- 產品數量 -->
-            <td><?= $perPage * ($page - 1) + $index + 1 ?></td>
+            <td class="index_sm"><?= $perPage * ($page - 1) + $index + 1 ?></td>
             <!-- 圖片 -->
-            <td class="img">
+            <td class="index_img">
               <?php if (!empty($row["imge_url"])): ?>
                 <?php if (filter_var($row["imge_url"], FILTER_VALIDATE_URL)): ?>
                   <img src="<?= htmlspecialchars($row["imge_url"]) ?>" alt="專輯圖片">
@@ -128,48 +135,52 @@ $totalPage = ceil($totalCount / $perPage);
               <?php endif; ?>
             </td>
 
+
             <!-- 專輯名稱 -->
             <td class="name" title="<?= htmlspecialchars($row["name"]) ?>">
               <?= htmlspecialchars($row["name"]) ?>
             </td>
+            <!-- 分類 -->
+            <td class="main_category  index_sm"><?= htmlspecialchars($row["main_category_title"] ?? '未分類') ?></td>
+            <td class="sub_category"><?= htmlspecialchars($row["sub_category_title"] ?? '未分類') ?></td>
             <!-- 狀態 -->
-            <td class="choice"><?= htmlspecialchars($row["status_name"] ?? '未知') ?></td>
+            <td class="choice index_sm ">
+              <span
+                class="<?= ($row["status_id"] === '2') ? 'status-sold-out' : 'status-sold' ?>"><?= htmlspecialchars($row["status_name"] ?? '未知') ?></span>
 
+            </td>
             <!-- 狀況 -->
-            <td class="choice"><?= htmlspecialchars($row["condition_name"] ?? '未知') ?></td>
-
+            <td class="choice  index_sm"><?= htmlspecialchars($row["condition_name"] ?? '未知') ?></td>
             <!-- 庫存 -->
-            <td class="choice"><?= intval($row["stock"] ?? 0) ?></td>
+            <td class="choice index_sm"><?= intval($row["stock"] ?? 0) ?></td>
 
             <!-- 尺寸 -->
-            <td class="choice"><?= htmlspecialchars($row["lp_size"] ?? '未知') ?></td>
+            <td class="choice index_sm"><?= htmlspecialchars($row["lp_size"] ?? '未知') ?></td>
 
-            <!-- 公司 -->
-            <td class="choice" title="<?= htmlspecialchars($row["company_name"] ?? '未知公司') ?>">
-              <?= htmlspecialchars($row["company_name"] ?? '未知') ?>
-            </td>
+
 
             <!-- 價格 -->
-            <td class="price">$<?= number_format($row["price"]) ?></td>
+            <td class="price index_sm">$<?= number_format($row["price"]) ?></td>
 
-            <td class="release_date"><?= $row["release_date"] ?></td>
-            <td class="main_category"><?= htmlspecialchars($row["main_category_title"] ?? '未分類') ?></td>
-            <td class="sub_category"><?= htmlspecialchars($row["sub_category_title"] ?? '未分類') ?></td>
+
+
+
+
             <!-- 更新時間 -->
             <td class="choice"><?= $row["creatTime"] ?></td>
 
             <!-- 操錯 -->
-            <td class="text-center">
+            <td class="text-center index_sm">
               <div class="action-buttons">
-                <button class="btn btn-danger btn-sm btn-del me-1" data-id="<?= $row["id"] ?>">
-                  <i class="fas fa-trash"></i> 刪除
+                <button class="btn btn-danger btn-sm btn-del me-1 btn-icon-absolute" data-id="<?= $row["id"] ?>">
+                    <i class="fa-solid fa-trash fa-fw " title="刪除"></i>
                 </button>
-                <a class="btn btn-warning btn-sm me-1" href="./doReturn.php?id=<?= $row["id"] ?>">
-                  <i class="fa-solid fa-rotate-right"></i>復原
+                <a class="btn btn-warning btn-sm me-1 btn-icon-absolute" href="./doReturn.php?id=<?= $row["id"] ?>">
+                  <i class="fa-solid fa-rotate-right"></i>
                 </a>
-                </button>
               </div>
             </td>
+           
 
 
 
@@ -180,13 +191,70 @@ $totalPage = ceil($totalCount / $perPage);
     </table>
   </div>
 
-  <!-- 分頁 -->
-  <div class="pagination">
-    <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-      <a class="pagination-btn <?= $page == $i ? "active" : "" ?>"
-        href="./delete.php?page=<?= $i ?>&search=<?= urlencode($search) ?>"><?= $i ?></a>
+
+<div class="pagination">
+    <div class="pagination-info">
+      第 <?= $page ?> 頁，共 <?= $totalPage ?> 頁
+    </div>
+    <?php
+    // 計算分頁範圍
+    $startPage = max(1, $page - 2);
+    $endPage = min($totalPage, $startPage + 4); ?>
+
+    <!-- // 第一頁 -->
+    <?php if ($startPage > 1): ?>
+      <button class="pagination-btn"
+        onclick="window.location.href='?page=1&search=<?= urlencode($search) ?>'"><i
+          class="fa-solid fa-angles-left"></i></button>
+    <?php endif; ?>
+
+    <!-- // 上一頁按鈕 -->
+    <?php if ($page > 1): ?>
+      <button class="pagination-btn"
+        onclick="window.location.href='?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>'">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    <?php else: ?>
+      <button class="pagination-btn" disabled>
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    <?php endif; ?>
+
+
+
+
+    <!-- 中間頁面 -->
+    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+      <button class="pagination-btn <?= $i == $page ? 'active' : '' ?>"
+        onclick="window.location.href='?page=<?= $i ?>&search=<?= urlencode($search) ?>'">
+        <?= $i ?>
+      </button>
     <?php endfor; ?>
+
+    <!-- 下一頁按鈕 -->
+    <?php if ($page < $totalPage): ?>
+      <button class="pagination-btn"
+        onclick="window.location.href='?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>'">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    <?php else: ?>
+      <button class="pagination-btn" disabled>
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    <?php endif; ?>
+
+    <!-- 最後一頁 -->
+    <?php if ($endPage < $totalPage): ?>
+      <button class="pagination-btn"
+        onclick="window.location.href='?page=<?= $totalPage ?>&search=<?= urlencode($search) ?>'">
+        <i class="fa-solid fa-angles-right"></i>
+      </button>
+    <?php endif; ?>
+
+
+
   </div>
+
 
 </div>
 
