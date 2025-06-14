@@ -1,13 +1,34 @@
 <?php
-require_once "connect.php";
+require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
 
 $pageTitle = "會員管理";
-$cssList = ["../css/index.css", "../css/add.css"];
+$cssList = ["../css/index.css", "../css/add.css", "./users.css"];
 include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
+
+// 縣市資料
+$sql = "SELECT * FROM `cities`";
+$sql2 = "SELECT * FROM `districts` ORDER BY city_id, name";
+
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt2 = $pdo->prepare($sql2);
+    $stmt2->execute();
+    $rows2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "系統錯誤，請恰管理人員<br>";
+    echo "Error: {$e->getMessage()}<br>";
+    clickGoTo("回上一頁", "./add.php");
+    exit;
+}
+
+
 ?>
 
 <div class="content-section">
@@ -23,7 +44,7 @@ include "../template_main.php";
                     <label for="memberAvatar" class="form-label"></label>
                     <div class="avatar-upload-container">
                         <div class="avatar-preview">
-                            <img id="avatarPreview" src="" alt="預覽圖片">
+                            <img id="avatarPreview" src="./images/users_default.jpg" alt="">
                         </div>
                         <input type="file" id="memberAvatar" name="avatar" class="form-control" accept="image/*"
                             onchange="previewImage(this)">
@@ -86,49 +107,54 @@ include "../template_main.php";
         </div>
 
         <div class="form-section">
-            <h4 class="form-section-title">聯絡資訊</h4>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="memberCity" class="form-label">縣市</label>
-                    <select id="memberCity" name="city" class="form-control" required>
-                        <option value="">請選擇縣市</option>
-                        <option value="台北市">台北市</option>
-                        <option value="新北市">新北市</option>
-                        <option value="桃園市">桃園市</option>
-                        <option value="台中市">台中市</option>
-                        <option value="台南市">台南市</option>
-                        <option value="高雄市">高雄市</option>
-                        <option value="基隆市">基隆市</option>
-                        <option value="新竹市">新竹市</option>
-                        <option value="嘉義市">嘉義市</option>
-                        <option value="新竹縣">新竹縣</option>
-                        <option value="苗栗縣">苗栗縣</option>
-                        <option value="彰化縣">彰化縣</option>
-                        <option value="南投縣">南投縣</option>
-                        <option value="雲林縣">雲林縣</option>
-                        <option value="嘉義縣">嘉義縣</option>
-                        <option value="屏東縣">屏東縣</option>
-                        <option value="宜蘭縣">宜蘭縣</option>
-                        <option value="花蓮縣">花蓮縣</option>
-                        <option value="台東縣">台東縣</option>
-                        <option value="澎湖縣">澎湖縣</option>
-                        <option value="金門縣">金門縣</option>
-                        <option value="連江縣">連江縣</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="memberDistrict" class="form-label">區域</label>
-                    <select id="memberDistrict" name="district" class="form-control" required>
-                        <option value="">請先選擇縣市</option>
-                    </select>
-                </div>
-            </div>
+            <h4 class="form-section-title">地址資訊</h4>
 
             <div class="form-row">
                 <div class="form-group full-width">
-                    <label for="memberAddress" class="form-label">詳細地址</label>
-                    <input type="text" id="memberAddress" name="address" class="form-control" placeholder="例：中山南路21號">
+                    <div id="addressList">
+                        <div class="address-item">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="memberCity" class="form-label">縣市</label>
+                                    <select name="city[]" class="form-control city-select" required>
+                                        <option value="">請選擇縣市</option>
+                                        <?php foreach ($rows as $row): ?>
+                                            <option value="<?= $row["id"] ?>"><?= $row["name"] ?></option>
+                                        <?php endforeach ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="memberDistrict" class="form-label">區域</label>
+                                    <select name="district[]" class="form-control district-select" required>
+                                        <option value="">請選擇區域</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="memberAddress" class="form-label">詳細地址</label>
+                                    <div class="address-input-group">
+                                        <input type="text" name="address[]" class="form-control"
+                                            placeholder="例：中山南路21號">
+                                        <div class="address-actions">
+                                            <div class="form-check">
+                                                <input type="radio" name="default_address" value="0"
+                                                    class="form-check-input" checked>
+                                                <label class="form-check-label">預設地址</label>
+                                            </div>
+                                            <button type="button" class="btn btn-danger remove-address"
+                                                style="display: none;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="addAddress">
+                        <i class="fas fa-plus"></i> 新增地址
+                    </button>
                 </div>
             </div>
         </div>
@@ -137,16 +163,35 @@ include "../template_main.php";
             <h4 class="form-section-title">帳戶設定</h4>
 
             <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="memberAccount" class="form-label required">帳號</label>
+                    <input type="email" id="memberAccount" name="account" class="form-control" required
+                        placeholder="將自動帶入Email，可修改">
+                    <div class="error-message" id="accountError"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label for="memberPassword" class="form-label required">密碼</label>
-                    <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
-                        required placeholder="至少6個字元">
+                    <div class="password-field-container">
+                        <input type="password" id="memberPassword" name="password" class="form-control" minlength="6"
+                            required placeholder="至少6個字元">
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="passwordError"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword" class="form-label required">確認密碼</label>
-                    <input type="password" id="confirmPassword" name="confirm_password" class="form-control" required>
+                    <div class="password-field-container">
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control" required>
+                        <button type="button" class="password-toggle">
+                            <i class="fas fa-eye-slash"></i>
+                        </button>
+                    </div>
                     <div class="error-message" id="confirmPasswordError"></div>
                 </div>
             </div>
@@ -155,75 +200,155 @@ include "../template_main.php";
 
 
         <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='usersindex.php'">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='index.php'">
                 <i class="fas fa-times"></i> 取消
             </button>
-            <button type="reset" class="btn btn-outline-secondary">
+            <button type="reset" class="btn btn-secondary">
                 <i class="fas fa-undo"></i> 重置
             </button>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i> 儲存會員
             </button>
+        </div>
     </form>
 </div>
 
+
 <script>
-    // 圖片預覽功能
-    function previewImage(input) {
-        const preview = document.getElementById('avatarPreview');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
+    let subs = [];
+    subs = <?php echo json_encode($rows2); ?>;
+
+    // 更新區域選單函數
+    function setSubMenu(cityId, districtSelect) {
+        const ary = subs.filter(sub => sub.city_id == cityId);
+        districtSelect.innerHTML = "<option value='' selected disabled>請選擇區域</option>";
+
+        // 使用 Set 來追蹤已經添加的區域名稱
+        const addedDistricts = new Set();
+
+        ary.forEach(sub => {
+            // 只有當區域名稱還沒有被添加過時才添加
+            if (!addedDistricts.has(sub.name)) {
+                const option = document.createElement("option");
+                option.value = sub.id;
+                option.innerHTML = sub.name;
+                districtSelect.append(option);
+                addedDistricts.add(sub.name);
             }
-            reader.readAsDataURL(input.files[0]);
-        }
+        });
     }
+</script>
 
-    // 縣市區域連動
-    const cityDistricts = {
-        '台北市': ['中正區', '大同區', '中山區', '松山區', '大安區', '萬華區', '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區'],
-        '新北市': ['板橋區', '三重區', '中和區', '永和區', '新莊區', '新店區', '樹林區', '鶯歌區', '三峽區', '淡水區', '汐止區', '瑞芳區', '土城區', '蘆洲區', '五股區', '泰山區', '林口區', '深坑區', '石碇區', '坪林區', '三芝區', '石門區', '八里區', '平溪區', '雙溪區', '貢寮區', '金山區', '萬里區', '烏來區'],
-        '桃園市': ['桃園區', '中壢區', '平鎮區', '八德區', '楊梅區', '蘆竹區', '大溪區', '龍潭區', '龜山區', '大園區', '觀音區', '新屋區', '復興區'],
-        '台中市': ['中區', '東區', '南區', '西區', '北區', '北屯區', '西屯區', '南屯區', '太平區', '大里區', '霧峰區', '烏日區', '豐原區', '后里區', '石岡區', '東勢區', '和平區', '新社區', '潭子區', '大雅區', '神岡區', '大肚區', '沙鹿區', '龍井區', '梧棲區', '清水區', '大甲區', '外埔區', '大安區'],
-        '台南市': ['中西區', '東區', '南區', '北區', '安平區', '安南區', '永康區', '歸仁區', '新化區', '左鎮區', '玉井區', '楠西區', '南化區', '仁德區', '關廟區', '龍崎區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區', '北門區', '新營區', '後壁區', '白河區', '東山區', '六甲區', '下營區', '柳營區', '鹽水區', '善化區', '大內區', '山上區', '新市區', '安定區'],
-        '高雄市': ['楠梓區', '左營區', '鼓山區', '三民區', '鹽埕區', '前金區', '新興區', '苓雅區', '前鎮區', '旗津區', '小港區', '鳳山區', '大寮區', '鳥松區', '林園區', '仁武區', '大樹區', '大社區', '岡山區', '路竹區', '橋頭區', '梓官區', '彌陀區', '永安區', '燕巢區', '田寮區', '阿蓮區', '茄萣區', '湖內區', '旗山區', '美濃區', '內門區', '杉林區', '甲仙區', '六龜區', '茂林區', '桃源區', '那瑪夏區'],
-        '基隆市': ['中正區', '七堵區', '暖暖區', '仁愛區', '中山區', '安樂區', '信義區'],
-        '新竹市': ['東區', '北區', '香山區'],
-        '嘉義市': ['東區', '西區'],
-        '新竹縣': ['竹北市', '竹東鎮', '新埔鎮', '關西鎮', '湖口鄉', '新豐鄉', '芎林鄉', '橫山鄉', '北埔鄉', '寶山鄉', '峨眉鄉', '尖石鄉', '五峰鄉'],
-        '苗栗縣': ['苗栗市', '頭份市', '竹南鎮', '後龍鎮', '通霄鎮', '苑裡鎮', '卓蘭鎮', '造橋鄉', '西湖鄉', '頭屋鄉', '公館鄉', '大湖鄉', '泰安鄉', '銅鑼鄉', '三義鄉', '西湖鄉', '南庄鄉', '頭屋鄉'],
-        '彰化縣': ['彰化市', '員林市', '和美鎮', '鹿港鎮', '溪湖鎮', '二林鎮', '田中鎮', '北斗鎮', '花壇鄉', '芬園鄉', '大村鄉', '永靖鄉', '伸港鄉', '線西鄉', '福興鄉', '秀水鄉', '埔心鄉', '埔鹽鄉', '大城鄉', '芳苑鄉', '竹塘鄉', '社頭鄉', '二水鄉', '田尾鄉', '埤頭鄉', '溪州鄉'],
-        '南投縣': ['南投市', '埔里鎮', '草屯鎮', '竹山鎮', '集集鎮', '名間鄉', '鹿谷鄉', '中寮鄉', '魚池鄉', '國姓鄉', '水里鄉', '信義鄉', '仁愛鄉'],
-        '雲林縣': ['斗六市', '斗南鎮', '虎尾鎮', '西螺鎮', '土庫鎮', '北港鎮', '古坑鄉', '大埤鄉', '莿桐鄉', '林內鄉', '二崙鄉', '崙背鄉', '麥寮鄉', '東勢鄉', '褒忠鄉', '台西鄉', '元長鄉', '四湖鄉', '口湖鄉', '水林鄉'],
-        '嘉義縣': ['太保市', '朴子市', '布袋鎮', '大林鎮', '民雄鄉', '溪口鄉', '新港鄉', '六腳鄉', '東石鄉', '義竹鄉', '鹿草鄉', '水上鄉', '中埔鄉', '竹崎鄉', '梅山鄉', '番路鄉', '大埔鄉', '阿里山鄉'],
-        '屏東縣': ['屏東市', '潮州鎮', '東港鎮', '恆春鎮', '萬丹鄉', '長治鄉', '麟洛鄉', '九如鄉', '里港鄉', '鹽埔鄉', '高樹鄉', '萬巒鄉', '內埔鄉', '竹田鄉', '新埤鄉', '枋寮鄉', '新園鄉', '崁頂鄉', '林邊鄉', '南州鄉', '佳冬鄉', '琉球鄉', '車城鄉', '滿州鄉', '枋山鄉', '三地門鄉', '霧台鄉', '瑪家鄉', '泰武鄉', '來義鄉', '春日鄉', '獅子鄉', '牡丹鄉'],
-        '宜蘭縣': ['宜蘭市', '羅東鎮', '蘇澳鎮', '頭城鎮', '礁溪鄉', '壯圍鄉', '員山鄉', '冬山鄉', '五結鄉', '三星鄉', '大同鄉', '南澳鄉'],
-        '花蓮縣': ['花蓮市', '鳳林鎮', '玉里鎮', '新城鄉', '吉安鄉', '壽豐鄉', '光復鄉', '豐濱鄉', '瑞穗鄉', '富里鄉', '秀林鄉', '萬榮鄉', '卓溪鄉'],
-        '台東縣': ['台東市', '成功鎮', '關山鎮', '卑南鄉', '鹿野鄉', '池上鄉', '東河鄉', '長濱鄉', '太麻里鄉', '大武鄉', '綠島鄉', '海端鄉', '延平鄉', '金峰鄉', '達仁鄉', '蘭嶼鄉'],
-        '澎湖縣': ['馬公市', '湖西鄉', '白沙鄉', '西嶼鄉', '望安鄉', '七美鄉'],
-        '金門縣': ['金城鎮', '金湖鎮', '金沙鎮', '金寧鄉', '烈嶼鄉', '烏坵鄉'],
-        '連江縣': ['南竿鄉', '北竿鄉', '莒光鄉', '東引鄉']
-    };
-
-    document.getElementById('memberCity').addEventListener('change', function () {
-        const districtSelect = document.getElementById('memberDistrict');
-        const selectedCity = this.value;
-
-        // 清空現有選項
-        districtSelect.innerHTML = '<option value="">請選擇區域</option>';
-
-        if (selectedCity && cityDistricts[selectedCity]) {
-            // 添加新的選項
-            cityDistricts[selectedCity].forEach(district => {
-                const option = document.createElement('option');
-                option.value = district;
-                option.textContent = district;
-                districtSelect.appendChild(option);
-            });
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 圖片預覽功能
+        function previewImage(input) {
+            const preview = document.getElementById('avatarPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
+        document.getElementById('memberAvatar').addEventListener('change', function () {
+            previewImage(this);
+        });
+
+        // 密碼顯示切換功能
+        document.querySelectorAll('.password-toggle').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+            });
+        });
+
+        // Email 同步到帳號
+        const emailInput = document.getElementById('memberEmail');
+        const accountInput = document.getElementById('memberAccount');
+
+        emailInput.addEventListener('input', function () {
+            accountInput.value = this.value;
+        });
+
+        accountInput.addEventListener('input', function () {
+            // 如果帳號被清空，則同步回 email 的值
+            if (this.value === '') {
+                this.value = emailInput.value;
+            }
+        });
+
+        // 地址相關功能
+        const addressList = document.getElementById('addressList');
+        const addAddressBtn = document.getElementById('addAddress');
+
+        // 新增地址
+        addAddressBtn.addEventListener('click', function () {
+            const addressItem = document.querySelector('.address-item').cloneNode(true);
+
+            // 重置選擇和輸入值
+            addressItem.querySelectorAll('select').forEach(select => {
+                select.value = '';
+            });
+            addressItem.querySelector('input[type="text"]').value = '';
+
+            // 更新預設地址radio的value
+            const defaultAddressRadio = addressItem.querySelector('input[type="radio"]');
+            defaultAddressRadio.value = addressList.children.length;
+            defaultAddressRadio.checked = false;
+
+            // 顯示刪除按鈕
+            addressItem.querySelector('.remove-address').style.display = 'inline-block';
+
+            // 重新綁定縣市選擇事件
+            const citySelect = addressItem.querySelector('.city-select');
+            citySelect.addEventListener('change', function () {
+                setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
+            });
+
+            addressList.appendChild(addressItem);
+        });
+
+        // 刪除地址
+        addressList.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-address')) {
+                const addressItem = e.target.closest('.address-item');
+                if (addressList.children.length > 1) {
+                    // 如果刪除的是預設地址，則將第一個地址設為預設
+                    if (addressItem.querySelector('input[type="radio"]').checked) {
+                        addressList.querySelector('.address-item:first-child input[type="radio"]').checked = true;
+                    }
+                    addressItem.remove();
+
+                    // 重新設置所有radio的value
+                    document.querySelectorAll('.address-item').forEach((item, index) => {
+                        item.querySelector('input[type="radio"]').value = index;
+                    });
+                }
+            }
+        });
+
+        // 縣市選擇事件
+        document.querySelectorAll('.city-select').forEach(select => {
+            select.addEventListener('change', function () {
+                setSubMenu(this.value, this.closest('.address-item').querySelector('.district-select'));
+            });
+        });
     });
 </script>
+
+
 
 <?php
 include "../template_btm.php";

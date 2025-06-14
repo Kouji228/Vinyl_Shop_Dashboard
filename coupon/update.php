@@ -1,6 +1,6 @@
 <?php
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 require_once "./couponMaps.php";
 
 $pageTitle = "修改優惠卷";
@@ -40,7 +40,7 @@ try {
 
 <div class="content-section">
     <div class="section-header">
-        <h3 class="section-title">修改優惠卷 (ID: <?= htmlspecialchars($row['id']) ?>)</h3>
+        <h3 class="section-title">修改優惠卷</h3>
         <a href="./index.php" class="btn btn-secondary">返回列表</a>
     </div>
 

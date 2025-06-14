@@ -1,7 +1,7 @@
 .title,
 .author {
     a {
-        color: #d1a65a;
+        color: #1a1a1a;
     }
 }
 .title {
@@ -15,12 +15,26 @@
     /* border: 2px solid red; */
 }
 
+.avatar-upload-container {
+    max-width: 700px;
+}
+
+#previewImage img {
+    width: auto;
+    max-height: 600px;
+}
+
 .flex-center {
     display: flex;
     justify-content: center;
     align-items: center;
 }
-
+.w-10 {
+    width: 10%;
+}
+.w25 {
+    width: 25px;
+}
 .wh50 {
     width: 50px;
     height: 50px;
@@ -32,6 +46,28 @@
 .w100 {
     width: 100px;
 }
-.w200 {
+.w150 {
     width: 150px;
+}
+.w180 {
+    width: 180px;
+}
+.w200 {
+    width: 200px;
+}
+.w300 {
+    width: 300px;
+}
+.wh600 {
+    width: 600px;
+    height: 600px;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+select {
+    cursor: pointer;
+}
+.searchInput {
+    flex-grow: 6 !important;
 }

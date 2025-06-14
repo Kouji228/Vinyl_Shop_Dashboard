@@ -3,6 +3,8 @@
 require_once "../components/connect.php";
 require_once "../components/Utilities.php";
 
+
+
 if (!isset($_POST["id"])) {
     alertGoTo("非法進入", "./index.php");
     exit;
@@ -16,13 +18,29 @@ $price = intval($_POST["price"]);
 $genre_id = intval($_POST["genre"]);
 $gender_id = intval($_POST["gender"]);
 $company = htmlspecialchars($_POST["company"]);
-$release_date = htmlspecialchars($_POST["release_date"]);
+$release_date = $_POST["release_date"] ?? $rowsVinyl["release_date"] ?? date("Y-m-d");
+
 $format = htmlspecialchars($_POST["format"]);
-$stock = htmlspecialchars($_POST["stock"]);
+$stock = $_POST["stock"] ?? $rowsVinyl["stock"] ?? 0;
 $desc_text = htmlspecialchars($_POST["desc_text"]);
 $playlist = htmlspecialchars($_POST["playlist"]);
 
-$status = htmlspecialchars($_POST["status"]);
+$sqlVinyl = "SELECT * FROM vinyl where id =?";
+$stmtVinyl = $pdo->prepare($sqlVinyl);
+$stmtVinyl->execute([$id]);
+$rowsVinyl = $stmtVinyl->fetch(PDO::FETCH_ASSOC);
+
+$status = $_POST["status"] != $rowsVinyl["status_id"] ? $_POST["status"] :  null;
+if ($status == null || $status === "") {
+    if ($stock == 0) {
+        $status = 3; // 缺貨
+    } elseif ($release_date > date("Y-m-d")) {
+        $status = 2; // 尚未發行
+    } else {
+        $status = 1; // 現貨
+    }
+}
+print_r($status);
 
 $set = [];
 $values = ["id" => $id];
@@ -84,6 +102,7 @@ if ($playlist !== "") {
     $set[] = "playlist = :playlist";
     $values["playlist"] = $playlist;
 }
+
 if ($status !== "") {
     $set[] = "status_id = :status";
     $values["status"] = $status;
@@ -103,7 +122,7 @@ try {
 
         $stmtImg = $pdo->prepare($sqlImg);
         $stmtImg->execute([$shs_id]);
-        $rowsImg=$stmtImg->fetchAll(PDO::FETCH_ASSOC);
+        $rowsImg = $stmtImg->fetchAll(PDO::FETCH_ASSOC);
 
         $timestamp = time();
         $ext = pathinfo($_FILES["myFile"]["name"], PATHINFO_EXTENSION);
@@ -114,11 +133,11 @@ try {
             // 已有圖片，刪除舊檔案
             $oldImgName = $rowsImg[0]["img_name"];
             $oldImgPath = "./img/{$oldImgName}";
-            if(file_exists($oldImgPath)){
+            if (file_exists($oldImgPath)) {
                 unlink($oldImgPath);
             }
-            
-             // 更新圖片資料
+
+            // 更新圖片資料
             $sqlUpdateImg = "UPDATE vinyl_img SET img_name = :name, img_path = :path WHERE shs_id = :id";
             $stmtUpdateImg = $pdo->prepare($sqlUpdateImg);
             $stmtUpdateImg->execute([
@@ -126,7 +145,7 @@ try {
                 ":path" => $file,
                 ":id" => $shs_id
             ]);
-            
+
         } else {
             if (move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)) {
                 $sqlInsertImg = "INSERT INTO vinyl_img (shs_id, img_name, img_path) VALUES (?, ?, ?)";
@@ -134,9 +153,9 @@ try {
                 $stmtInsertImg->execute([$shs_id, $img_name, $file]);
             }
         }
-        if(move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)){
-        $img = $img_name;
-    }
+        if (move_uploaded_file($_FILES["myFile"]["tmp_name"], $file)) {
+            $img = $img_name;
+        }
     }
 
     // 顯示成功訊息

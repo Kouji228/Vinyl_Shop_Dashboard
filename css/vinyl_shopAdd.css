@@ -1,0 +1,38 @@
+/* 時間範圍徽章 */
+.time-range-badge {
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* flatpickr 日曆 */
+.flatpickr-calendar {
+  width: 300px;
+}
+
+/* flatpickr 時間 */
+.flatpickr-time {
+  height: 40px;
+}
+
+.flatpickr-time input {
+  font-size: 14px;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #ced4da;
+}
+
+.form-check {
+  min-width: 80px;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}

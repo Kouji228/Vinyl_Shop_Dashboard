@@ -374,7 +374,7 @@ body {
   display: inline-flex;
   align-items: center;
   /* ↓↓↓ 新增這一行來確保內容水平置中 ↓↓↓ */
-  justify-content: center; 
+  justify-content: center;
   gap: 0.5rem;
   text-align: center;
   border: 2px solid transparent;
@@ -538,16 +538,17 @@ table {
   transition: background-color 0.3s ease;
 }
 
-.sortable-header:hover {
+/* .sortable-header:hover {
   background: var(--beige-mist);
-}
+} */
 
 .sortable-header::after {
   content: '\f0dc';
   font-family: 'Font Awesome 6 Free';
+  font-size: 16px;
   font-weight: 900;
   position: absolute;
-  right: 8px;
+  right: 5px;
   top: 50%;
   transform: translateY(-50%);
   opacity: 0.3;
@@ -559,13 +560,13 @@ table {
 }
 
 .sortable-header.sort-asc::after {
-  content: '\f0de';
+  content: '\f0d8';
   opacity: 1;
   color: var(--warm-brass);
 }
 
 .sortable-header.sort-desc::after {
-  content: '\f0dd';
+  content: '\f0d7';
   opacity: 1;
   color: var(--warm-brass);
 }

@@ -1,9 +1,9 @@
 <?php
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 
 // 檢查請求來源是否正常
-if (!isset($_GET["id"])) {
+if (!isset($_POST["id"])) {
     alertGoTo("請從正常管道進入", "./index.php");
     exit();
 }

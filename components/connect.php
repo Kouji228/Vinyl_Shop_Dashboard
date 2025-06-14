@@ -2,8 +2,7 @@
 $servername = "127.0.0.1";
 $username = "root";  // XAMPP 默認用戶名
 $password = "";      // XAMPP 默認密碼為空
-// $dbname = "article_sql";
-$dbname = "vinyl";
+$dbname = "ef_db";
 
 try {
   $pdo = new PDO(

@@ -1,6 +1,6 @@
 <?php
-require_once "./connect.php";
-require_once "./Utilities.php";
+require_once "../components/connect.php";
+require_once "../components/Utilities.php";
 require_once "./couponMaps.php";
 
 // --- 樣板需要的設定 ---
@@ -82,7 +82,6 @@ try {
     <div class="details-card">
         <div class="details-header">
             <h4 class="details-main-title"><?= htmlspecialchars($coupon['name'] ?? 'N/A') ?></h4>
-            <span class="details-id">ID: <?= htmlspecialchars($coupon['id']) ?></span>
         </div>
         <div class="details-body">
             <div class="details-grid">

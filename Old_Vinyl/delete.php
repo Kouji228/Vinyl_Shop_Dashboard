@@ -17,7 +17,6 @@ if ($search != "") {
   $values["search"] = "%$search%";
 }
 
-
 $perPage = 10;
 $page = intval($_GET["page"] ?? 1);
 $pageStart = ($page - 1) * $perPage;
@@ -134,7 +133,6 @@ $totalPage = ceil($totalCount / $perPage);
                 <img src="./uploads/no-image.png" alt="無圖片">
               <?php endif; ?>
             </td>
-
 
             <!-- 專輯名稱 -->
             <td class="name" title="<?= htmlspecialchars($row["name"]) ?>">
