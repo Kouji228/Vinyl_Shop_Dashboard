@@ -1,3 +1,51 @@
+:root {
+    /* 主題顏色 */
+    --retro-indigo: #2e4057;
+    --olive-moss: #7c805e;
+    --warm-brass: #ca9d4e;
+    --beige-mist: #f3efea;
+    --smoke-violet: #9e9d9d;
+    --vinyl-black: #1a1a1a;
+    --white: #ffffff;
+    --light-gray: #f8f6f3;
+
+    /* 狀態顏色 */
+    --success-color: #3e9241;
+    --success-hover: #5fb365;
+    --warning-color: #ca9d4e;
+    --error-color: #c23c33;
+    --error-hover: #d32f2f;
+    --danger-color: #b70c00;
+
+    /* 按鈕顏色 */
+    --btn-secondary: #6c757d;
+    --btn-info-hover: #243447;
+    --primary-color: #007bff;
+    --primary-dark: #0056b3;
+    --secondary-color: #6c757d;
+
+    /* 背景顏色 */
+    --bg-light: #f8f9fa;
+    --bg-tag: #cfe2ff;
+    --bg-tag-text: #084298;
+
+    /* 狀態標籤顏色 */
+    --status-draft-bg: #e9ecef;
+    --status-draft-text: #495057;
+    --status-published-bg: #d4edda;
+    --status-published-text: #155724;
+    --status-scheduled-bg: #f8d7da;
+    --status-scheduled-text: #721c24;
+
+    /* 邊框和陰影 */
+    --border-color: #d1a65a33;
+    --shadow-light: 0 2px 8px #2e405714;
+    --shadow-medium: 0 4px 16px #2e40571f;
+    --shadow-heavy: 0 8px 32px #2e405729;
+}
+
+
+
 /* =================================================================== */
 /* coupon.css - 最終修正版                                           */
 /* =================================================================== */
@@ -87,16 +135,17 @@
 
 /* 根據不同狀態設定背景色 */
 .status-badge.status-active {
-    background-color: var(--success-color, #28a745);
-    color: black;
+    background-color: #d4edda;
+    color: #155724;
 }
 
 .status-badge.status-pending {
-    background-color: var(--warning-color, #ffc107);
+    background-color: #e9ecef;
+    color: #495057;
 }
 
 .status-badge.status-inactive {
-    background-color: var(--error-color, #f44336);
+    background-color: var(--error-color);
 }
 
 .status-badge.status-unknown {

@@ -9,10 +9,6 @@ include "../template_top.php";
 include "../template_main.php";
 
 
-
-
-
-
 // 分頁邏輯
 $perPage = 25;
 $page = intval($_GET["page"] ?? 1);
@@ -100,14 +96,15 @@ try {
     exit;
 }
 
-$totalPage = ceil($totalCount / $perPage);
+$totalPages = ceil($totalCount / $perPage);
 ?>
 
 <div class="content-section">
     <div class="section-header d-flex justify-content-between align-items-center">
         <h3 class="section-title">會員列表</h3>
+        <span class="ms-auto me-2">目前共 <?= $totalCount ?> 筆資料</span>
         <div class="d-flex align-items-center gap-3">
-            <!-- <a href="./add.php" class="btn btn-primary">新增會員</a> -->
+            <a href="./add.php" class="btn btn-primary">新增會員</a>
         </div>
     </div>
     <div class="controls-section">
@@ -151,7 +148,8 @@ $totalPage = ceil($totalCount / $perPage);
                     <th>Email</th>
                     <th>電話</th>
                     <th>
-                        <a href="?sort=level&order=<?= $sortColumn === 'level' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                        <a href="?sort=level&order=<?= $sortColumn === 'level' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>"
+                            class="text-white text-decoration-none">
                             等級
                             <?php if ($sortColumn === 'level'): ?>
                                 <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
@@ -161,7 +159,8 @@ $totalPage = ceil($totalCount / $perPage);
                         </a>
                     </th>
                     <th>
-                        <a href="?sort=created_at&order=<?= $sortColumn === 'created_at' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                        <a href="?sort=created_at&order=<?= $sortColumn === 'created_at' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>"
+                            class="text-white text-decoration-none">
                             註冊時間
                             <?php if ($sortColumn === 'created_at'): ?>
                                 <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
@@ -171,7 +170,8 @@ $totalPage = ceil($totalCount / $perPage);
                         </a>
                     </th>
                     <th>
-                        <a href="?sort=is_valid&order=<?= $sortColumn === 'is_valid' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>" class="text-white text-decoration-none">
+                        <a href="?sort=is_valid&order=<?= $sortColumn === 'is_valid' && $sortOrder === 'ASC' ? 'DESC' : 'ASC' ?>"
+                            class="text-white text-decoration-none">
                             帳號狀態
                             <?php if ($sortColumn === 'is_valid'): ?>
                                 <i class="fas fa-sort-<?= $sortOrder === 'ASC' ? 'up' : 'down' ?>"></i>
@@ -226,22 +226,60 @@ $totalPage = ceil($totalCount / $perPage);
     </div>
 
     <!-- 分頁 -->
-    <div class="pagination">
-        <?php if ($page > 1): ?>
-            <a href="?page=<?= $page - 1 ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>" class="pagination-btn"><i
-                    class="fas fa-chevron-left"></i></a>
-        <?php endif; ?>
+    <?php if ($totalPages > 1): ?>
+        <div class="pagination">
+            <div class="pagination-info">
+                第 <?= $page ?> 頁，共 <?= $totalPages ?> 頁
+            </div>
+            <?php if ($page > 1): ?>
+                <button class="pagination-btn"
+                    onclick="window.location.href='?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&level=<?= urlencode($level) ?>&status=<?= urlencode($status) ?>&sort=<?= urlencode($sortColumn) ?>&order=<?= urlencode($sortOrder) ?>'">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            <?php else: ?>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            <?php endif; ?>
 
-        <?php for ($i = 1; $i <= $totalPage; $i++): ?>
-            <a href="?page=<?= $i ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>"
-                class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
-        <?php endfor; ?>
+            <?php
+            $startPage = max(1, $page - 2);
+            $endPage = min($totalPages, $page + 2);
 
-        <?php if ($page < $totalPage): ?>
-            <a href="?page=<?= $page + 1 ?>&sort=<?= $sortColumn ?>&order=<?= $sortOrder ?>" class="pagination-btn"><i
-                    class="fas fa-chevron-right"></i></a>
-        <?php endif; ?>
-    </div>
+            if ($startPage > 1) {
+                echo '<button class="pagination-btn" onclick="window.location.href=\'?page=1&search=' . urlencode($search) . '&level=' . urlencode($level) . '&status=' . urlencode($status) . '&sort=' . urlencode($sortColumn) . '&order=' . urlencode($sortOrder) . '\'">1</button>';
+                if ($startPage > 2) {
+                    echo '<span class="pagination-ellipsis">...</span>';
+                }
+            }
+
+            for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <button class="pagination-btn <?= $i == $page ? 'active' : '' ?>"
+                    onclick="window.location.href='?page=<?= $i ?>&search=<?= urlencode($search) ?>&level=<?= urlencode($level) ?>&status=<?= urlencode($status) ?>&sort=<?= urlencode($sortColumn) ?>&order=<?= urlencode($sortOrder) ?>'">
+                    <?= $i ?>
+                </button>
+            <?php endfor;
+
+            if ($endPage < $totalPages) {
+                if ($endPage < $totalPages - 1) {
+                    echo '<span class="pagination-ellipsis">...</span>';
+                }
+                echo '<button class="pagination-btn" onclick="window.location.href=\'?page=' . $totalPages . '&search=' . urlencode($search) . '&level=' . urlencode($level) . '&status=' . urlencode($status) . '&sort=' . urlencode($sortColumn) . '&order=' . urlencode($sortOrder) . '\'">' . $totalPages . '</button>';
+            }
+            ?>
+
+            <?php if ($page < $totalPages): ?>
+                <button class="pagination-btn"
+                    onclick="window.location.href='?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&level=<?= urlencode($level) ?>&status=<?= urlencode($status) ?>&sort=<?= urlencode($sortColumn) ?>&order=<?= urlencode($sortOrder) ?>'">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            <?php else: ?>
+                <button class="pagination-btn" disabled>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <script>
         const btnSuspend = document.querySelectorAll(".btn-suspend");

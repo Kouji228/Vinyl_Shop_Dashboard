@@ -17,170 +17,21 @@ if (isset($_SESSION['admin_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理者登入</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="../css/index.css" rel="stylesheet">
-    <style>
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            background: #f5f5f5;
-        }
+    <!-- Bootstrap 5.3.5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous" />
 
-        .signup-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            margin: 2rem;
-            position: relative;
-            z-index: 1;
-        }
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
-        .signup-box {
-            display: flex;
-            background: var(--white);
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
 
-        .left-image {
-            flex: 1;
-            background: url('./images/admin_login.jpg') center/cover;
-            position: relative;
-        }
+    <!-- Google 字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
 
-        .signup-form {
-            flex: 1;
-            padding: 3rem;
-            background: var(--white);
-        }
-
-        .signup-form h2 {
-            font-family: 'Playfair Display', serif;
-            color: #333;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .signup-form p {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            background: #f8f8f8;
-            margin-bottom: 1rem;
-        }
-
-        .form-control:focus {
-            border-color: #4a90e2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-            background: var(--white);
-        }
-
-        .position-relative {
-            position: relative;
-        }
-
-        .form-check-icon {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #4CAF50;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .form-control:valid+.form-check-icon {
-            opacity: 1;
-        }
-
-        .btn-signup {
-            width: 100%;
-            padding: 0.8rem;
-            background: #4a90e2;
-            color: var(--white);
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
-            margin-top: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-signup:hover {
-            background: #357abd;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 2.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            padding: 0;
-            z-index: 2;
-        }
-
-        .password-toggle:hover {
-            color: #4a90e2;
-        }
-
-        .error-message {
-            color: #dc3545;
-            margin-bottom: 1rem;
-            text-align: center;
-            padding: 0.75rem;
-            background: rgba(220, 53, 69, 0.1);
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        .text-muted {
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .text-muted:hover {
-            color: #4a90e2;
-        }
-
-        @media (max-width: 768px) {
-            .signup-box {
-                flex-direction: column;
-            }
-
-            .right-image {
-                display: none;
-            }
-
-            .signup-form {
-                padding: 2rem;
-            }
-        }
-    </style>
+    <link href="./css/admin_login.css" rel="stylesheet">
 </head>
 
 <body>
@@ -203,7 +54,8 @@ if (isset($_SESSION['admin_id'])) {
                         <i class="fas fa-check form-check-icon"></i>
                     </div>
                     <div class="position-relative password-field-container">
-                        <input type="password" class="form-control" id="adminPassword" name="password" placeholder="管理者密碼" required>
+                        <input type="password" class="form-control" id="adminPassword" name="password"
+                            placeholder="管理者密碼" required>
                         <i class="fas fa-check form-check-icon"></i>
                         <button type="button" class="password-toggle">
                             <i class="fas fa-eye-slash"></i>
@@ -222,11 +74,12 @@ if (isset($_SESSION['admin_id'])) {
     </div>
 
     <script>
-        document.querySelectorAll('.password-toggle').forEach(function(button) {
-            button.addEventListener('click', function() {
+        // 密碼切換按鈕
+        document.querySelectorAll('.password-toggle').forEach(function (button) {
+            button.addEventListener('click', function () {
                 const input = this.parentElement.querySelector('input');
                 const icon = this.querySelector('i');
-                
+
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.classList.remove('fa-eye-slash');
@@ -239,7 +92,9 @@ if (isset($_SESSION['admin_id'])) {
             });
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous">
+        </script>
 </body>
 
 </html>

@@ -23,7 +23,6 @@
 
     // 頁面切換功能
     function showSection(sectionId) {
-        // 隱藏所有 section
         const sections = document.querySelectorAll('.page-section');
         sections.forEach(section => {
             section.style.display = 'none';

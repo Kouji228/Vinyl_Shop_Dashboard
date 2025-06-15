@@ -91,7 +91,7 @@ $totalPage = ceil($totalCount / $perPage); //
 <div class="content-section">
     <div class="section-header d-flex justify-content-between align-items-center">
         <h3 class="section-title">優惠卷列表</h3>
-        <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料</span>
+        <span class="ms-auto me-2">目前共 <?= $totalCount ?> 筆資料</span>
         <a href="./add.php" class="btn btn-primary">增加資料</a>
     </div>
 
