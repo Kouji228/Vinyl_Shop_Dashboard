@@ -67,7 +67,7 @@ try {
     <div class="content-section">
         <div class="section-header d-flex justify-content-between align-items-center">
             <h3 class="section-title">店面列表</h3>
-            <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料
+            <span class="ms-auto me-2">目前共 <?= $totalCount ?> 筆資料
             <?php if (!empty($searchTitle) || !empty($selectedDistrict)): ?>
                 (已篩選)
             <?php endif; ?></span>
