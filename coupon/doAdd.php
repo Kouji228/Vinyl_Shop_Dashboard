@@ -81,6 +81,14 @@ if ($ruleData['max_discount_amount'] !== null && $ruleData['max_discount_amount'
     exit;
 }
 
+// 日期區間驗證
+if (!empty($couponData['start_at']) && !empty($couponData['end_at'])) {
+    if (strtotime($couponData['start_at']) > strtotime($couponData['end_at'])) {
+        alertAndBack("開始時間不能大於結束時間，請停調整");
+        exit;
+    }
+}
+
 // 限制條件相關驗證
 if ($targetData['target_type'] && empty($targetData['target_value'])) {
     alertAndBack("選擇限制類型後，請選擇次類型。");
@@ -105,7 +113,7 @@ try {
         if ($stmtCode->fetchColumn() > 0) {
             // 因為此錯誤非系統異常，而是使用者輸入問題，所以可以自行 rollback 並提示
             $pdo->rollBack();
-            alertAndBack("錯誤：優惠碼 '{$couponData['code']}' 已經存在，請使用不同的優惠碼。");
+            alertAndBack("此優惠碼已經存在，請使用不同的優惠碼。");
             exit;
         }
     }
