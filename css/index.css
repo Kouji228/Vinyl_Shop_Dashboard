@@ -527,6 +527,7 @@ body {
 
 .btn-warning:hover {
   background-color: #855e23;
+  color: var(--white);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(209, 166, 90, 0.4);
 }
@@ -563,6 +564,8 @@ body {
 
 .btn-info:hover {
   background-color: var(--btn-info-hover);
+  border-color: var(--btn-info-hover);
+  /* color: var(--white); */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(46, 64, 87, 0.4);
 }
@@ -936,7 +939,7 @@ tbody tr:hover {
     object-fit: cover;
 }
 
-.avatar-preview::after {
+/* .avatar-preview::after {
     content: '點擊更換頭像';
     position: absolute;
     bottom: 0;
@@ -953,7 +956,7 @@ tbody tr:hover {
 
 .avatar-preview:hover::after {
     opacity: 1;
-}
+} */
 
 /* 下拉選單樣式 */
 select.form-control {

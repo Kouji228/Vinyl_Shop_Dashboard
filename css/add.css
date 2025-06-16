@@ -183,7 +183,7 @@
     object-fit: cover;
 }
 
-.avatar-preview::after {
+/* .avatar-preview::after {
     content: '點擊更換頭像';
     position: absolute;
     bottom: 0;
@@ -200,7 +200,7 @@
 
 .avatar-preview:hover::after {
     opacity: 1;
-}
+} */
 
 /* 地址下拉選單樣式 */
 select.form-control {

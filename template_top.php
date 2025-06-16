@@ -1,13 +1,13 @@
-<!-- <?php
+<?php
 session_start();
 
 // 檢查是否已登入
-// if (!isset($_SESSION["admin"])) {
-//     // 如果未登入，導向到登入頁面
-//     header("Location: ../admin_login.php");
-//     exit;
-// }
-?>  -->
+if (!isset($_SESSION["admin"])) {
+  // 如果未登入，導向到登入頁面
+  header("Location: ../admin_login.php");
+  exit;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="zh-Hant">
@@ -51,7 +51,9 @@ session_start();
     <!-- 側邊欄 -->
     <nav class="sidebar" id="sidebar">
       <div class="logo">
-        <img src="../images/eflogo.png" alt="Echo & Flow Logo" class="logo-image" />
+        <a href="../index.php">
+          <img src="../images/eflogo.png" alt="Echo & Flow Logo" class="logo-image" />
+        </a>
       </div>
 
       <nav class="sidebar-nav">
