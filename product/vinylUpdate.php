@@ -69,10 +69,10 @@ try {
         <!-- 唱片 -->
         <div class="form-section">
             <div class="form-row avatar-row">
-                <div class="form-group avatar-group">
+                <div class="form-group vinyl-group">
                     <!-- <label for="memberAvatar" class="form-label"></label> -->
                     <div class="avatar-upload-container">
-                        <div class="avatar-preview" id="previewImage">
+                        <div class="vinyl-preview" id="previewImage">
                             <img id="previewImage" class="img-fluid mb-4 rounded-3" src="./img/<?= $rowsImg[0]["img_name"] ?>"
                                 alt="" srcset="">
                         </div>

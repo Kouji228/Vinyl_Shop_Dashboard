@@ -82,7 +82,7 @@ if ($format) {
   $values["format"] = $format;
 }
 if ($stock !== "") {
-  $conditions[] = "stock > :stock";
+  $conditions[] = "stock >= :stock";
   $values["stock"] = (int) $stock;
 }
 
@@ -126,7 +126,7 @@ $sqlGenre = "SELECT * FROM vinyl_genre";
 $sqlGender = "SELECT * FROM vinyl_gender";
 $sqlStatus = "SELECT * FROM vinyl_status";
 
-$sqlVinyl="SELECT * FROM vinyl where status_id = 1";
+$sqlVinyl = "SELECT * FROM vinyl where status_id = 1";
 
 try {
   $stmt = $pdo->prepare($sql);
@@ -155,7 +155,7 @@ try {
 
   $stmtVinyl = $pdo->prepare($sqlVinyl);
   $stmtVinyl->execute();
-  $rowsVinyl= $stmtVinyl->fetchAll(PDO::FETCH_ASSOC);
+  $rowsVinyl = $stmtVinyl->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
   echo "系統錯誤，請恰管理人員<br>";
   echo "錯誤: " . $e->getMessage();
@@ -184,16 +184,17 @@ $totalPage = ceil($totalCount / $perPage);
     }
     ?>
     <h3 class="section-title"><?= $statusName ?>商品列表</h3>
+    <span class="fs-5 ms-auto me-3 flex-center">總共 <?= $totalCount ?> 個商品</span>
     <a href="./vinylAdd.php" class="btn btn-primary">增加黑膠唱片</a>
   </div>
 
   <!--搜尋與分類 -->
   <div class="controls-section">
     <div class="w-100 d-flex">
-      <button type="button" class="btn btn-success me-1"><a class="text-decoration-none text-white"
+      <button type="button" class="btn clear-filters me-1"><a class="text-decoration-none text-white"
           href="./">清除搜尋</a></button>
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">進階搜尋</button>
-      <span class="fs-5 ms-3 flex-center">總共 <?= $totalCount ?> 個商品, 每頁有 <?= $perPage ?> 個商品</span>
+      <span class="fs-5 ms-3 flex-center">每頁有 <?= $perPage ?> 個商品</span>
       <div class="ms-auto d-flex w200">
         <select name="perpage" id="perpageNum" class="form-select w100 me-2">
           <option value="20" <?= $perPage == 20 ? "selected" : "" ?>>20</option>
@@ -459,7 +460,7 @@ $totalPage = ceil($totalCount / $perPage);
     <div class=" modal-content">
     <div class="modal-header bg-dark text-white">
       <h1 class="modal-title fs-5" id="exampleModalLabel">進階搜尋</h1>
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <button type="button" class="btn-close btn-white" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
 
     <div class="modal-body">
@@ -481,14 +482,16 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="modal_title">唱片名稱</label>
-            <input name="modal_title" id="modal_title" type="text" class="form-control" <?= $titleSearch ? 'value="' . htmlspecialchars($titleSearch) . '"' : 'placeholder="唱片名稱"' ?> list="titleList">
+            <input name="modal_title" id="modal_title" type="text" class="form-control" placeholder="唱片名稱"
+              <?= $titleSearch ? 'value="' . htmlspecialchars($titleSearch) . '"' : '' ?> list="titleList">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="modal_author" class="form-label">藝術家</label>
-            <input name="modal_author" id="modal_author" type="text" class="form-control" <?= $authorSearch ? 'value="' . htmlspecialchars($authorSearch) . '"' : 'placeholder="作家"' ?> list="authorList">
+            <input name="modal_author" id="modal_author" type="text" class="form-control" placeholder="創作者名稱"
+              <?= $authorSearch ? 'value="' . htmlspecialchars($authorSearch) . '"' : '' ?> list="authorList">
             <datalist id="authorList">
               <?php foreach ($rowsAuthor as $row): ?>
                 <option value="<?= $row["author"] ?>"></option>
@@ -500,7 +503,8 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label for="modal_company" class="form-label">公司</label>
-            <input name="modal_company" id="modal_company" type="text" class="form-control" placeholder="公司名稱">
+            <input name="modal_company" id="modal_company" type="text" class="form-control" placeholder="公司名稱"
+              <?= $company ? 'value="' . htmlspecialchars($company) . '"' : '' ?>>
           </div>
         </div>
 
@@ -529,12 +533,12 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="modal_price1">最小價格</label>
-            <input name="modal_price" id="modal_price1" type="number" class="form-control" placeholder="最小價格">
+            <input name="modal_price" id="modal_price1" type="number" class="form-control" placeholder="最小價格" <?= $price1 ? 'value="' . htmlspecialchars($price1) . '"' : '' ?>>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="modal_price2">最大價格</label>
-            <input name="modal_price" id="modal_price2" type="number" class="form-control" placeholder="最大價格">
+            <input name="modal_price" id="modal_price2" type="number" class="form-control" placeholder="最大價格" <?= $price2 ? 'value="' . htmlspecialchars($price2) . '"' : '' ?>>
           </div>
 
 
@@ -543,12 +547,12 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="modal_stock">庫存</label>
-            <input name="modal_stock" id="modal_stock" type="number" class="form-control" placeholder="庫存數量">
+            <input name="modal_stock" id="modal_stock" type="number" class="form-control" placeholder="庫存數量" <?= $stock ? 'value="' . htmlspecialchars($stock) . '"' : '' ?>>
             <!-- <div class="error-message" id="levelError"></div> -->
           </div>
           <div class="form-group">
             <label class="form-label" for="modal_format">規格</label>
-            <input name="modal_format" id="modal_format" type="text" class="form-control" placeholder="LP數量 ex: 1LP">
+            <input name="modal_format" id="modal_format" type="text" class="form-control" placeholder="LP數量 ex: 1LP" <?= $format ? 'value="' . htmlspecialchars($format) . '"' : '' ?>>
             <!-- <div class="error-message" id="levelError"></div> -->
           </div>
 
@@ -557,11 +561,11 @@ $totalPage = ceil($totalCount / $perPage);
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="modal_date1">最小日期</label>
-            <input name="modal_date1" id="modal_date1" type="date" class="form-control">
+            <input name="modal_date1" id="modal_date1" type="date" class="form-control" <?= $date1 ? 'value="' . htmlspecialchars($date1) . '"' : '' ?>>
           </div>
           <div class="form-group">
             <label class="form-label" for="modal_date1">最大日期</label>
-            <input name="modal_date2" id="modal_date2" type="date" class="form-control">
+            <input name="modal_date2" id="modal_date2" type="date" class="form-control" <?= $date2 ? 'value="' . htmlspecialchars($date2) . '"' : '' ?>>
           </div>
 
         </div>
@@ -569,7 +573,7 @@ $totalPage = ceil($totalCount / $perPage);
     </div>
 
     <div class="modal-footer bg-dark">
-      <button type="button" class="btn btn-success me-1 btn-clear">清除篩選</button>
+      <button type="button" class="btn clear-filters me-1 btn-clear">清除篩選</button>
       <button type="button" class="btn btn-primary ms-auto filter-advance">搜尋</button>
       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
     </div>
@@ -585,6 +589,7 @@ $totalPage = ceil($totalCount / $perPage);
   const btnDel = document.querySelectorAll('.btn-del');
   const btnRemove = document.querySelectorAll('.btn-remove');
   const btnRestock = document.querySelectorAll('.btn-restock');
+  const idSelect = document.querySelectorAll("th.id")
 
   const btnSearch = document.querySelector(".btn-search");
   const inputPrice1 = document.querySelector("input[name=price1]");
@@ -648,6 +653,10 @@ $totalPage = ceil($totalCount / $perPage);
       window.location.href = `./doRemoveVinyl.php?id=${btn.dataset.id}`
     }
   }
+
+  // idSelect.forEach("click",()=>{
+  //   // s
+  // })
 
   // !!　搜尋
   searchType.addEventListener('change', function () {
@@ -861,6 +870,7 @@ $totalPage = ceil($totalCount / $perPage);
 
     // 逐一處理每個欄位
     fields.forEach(id => {
+      if (id === "modal_status") return;
       const el = document.getElementById(id);
       if (el && el.value.trim() !== "") {
         el.value = ""
