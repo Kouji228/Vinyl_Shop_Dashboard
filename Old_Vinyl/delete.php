@@ -84,7 +84,7 @@ $totalPage = ceil($totalCount / $perPage);
   <div class="section-header d-flex justify-content-between align-items-center">
     <h3 class="section-title">二手商品回收桶</h3>
     <span class="ms-auto">目前共 <?= $totalCount ?> 筆資料</span>
-    <a href="./index.php" class="btn btn-secondary">返回列表</a>
+    <a href="./index.php" class="btn btn-secondary m-2">返回列表</a>
   </div>
   <!-- 搜尋篩選 -->
   <div class="controls-section">

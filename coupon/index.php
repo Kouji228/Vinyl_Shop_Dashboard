@@ -5,15 +5,15 @@ require_once "../components/Utilities.php";
 require_once "./couponMaps.php"; // 引入共用的 Map 陣列
 
 $pageTitle = "優惠卷管理";
-$cssList = ["../css/index.css", "./coupon.css"]; //
+$cssList = ["../css/index.css", "./coupon.css"];
 include "../vars.php";
 include "../template_top.php";
 include "../template_main.php";
 
 // --- 參數設定 ---
-$perPage = 15; //
+$perPage = 15;
 $page = isset($_GET["page"]) ? max(1, (int) $_GET["page"]) : 1;
-$pageStart = ($page - 1) * $perPage; //
+$pageStart = ($page - 1) * $perPage;
 
 // --- 集中接收與管理所有篩選條件 ---
 $filters = [
@@ -29,6 +29,11 @@ $valid_columns = ['id', 'start_at', 'end_at'];
 $sort_by = in_array($_GET['sort_by'] ?? '', $valid_columns) ? $_GET['sort_by'] : 'id';
 $sort_order = (isset($_GET['sort_order']) && strtolower($_GET['sort_order']) === 'desc') ? 'desc' : 'asc';
 $next_sort_order = ($sort_order === 'asc') ? 'desc' : 'asc';
+
+// 為分頁連結準備基礎參數
+$baseLinkParams = array_filter($filters); // 使用已定義的 $filters 陣列
+$baseLinkParams['sort_by'] = $sort_by;
+$baseLinkParams['sort_order'] = $sort_order;
 
 // --- 動態建立 SQL WHERE 條件 ---
 $whereConditions = ["coupons.`is_valid` = 1"]; // 基礎條件：只選取有效的優惠卷
@@ -62,10 +67,10 @@ $whereClause = "WHERE " . implode(" AND ", $whereConditions);
 // --- 資料庫查詢 ---
 try {
     // 查詢總筆數 (用於分頁)
-    $sqlAll = "SELECT COUNT(coupons.id) as total FROM `coupons` LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id $whereClause"; //
+    $sqlAll = "SELECT COUNT(coupons.id) as total FROM `coupons` LEFT JOIN `coupon_rules` ON coupons.id = coupon_rules.coupon_id $whereClause";
     $stmtAll = $pdo->prepare($sqlAll);
     $stmtAll->execute($bindings);
-    $totalCount = $stmtAll->fetch(PDO::FETCH_ASSOC)['total'] ?? 0; //
+    $totalCount = $stmtAll->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
     // 查詢當前頁面的資料
     $sql = "SELECT coupons.*,
@@ -79,13 +84,13 @@ try {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($bindings);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC); //
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     die("資料庫查詢失敗: " . $e->getMessage()); // 發生錯誤時中斷並顯示訊息
 }
 
-$totalPage = ceil($totalCount / $perPage); //
+$totalPage = ceil($totalCount / $perPage);
 ?>
 
 <div class="content-section">
@@ -123,7 +128,7 @@ $totalPage = ceil($totalCount / $perPage); //
                 id="dateEndInput" title="結束日期">
         </div>
 
-        <div class="form-actions controls-actions">
+        <div class="controls-actions">
             <button id="btnCouponSearch" class="btn btn-primary">搜尋</button>
             <button type="button" class="clear-filters" onclick="window.location.href='index.php'">清除篩選</button>
         </div>
@@ -188,7 +193,7 @@ $totalPage = ceil($totalCount / $perPage); //
                             </td>
                             <td class="text-center">
                                 <div class="action-buttons">
-                                    <a class="btn btn-sm btn-info btn-icon-absolute"
+                                    <a class="btn btn-sm btn-success btn-icon-absolute"
                                         href="./coupon_details_page.php?id=<?= $row["id"] ?>" title="詳細">
                                         <i class="fas fa-fw fa-eye"></i>
                                     </a>
@@ -213,42 +218,83 @@ $totalPage = ceil($totalCount / $perPage); //
         </table>
     </div>
 
-    <?php if ($totalPage > 0): ?>
-        <div class="pagination"> <?php if ($page > 1):
-            $prevLinkParams = array_filter($filters);
-            $prevLinkParams['page'] = $page - 1;
-            $prevLinkParams['sort_by'] = $sort_by;
-            $prevLinkParams['sort_order'] = $sort_order;
-            ?>
-                <a href="?<?= http_build_query($prevLinkParams) ?>" class="pagination-btn"><i
-                        class="fas fa-chevron-left"></i></a>
-            <?php else: ?>
-                <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
-            <?php endif; ?>
-
-            <?php for ($i = 1; $i <= $totalPage; $i++):
-                $pageLinkParams = array_filter($filters);
-                $pageLinkParams['page'] = $i;
-                $pageLinkParams['sort_by'] = $sort_by;
-                $pageLinkParams['sort_order'] = $sort_order;
-                ?>
-                <a href="?<?= http_build_query($pageLinkParams) ?>"
-                    class="pagination-btn <?= ($page == $i) ? "active" : "" ?>"><?= $i ?></a>
-            <?php endfor; ?>
-
-            <?php if ($page < $totalPage):
-                $nextLinkParams = array_filter($filters);
-                $nextLinkParams['page'] = $page + 1;
-                $nextLinkParams['sort_by'] = $sort_by;
-                $nextLinkParams['sort_order'] = $sort_order;
-                ?>
-                <a href="?<?= http_build_query($nextLinkParams) ?>" class="pagination-btn"><i
-                        class="fas fa-chevron-right"></i></a>
-            <?php else: ?>
-                <button class="pagination-btn" disabled><i class="fas fa-chevron-right"></i></button>
-            <?php endif; ?>
+    <!-- 分頁 -->
+    <div class="pagination">
+        <div class="pagination-info">
+            第 <?= $page ?> 頁，共 <?= $totalPage ?> 頁
         </div>
-    <?php endif; ?>
+        <?php
+        // 計算分頁範圍
+        $startPage = max(1, $page - 2);
+        $endPage = min($totalPage, $startPage + 4);
+        ?>
+
+        <!-- // 第一頁 -->
+        <?php if ($startPage > 1): ?>
+            <?php
+            $firstPageParams = $baseLinkParams;
+            $firstPageParams['page'] = 1;
+            $queryString = http_build_query($firstPageParams);
+            ?>
+            <button class="pagination-btn" onclick="window.location.href='?<?= $queryString ?>'"><i
+                    class="fa-solid fa-angles-left"></i></button>
+        <?php endif; ?>
+
+        <!-- // 上一頁按鈕 -->
+        <?php if ($page > 1): ?>
+            <?php
+            $prevPageParams = $baseLinkParams;
+            $prevPageParams['page'] = $page - 1;
+            $queryString = http_build_query($prevPageParams);
+            ?>
+            <button class="pagination-btn" onclick="window.location.href='?<?= $queryString ?>'">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        <?php else: ?>
+            <button class="pagination-btn" disabled>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        <?php endif; ?>
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <?php
+            $numPageParams = $baseLinkParams;
+            $numPageParams['page'] = $i;
+            $queryString = http_build_query($numPageParams);
+            ?>
+            <button class="pagination-btn <?= $i == $page ? 'active' : '' ?>"
+                onclick="window.location.href='?<?= $queryString ?>'">
+                <?= $i ?>
+            </button>
+        <?php endfor; ?>
+        <!-- 下一頁按鈕 -->
+        <?php if ($page < $totalPage): ?>
+            <?php
+            $nextPageParams = $baseLinkParams;
+            $nextPageParams['page'] = $page + 1;
+            $queryString = http_build_query($nextPageParams);
+            ?>
+            <button class="pagination-btn" onclick="window.location.href='?<?= $queryString ?>'">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        <?php else: ?>
+            <button class="pagination-btn" disabled>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        <?php endif; ?>
+        <!-- 最後一頁 -->
+        <?php if ($endPage < $totalPage): ?>
+            <?php
+            $lastPageParams = $baseLinkParams;
+            $lastPageParams['page'] = $totalPage;
+            $queryString = http_build_query($lastPageParams);
+            ?>
+            <button class="pagination-btn" onclick="window.location.href='?<?= $queryString ?>'">
+                <i class="fa-solid fa-angles-right"></i>
+            </button>
+        <?php endif; ?>
+
+    </div>
+
 </div>
 
 <script>
