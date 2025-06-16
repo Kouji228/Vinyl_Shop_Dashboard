@@ -74,7 +74,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
           <div class="form-row">
             <div class="form-group flex-grow-1">
               <label class="form-label required">標題</label>
-              <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($article['title'] ?? '') ?>" required />
+              <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($article['title'] ?? '') ?>" />
             </div>
           </div>
           <div class="form-row">
@@ -82,7 +82,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
               <label class="form-label">封面圖片</label>
               <input type="file" id="coverFileInput" accept="image/*" class="form-control mb-2">
               <input type="text" name="cover_image_url" class="form-control" value="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" placeholder="請輸入圖片網址" />
-              <img src="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?>" alt="封面圖片" class="cover-image-preview mt-2" style="max-width:200px;">
+              <img src="<?= htmlspecialchars($article['cover_image_url'] ?? '') ?: 'img/sample/sample.png' ?>" alt="封面圖片" class="cover-image-preview mt-2" style="max-width:200px;">
             </div>
           </div>
           <div class="form-row">
@@ -123,7 +123,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
           </div>
           <div class="form-row">
             <div class="form-group flex-grow-1">
-              <label class="form-label">內文</label>
+              <label class="form-label required">內文</label>
               <div id="editor">
                 <?= $article['content'] ?? '<p>這裡是內容</p>' ?>
               </div>
@@ -142,7 +142,7 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
               </select>
             </div>
             <div class="form-group col-12 col-md-6" id="scheduledDateGroup" style="display: none;">
-              <label class="form-label">發布時間安排</label>
+              <label class="form-label required">發布時間安排</label>
               <input type="datetime-local" name="scheduled_at" class="form-control"
                     value="<?= !empty($article['scheduled_at']) ? date('Y-m-d\TH:i', strtotime($article['scheduled_at'])) : '' ?>" />
             </div>
@@ -196,12 +196,20 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
       // ===== 表單提交處理 =====
       console.log('送出按鈕已綁定');
       btnSend.addEventListener('click', (e) => {
+        e.preventDefault(); // 阻止表單預設送出
+        if (!validateForm()) return;
         console.log('送出按鈕被點擊');
         const formData = new FormData();
         formData.append('title', inputTitle.value);
         formData.append('content', editorInstance.getData());
         formData.append('status', document.querySelector('[name=status]').value);
-        formData.append('cover_image_url', document.querySelector('[name=cover_image_url]').value);
+        // 封面圖片處理
+        const DEFAULT_IMAGE_URL = 'img/sample/sample.png';
+        let coverUrl = document.querySelector('[name=cover_image_url]').value;
+        if (!coverUrl || coverUrl === DEFAULT_IMAGE_URL) {
+          coverUrl = '';
+        }
+        formData.append('cover_image_url', coverUrl);
         formData.append('scheduled_at', document.querySelector('[name=scheduled_at]').value);
         if (articleId) {
           formData.append('id', articleId);
@@ -236,6 +244,24 @@ $categories = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
             alert('發生錯誤，請稍後再試');
           });
       });
+
+       // ===== 表單驗證 =====
+       function validateForm() {
+          // 標題必填
+          const title = document.querySelector('[name="title"]').value.trim();
+          if (!title) {
+            alert('請輸入標題');
+            return false;
+          }
+
+          // 內文必填
+          if (!editorInstance.getData().trim() || editorInstance.getData().trim() === '<p>這裡是內容</p>') {
+            alert('請輸入內文');
+            return false;
+          }
+
+          return true;
+        }
 
       // ===== CKEditor 圖片上傳適配器 =====
       class MyUploadAdapter {
