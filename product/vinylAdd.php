@@ -140,18 +140,22 @@ try {
           </div>
         </div>
 
-        <div class="form-group avatar-group">
+        <div class="form-group vinyl-group">
           <label for="imageInput" class="form-label"></label>
           <div class="avatar-upload-container">
-            <div class="avatar-preview flex-center rounded-5" id="previewImage">
+
+            <div class="vinyl-preview flex-center rounded-5 overflow-hidden" id="previewImage">
               <div class="wh600 flex-center bg-secondary text-white fs-2 rounded-3">
                 圖片預覽位置
               </div>
             </div>
-            <input type="file" id="imageInput" name="myFile" class="form-control mt-4 required" accept="image/*" required>
+
+            <input type="file" id="imageInput" name="myFile" class="form-control mt-4 required" accept="image/*"
+              required>
             <small class="form-text">支援 JPG、PNG、GIF 格式，檔案大小不超過 2MB</small>
           </div>
         </div>
+
       </div>
 
 
@@ -255,7 +259,6 @@ try {
       reader.readAsDataURL(file);
     }
   });
-
 
 </script>
 <?php include "../template_btm.php"; ?>

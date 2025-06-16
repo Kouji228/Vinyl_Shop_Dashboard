@@ -64,12 +64,15 @@ try {
         <div class="form-section">
             <!-- <h4 class="form-section-title">基本資訊</h4> -->
             <div class="form-row avatar-row">
-                <div class="form-group avatar-group">
+                <div class="form-group vinyl-group">
                     <!-- <label for="memberAvatar" class="form-label"></label> -->
                     <div class="avatar-upload-container">
-                        <?php if ($rowsImg): ?>
-                            <img class="img-fluid my-3 rounded-3" src="./img/<?= $rowsImg[0]["img_name"] ?>" alt="" srcset="">
-                        <?php endif; ?>
+                        <div class="vinyl-preview">
+                            <?php if ($rowsImg): ?>
+                                <img class="img-fluid my-3 rounded-3" src="./img/<?= $rowsImg[0]["img_name"] ?>" alt=""
+                                    srcset="">
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
