@@ -68,6 +68,14 @@ if ($ruleData['discount_type'] === 'fixed' && $ruleData['discount_value'] <= 0) 
     exit;
 }
 
+// 日期區間驗證
+if (!empty($couponData['start_at']) && !empty($couponData['end_at'])) {
+    if (strtotime($couponData['start_at']) > strtotime($couponData['end_at'])) {
+        alertAndBack("開始時間不能大於結束時間，請重新調整");
+        exit;
+    }
+}
+
 // 限制條件相關驗證
 if (empty($targetData['target_type']) || empty($targetData['target_value'])) {
     alertAndBack("請完整選擇限制類型與次類型。");
@@ -87,7 +95,7 @@ try {
         $stmtCode->execute([':code' => $couponData['code'], ':id' => $id]);
         if ($stmtCode->fetchColumn() > 0) {
             $pdo->rollBack();
-            alertAndBack("錯誤：優惠碼 '{$couponData['code']}' 已經存在，請使用不同的優惠碼。");
+            alertAndBack("此優惠碼已經存在，請使用不同的優惠碼。");
             exit;
         }
     }

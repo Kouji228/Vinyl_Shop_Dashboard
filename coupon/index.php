@@ -305,7 +305,7 @@ $totalPage = ceil($totalCount / $perPage);
 
     function doConfirm(e) {
         const btn = e.target.closest('.btn-del');
-        if (btn && confirm("確定要刪除嗎?")) {
+        if (btn && confirm("刪除後無法復原，確定要刪除嗎?")) {
             window.location.href = `./doDelete.php?id=${btn.dataset.id}`;
         }
     }

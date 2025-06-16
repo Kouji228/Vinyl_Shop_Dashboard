@@ -26,7 +26,7 @@ include "../template_main.php";
                     <input id="couponName" name="name" type="text" class="form-control" placeholder="優惠卷名稱" required>
                 </div>
                 <div class="form-group">
-                    <label for="couponCode" class="form-label">優惠碼</label>
+                    <label for="couponCode" class="form-label">優惠碼 (不可重複)</label>
                     <input id="couponCode" name="code" type="text" class="form-control" placeholder="優惠碼設定 (可選)">
                 </div>
             </div>
@@ -92,7 +92,7 @@ include "../template_main.php";
                 <div class="form-group">
                     <label for="ruleDiscountValue" class="form-label required">折扣值 (整數)</label>
                     <input id="ruleDiscountValue" name="discount_value" type="number" class="form-control"
-                        placeholder="金額或百分比(例:10為10%)" required>
+                        placeholder="金額或百分比(例:10為10%為9折)" required>
                 </div>
                 <div class="form-group">
                     <label for="ruleMaxDiscountAmount" class="form-label">最大折扣金額</label>
