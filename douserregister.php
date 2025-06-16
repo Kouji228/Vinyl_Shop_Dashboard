@@ -15,18 +15,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     $phone = $_POST['phone'] ?? '';
+    $birthday = $_POST['birthday'] ?? '';
+    $gender = $_POST['gender'] ?? '';
 
     // 驗證輸入
-    if (empty($name) || empty($account) || empty($password) || empty($confirm_password) || empty($phone)) {
+    if (empty($name) || empty($account) || empty($password) || empty($confirm_password) || empty($phone) || empty($birthday) || empty($gender)) {
         $_SESSION['register_error'] = '所有欄位都必須填寫';
         header("Location: user_register.php");
         exit;
     } elseif ($password !== $confirm_password) {
-        $_SESSION['register_error'] = '密碼不匹配';
+        $_SESSION['register_error'] = '密碼不一致';
         header("Location: user_register.php");
         exit;
-    } elseif (strlen($password) < 8) {
-        $_SESSION['register_error'] = '密碼長度必須至少8個字符';
+    } elseif (strlen($password) < 6) {
+        $_SESSION['register_error'] = '密碼長度必須至少6個字符';
         header("Location: user_register.php");
         exit;
     }
@@ -43,9 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 創建新用戶
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare("INSERT INTO users (name, account, password, phone, status, created_at) VALUES (?, ?, ?, ?, 'active', NOW())");
+        $stmt = $pdo->prepare("INSERT INTO users (name, account, password, email, phone, birthday, gender, level, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, '一般會員', NOW())");
 
-        if ($stmt->execute([$name, $account, $hashed_password, $phone])) {
+        if ($stmt->execute([$name, $account, $hashed_password, $account, $phone, $birthday, $gender])) {
             $_SESSION['register_success'] = '註冊成功！請登入';
             header("Location: user_login.php");
             exit;

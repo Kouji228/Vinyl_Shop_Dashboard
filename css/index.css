@@ -389,8 +389,12 @@ body {
   border: 2px solid transparent;
 }
 
-.btn i {
+/* .btn i {
   margin-right: 0.5rem;
+} */
+
+.btn:hover {
+  border-color: #00000010;
 }
 
 /* 搜尋與篩選區塊樣式 */
@@ -1056,9 +1060,9 @@ select.form-control:focus {
   font-size: 0.95rem;
 }
 
-.btn i {
+/* .btn i {
   margin-right: 0.5rem;
-}
+} */
 
 /*  rwd設定 */
 @media (max-width: 1024px) {
