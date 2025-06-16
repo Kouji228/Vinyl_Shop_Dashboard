@@ -64,7 +64,7 @@ $categoryStats = $stmtCategories->fetchAll(PDO::FETCH_ASSOC);
                     <div class="card-body d-flex align-items-center">
                         <i class="fas fa-users fa-2x me-3"></i>
                         <div>
-                            <h5 class="card-title mb-0">總用戶數</h5>
+                            <h5 class="card-title mb-0">活躍用戶數</h5>
                             <p class="stat-number mb-0"><?= $totalMembers ?></p>
                         </div>
                     </div>
