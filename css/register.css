@@ -37,7 +37,7 @@ body {
 
 .auth-image {
     flex: 1;
-    background-image: url('../images/user_register.jpg');
+    background-image: url('../images/user_register.png');
     background-size: cover;
     background-position: center;
     position: relative;

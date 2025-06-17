@@ -552,7 +552,8 @@ $totalPage = ceil($totalCount / $perPage);
           </div>
           <div class="form-group">
             <label class="form-label" for="modal_format">規格</label>
-            <input name="modal_format" id="modal_format" type="text" class="form-control" placeholder="LP數量 ex: 1LP" <?= $format ? 'value="' . htmlspecialchars($format) . '"' : '' ?>>
+            <input name="modal_format" id="modal_format" type="text" class="form-control" placeholder="LP數量 ex: 1LP"
+              <?= $format ? 'value="' . htmlspecialchars($format) . '"' : '' ?>>
             <!-- <div class="error-message" id="levelError"></div> -->
           </div>
 
@@ -672,6 +673,8 @@ $totalPage = ceil($totalCount / $perPage);
     // 先移除舊的 title / author 參數，避免殘留
     params.delete("title");
     params.delete("author");
+    params.delete("price1");
+    params.delete("price2"); 
 
     // 處理價格區間
     if (inputPrice1.value !== "") {

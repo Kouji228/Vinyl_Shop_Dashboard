@@ -143,7 +143,7 @@ try {
                             <select name="gender" id="gender" class="form-select" required>
                                 <?php foreach ($rowsGender as $row): ?>
                                     <?php if ($row["genre_id"] == $rowsVinyl["genre_id"]): ?>
-                                        <option value="<?= $row["id"] ?>">
+                                        <option value="<?= $row["id"] ?>" <?= $row["id"] == $rowsVinyl["gender_id"] ? 'selected' : "" ?>>
                                             <?= $row["gender"] ?>
                                         </option>
                                     <?php endif; ?>
