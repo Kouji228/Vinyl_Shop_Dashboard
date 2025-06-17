@@ -102,7 +102,7 @@ $totalPage = ceil($totalCount / $perPage);
 
     <div class="controls-section">
         <div class="filter-group">
-            <select name="qType" id="qTypeSelect" class="form-select">
+            <select name="qType" id="qTypeSelect" >
                 <option value="name" <?= ($filters['qType'] === 'name') ? 'selected' : '' ?>>名稱</option>
                 <option value="code" <?= ($filters['qType'] === 'code') ? 'selected' : '' ?>>優惠碼</option>
             </select>
@@ -112,7 +112,7 @@ $totalPage = ceil($totalCount / $perPage);
                 value="<?= htmlspecialchars($filters['search']) ?>" id="searchText">
         </div>
         <div class="filter-group">
-            <select name="status_filter" id="statusFilterSelect" class="form-select">
+            <select name="status_filter" id="statusFilterSelect" >
                 <option value="">全部狀態</option>
                 <?php foreach ($statusMap as $value => $displayText): ?>
                     <option value="<?= htmlspecialchars($value) ?>" <?= ($filters['status_filter'] === $value) ? "selected" : "" ?>>
